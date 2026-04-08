@@ -8,8 +8,6 @@ use App\Models\Student;
 use App\Models\StudentActivity;
 use App\Models\Subject;
 use App\Models\Teacher;
-use App\Models\User;
-use Database\Factories\MaterialFactory;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
