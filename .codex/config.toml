@@ -1,0 +1,4 @@
+[mcp_servers.laravel-boost]
+command = "php"
+args = ["artisan", "boost:mcp"]
+cwd = "/run/media/ohrui/01DCC52D15ED5DB0/Penting/programming/tugas-akhir/monitoring-belajar-smk2"
