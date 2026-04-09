@@ -1,7 +1,7 @@
 import { Form, Head, Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
-import { useState } from 'react';
+import { useState, ReactNode } from 'react';
 
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
