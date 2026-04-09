@@ -1,16 +1,17 @@
 import { Form, Head, Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
-import { useState, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import { useState } from 'react';
 
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import CleanLayout from '@/layouts/auth/clean-layout';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
-import CleanLayout from '@/layouts/auth/clean-layout';
 
 export default function Register() {
     const [showPassword, setShowPassword] = useState(false);
