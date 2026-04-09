@@ -1,14 +1,14 @@
-import { Breadcrumbs } from '@/components/breadcrumbs';
-import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Search, Bell, LogOut } from 'lucide-react';
-import { UserMenuContent } from '@/components/user-menu-content';
 import { usePage, Link } from '@inertiajs/react';
+import { Bell, LogOut } from 'lucide-react';
+import { Breadcrumbs } from '@/components/breadcrumbs';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import { UserMenuContent } from '@/components/user-menu-content';
 import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
 
 export function AppSidebarHeader({
@@ -64,9 +64,9 @@ export function AppSidebarHeader({
                     </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Link 
-                    href="/logout" 
-                    method="post" 
+                <Link
+                    href="/logout"
+                    method="post"
                     as="button"
                     className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                 >

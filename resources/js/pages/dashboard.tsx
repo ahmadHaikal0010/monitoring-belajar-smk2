@@ -1,7 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { 
     Users, 
     UserCheck, 
@@ -11,6 +9,8 @@ import {
     ArrowDownRight,
     Clock
 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { dashboard } from '@/routes';
 
 export default function Dashboard() {
@@ -140,6 +140,7 @@ export default function Dashboard() {
                             <div className="space-y-6">
                                 {penyelesaianMapel.map((mapel, i) => {
                                     const percentage = Math.round((mapel.count / mapel.total) * 100);
+
                                     return (
                                         <div key={i} className="space-y-2">
                                             <div className="flex items-center justify-between text-sm">
