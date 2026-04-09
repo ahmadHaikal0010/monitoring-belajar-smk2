@@ -25,7 +25,7 @@ class MaterialFactory extends Factory
             'title' => fake()->sentence(),
             'type' => fake()->randomElement(['video', 'document', 'url']),
             'content_path' => fake()->optional()->url(),
-            'description' => fake()->optional()->paragraph()
+            'description' => fake()->optional()->paragraph(),
         ];
     }
 }

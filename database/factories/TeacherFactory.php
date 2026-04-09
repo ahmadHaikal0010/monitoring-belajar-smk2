@@ -21,7 +21,7 @@ class TeacherFactory extends Factory
         return [
             'user_id' => User::factory(),
             'nip' => fake()->unique()->numerify('NIP-########'),
-            'specialization' => fake()->randomElement(['Mathematics', 'Science', 'Literature', 'History', "Physical Education"])
+            'specialization' => fake()->randomElement(['Mathematics', 'Science', 'Literature', 'History', 'Physical Education']),
         ];
     }
 }
