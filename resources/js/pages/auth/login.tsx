@@ -4,7 +4,6 @@ import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 
-import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -47,8 +46,18 @@ export default function Login({
                 resetOnSuccess={['password']}
                 className="space-y-5"
             >
-                {({ processing, errors }) => (
+                {({ processing, hasErrors }) => (
                     <>
+                        {hasErrors && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-xl flex items-center gap-3 text-red-600 dark:text-red-400 text-sm font-medium"
+                            >
+                                <Mail className="w-5 h-5 flex-shrink-0" />
+                                <span>Email atau kata sandi yang Anda masukkan salah.</span>
+                            </motion.div>
+                        )}
                         <div className="space-y-2">
                             <Label htmlFor="email" className="text-foreground text-sm font-semibold ml-1">Email</Label>
                             <div className="relative group">
@@ -65,7 +74,6 @@ export default function Login({
                                     className="pl-12 h-12 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-4 focus:ring-primary/10 transition-all duration-200 text-base shadow-sm"
                                 />
                             </div>
-                            <InputError message={errors.email} />
                         </div>
 
                         <div className="space-y-2">
@@ -98,7 +106,6 @@ export default function Login({
                                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                 </button>
                             </div>
-                            <InputError message={errors.password} />
                         </div>
 
                         <div className="pt-2">

@@ -40,10 +40,10 @@ export default function CreateTeacher() {
                     <motion.div 
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="mb-4 p-4 bg-red-50 border border-red-100 rounded-xl flex items-center gap-3 text-red-600 text-sm font-medium"
+                        className="mb-4 p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-xl flex items-center gap-3 text-red-600 dark:text-red-400 text-sm font-medium"
                     >
                         <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                        <span>Ada kesalahan pada formulir. Silakan periksa kembali data Anda.</span>
+                        <span>Ada beberapa data yang kurang tepat. Silakan periksa kolom yang berwarna merah.</span>
                     </motion.div>
                 )}
 
@@ -57,7 +57,7 @@ export default function CreateTeacher() {
                             Hampir selesai! Silakan lengkapi profil guru Anda untuk memulai.
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="pt-8">
+                    <CardContent className="pt-8 text-left">
                         <form onSubmit={submit} className="space-y-6">
                             <div className="space-y-2 group">
                                 <Label htmlFor="nip" className="flex items-center gap-2 text-sm font-semibold ml-1 group-focus-within:text-primary transition-colors">
@@ -73,8 +73,12 @@ export default function CreateTeacher() {
                                         placeholder="Contoh: 198001012005011001"
                                         className="h-12 bg-white/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-4 focus:ring-primary/10 transition-all duration-200"
                                         required
+                                        maxLength={18}
                                     />
                                 </div>
+                                <p className="text-[10px] text-muted-foreground mt-1 ml-1 font-medium italic">
+                                    Harus berjumlah tepat 18 karakter.
+                                </p>
                                 <InputError message={errors.nip} />
                             </div>
 
