@@ -11,4 +11,11 @@ class Teacher extends Model
 {
     /** @use HasFactory<TeacherFactory> */
     use HasFactory, HasUuids;
+
+    protected $fillable = [
+        'user_id',
+        'nip',
+        'specialization',
+        'photo',
+    ];
 }
