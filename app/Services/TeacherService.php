@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Repositories\Interfaces\TeacherRepositoryInterface;
+use Illuminate\Http\UploadedFile;
 
 class TeacherService
 {
@@ -15,7 +16,7 @@ class TeacherService
 
     public function createTeacher($data)
     {
-        if (!empty($data['photo']) && $data['photo'] instanceof \Illuminate\Http\UploadedFile) {
+        if (! empty($data['photo']) && $data['photo'] instanceof UploadedFile) {
             $data['photo'] = $this->storePhoto($data['photo']);
         }
 
