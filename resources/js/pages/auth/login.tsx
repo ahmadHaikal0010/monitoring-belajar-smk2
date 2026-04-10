@@ -4,7 +4,6 @@ import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 
-import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -47,10 +46,10 @@ export default function Login({
                 resetOnSuccess={['password']}
                 className="space-y-5"
             >
-                {({ processing, errors, hasErrors }) => (
+                {({ processing, hasErrors }) => (
                     <>
                         {hasErrors && (
-                            <motion.div 
+                            <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 className="p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-xl flex items-center gap-3 text-red-600 dark:text-red-400 text-sm font-medium"
