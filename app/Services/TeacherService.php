@@ -40,4 +40,9 @@ class TeacherService
 
         return $file->storeAs('teacher-photos', $filename, 'public');
     }
+
+    public function getTeacherByUserId($userId)
+    {
+        return $this->teacherRepository->getByUserId($userId);
+    }
 }

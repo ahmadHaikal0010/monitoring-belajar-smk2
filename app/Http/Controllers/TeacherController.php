@@ -29,4 +29,14 @@ class TeacherController extends Controller
 
         return redirect()->route('dashboard');
     }
+
+    public function profile()
+    {
+        $userId = auth()->id();
+        $teacher = $this->teacherService->getTeacherByUserId($userId);
+
+        return Inertia::render('Teacher/profile', [
+            'teacher' => $teacher,
+        ]);
+    }
 }

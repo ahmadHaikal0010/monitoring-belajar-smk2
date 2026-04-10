@@ -18,4 +18,9 @@ class Teacher extends Model
         'specialization',
         'photo',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

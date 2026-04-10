@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Repositories\Interfaces\TeacherRepositoryInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class MysqlTeacherRepository implements TeacherRepositoryInterface
@@ -23,6 +24,20 @@ class MysqlTeacherRepository implements TeacherRepositoryInterface
 
     public function getByUserId($userId)
     {
-        return DB::table('teachers')->where('user_id', $userId)->first();
+        $teacher = DB::table('teachers')
+            ->where('user_id', $userId)
+            ->first();
+
+        if ($teacher) {
+            $user = DB::table('users')
+                ->where('id', $userId)
+                ->select('name', 'email', 'created_at')
+                ->first();
+
+            $teacher->user = $user;
+            $teacher->photo_url = $teacher->photo ? Storage::disk('public')->url($teacher->photo) : null;
+        }
+
+        return $teacher;
     }
 }
