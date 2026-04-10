@@ -23,9 +23,9 @@ class CheckTeacherProfile
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $userId = $request->user()->id;
+        $user = $request->user();
 
-        if (! $this->teacherService->isProfileCompleted($userId)) {
+        if ($user && $user->role === 'guru' && ! $this->teacherService->isProfileCompleted($user->id)) {
             return redirect()->route('teacher.create');
         }
 

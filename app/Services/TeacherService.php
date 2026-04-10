@@ -15,7 +15,7 @@ class TeacherService
 
     public function createTeacher($data)
     {
-        if (! empty($data['photo'])) {
+        if (!empty($data['photo']) && $data['photo'] instanceof \Illuminate\Http\UploadedFile) {
             $data['photo'] = $this->storePhoto($data['photo']);
         }
 
