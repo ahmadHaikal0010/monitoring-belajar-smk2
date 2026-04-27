@@ -25,8 +25,9 @@ class StoreTeacherRequest extends FormRequest
     {
         return [
             'nip' => ['required', 'string', 'size:18', 'unique:teachers,nip'],
-            'specialization' => ['required', 'string', 'max:100'],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'bio' => ['nullable', 'string'],
+            'specialization' => ['required', 'string', 'max:100'],
         ];
     }
 
@@ -42,6 +43,7 @@ class StoreTeacherRequest extends FormRequest
             'nip.size' => 'NIP harus berjumlah tepat 18 karakter.',
             'nip.unique' => 'NIP ini sudah terdaftar di sistem kami.',
             'specialization.required' => 'Bidang keahlian atau spesialisasi wajib diisi.',
+            'bio.string' => 'Bio harus berupa teks.',
             'photo.image' => 'File harus berupa gambar.',
             'photo.mimes' => 'Format foto yang diizinkan hanya: JPG, JPEG, PNG, dan WEBP.',
             'photo.max' => 'Ukuran foto maksimal adalah 2MB.',

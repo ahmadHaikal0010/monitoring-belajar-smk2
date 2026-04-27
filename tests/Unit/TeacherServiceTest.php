@@ -16,17 +16,19 @@ class TeacherServiceTest extends TestCase
             ->method('create')
             ->with($this->equalTo([
                 'user_id' => 2,
-                'nip' => '123456789',
-                'specialization' => 'Science',
+                'nip' => '111111111111111111',
                 'photo' => 'teacher_photo.jpg',
+                'bio' => 'Experienced science teacher',
+                'specialization' => 'Science',
             ]));
 
         $teacherService = new TeacherService($teacherRepositoryMock);
         $teacherService->createTeacher([
             'user_id' => 2,
-            'nip' => '123456789',
-            'specialization' => 'Science',
+            'nip' => '111111111111111111',
             'photo' => 'teacher_photo.jpg',
+            'bio' => 'Experienced science teacher',
+            'specialization' => 'Science',
         ]);
     }
 }
