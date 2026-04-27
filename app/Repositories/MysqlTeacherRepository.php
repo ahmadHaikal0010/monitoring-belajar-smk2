@@ -15,8 +15,9 @@ class MysqlTeacherRepository implements TeacherRepositoryInterface
             'id' => (string) Str::uuid(),
             'user_id' => $data['user_id'],
             'nip' => $data['nip'],
-            'specialization' => $data['specialization'] ?? null,
             'photo' => $data['photo'] ?? null,
+            'bio' => $data['bio'] ?? null,
+            'specialization' => $data['specialization'] ?? null,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
