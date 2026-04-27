@@ -26,7 +26,7 @@ class StoreTeacherRequest extends FormRequest
         return [
             'nip' => ['required', 'string', 'size:18', 'unique:teachers,nip'],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-            'bio' => ['nullable', 'string'],
+            'bio' => ['nullable', 'string', 'max:255'],
             'specialization' => ['required', 'string', 'max:100'],
         ];
     }

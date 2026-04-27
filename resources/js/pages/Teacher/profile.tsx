@@ -1,15 +1,17 @@
-import { Head } from '@inertiajs/react';
-import { User, Briefcase, GraduationCap, Mail, Calendar } from 'lucide-react';
+import { Head, Link } from '@inertiajs/react';
+import { User, Briefcase, GraduationCap, Mail, Calendar, Settings2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { profile } from '@/routes/teacher';
+import { profile, edit } from '@/routes/teacher';
 
 interface TeacherProfileProps {
     teacher: {
         id: string;
         nip: string;
         specialization: string;
+        bio?: string;
         photo_url?: string;
         user: {
             name: string;
@@ -36,14 +38,22 @@ export default function TeacherProfile({ teacher: teacherData }: TeacherProfileP
             <Head title="Data Diri" />
 
             <div className="flex flex-col gap-8 p-6">
-                <div className="flex flex-col gap-1">
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Data Diri</h1>
-                    <p className="text-muted-foreground">Informasi profil lengkap Anda sebagai guru</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex flex-col gap-1">
+                        <h1 className="text-3xl font-bold tracking-tight text-foreground">Data Diri</h1>
+                        <p className="text-muted-foreground">Informasi profil lengkap Anda sebagai guru</p>
+                    </div>
+                    <Button asChild variant="outline" className="w-fit shadow-sm bg-background/50 backdrop-blur-sm border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all duration-200">
+                        <Link href={edit.url()}>
+                            <Settings2 className="w-4 h-4 mr-2" />
+                            Ubah Profil
+                        </Link>
+                    </Button>
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-3">
                     {/* Card Profil Utama */}
-                    <Card className="lg:col-span-1 border-none shadow-md bg-card/50 backdrop-blur-sm">
+                    <Card className="lg:col-span-1 border-none shadow-md bg-card/50 backdrop-blur-sm h-fit">
                         <CardHeader className="flex flex-col items-center pb-8 pt-10">
                             <Avatar className="w-32 h-32 border-4 border-background shadow-xl mb-4">
                                 <AvatarImage src={teacherData.photo_url} alt={teacherData.user?.name} />
@@ -54,7 +64,7 @@ export default function TeacherProfile({ teacher: teacherData }: TeacherProfileP
                             <CardTitle className="text-xl font-bold text-center">{teacherData.user?.name}</CardTitle>
                             <Badge variant="secondary" className="mt-2 px-4 py-1">Guru</Badge>
                         </CardHeader>
-                        <CardContent className="space-y-4 border-t pt-6 text-center">
+                        <CardContent className="space-y-4 border-t pt-6">
                             <div className="flex items-center justify-center gap-2 text-sm font-medium text-foreground">
                                 <Mail className="w-4 h-4 text-muted-foreground" />
                                 {teacherData.user?.email}
@@ -70,6 +80,15 @@ export default function TeacherProfile({ teacher: teacherData }: TeacherProfileP
                                     }) : '-'}
                                 </span>
                             </div>
+
+                            {teacherData.bio && (
+                                <div className="mt-6 pt-6 border-t">
+                                    <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 text-center">Bio Singkat</div>
+                                    <p className="text-sm text-center italic text-muted-foreground leading-relaxed px-2">
+                                        "{teacherData.bio}"
+                                    </p>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
 
