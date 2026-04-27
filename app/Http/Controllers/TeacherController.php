@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Teacher\StoreTeacherRequest;
+use App\Http\Requests\Teacher\UpdateTeacherRequest;
 use App\Services\TeacherService;
 use Inertia\Inertia;
 
@@ -38,5 +39,25 @@ class TeacherController extends Controller
         return Inertia::render('Teacher/profile', [
             'teacher' => $teacher,
         ]);
+    }
+
+    public function edit()
+    {
+        $userId = auth()->id();
+        $teacher = $this->teacherService->getTeacherByUserId($userId);
+
+        return Inertia::render('Teacher/edit', [
+            'teacher' => $teacher,
+        ]);
+    }
+
+    public function update(UpdateTeacherRequest $request)
+    {
+        $data = $request->validated();
+        $userId = auth()->id();
+
+        $this->teacherService->updateTeacher($data, $userId);
+
+        return redirect()->route('teacher.profile');
     }
 }

@@ -36,7 +36,7 @@ class TeacherPolicy
      */
     public function update(User $user, Teacher $teacher): bool
     {
-        return false;
+        return $user->role === 'guru' || $user->role === 'admin';
     }
 
     /**
