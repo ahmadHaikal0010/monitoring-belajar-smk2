@@ -1,6 +1,6 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { Briefcase, GraduationCap, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { Briefcase, GraduationCap, Image as ImageIcon, AlertCircle, FileText } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -16,6 +16,7 @@ export default function CreateTeacher() {
     const { data, setData, post, processing, errors, hasErrors } = useForm({
         nip: '',
         specialization: '',
+        bio: '',
         photo: null as File | null,
     });
 
@@ -98,6 +99,28 @@ export default function CreateTeacher() {
                                     />
                                 </div>
                                 <InputError message={errors.specialization} />
+                            </div>
+
+                            <div className="space-y-2 group">
+                                <Label htmlFor="bio" className="flex items-center gap-2 text-sm font-semibold ml-1 group-focus-within:text-primary transition-colors">
+                                    <FileText className="w-4 h-4" />
+                                    Bio Singkat (Opsional)
+                                </Label>
+                                <div className="relative">
+                                    <textarea
+                                        id="bio"
+                                        name="bio"
+                                        value={data.bio}
+                                        onChange={(e) => setData('bio', e.target.value)}
+                                        placeholder="Ceritakan sedikit tentang pengalaman atau profil mengajar Anda..."
+                                        className="min-h-[100px] w-full bg-white/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-4 focus:ring-primary/10 transition-all duration-200 p-3 text-sm outline-none border resize-none"
+                                        maxLength={255}
+                                    />
+                                    <div className="absolute bottom-2 right-2 text-[10px] text-muted-foreground font-medium">
+                                        {data.bio.length}/255
+                                    </div>
+                                </div>
+                                <InputError message={errors.bio} />
                             </div>
 
                             <div className="space-y-2 group">

@@ -20,8 +20,10 @@ class TeacherFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'nip' => fake()->unique()->numerify('NIP-########'),
-            'specialization' => fake()->randomElement(['Mathematics', 'Science', 'Literature', 'History', 'Physical Education']),
+            'nip' => $this->faker->unique()->numerify('##################'), // 18 digits
+            'specialization' => $this->faker->randomElement(['Rekayasa Perangkat Lunak', 'Teknik Komputer dan Jaringan', 'Multimedia', 'Sistem Informasi']),
+            'bio' => $this->faker->sentence(),
+            'photo' => null,
         ];
     }
 }
