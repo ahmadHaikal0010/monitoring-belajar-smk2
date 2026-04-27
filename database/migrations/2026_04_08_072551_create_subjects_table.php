@@ -13,9 +13,13 @@ return new class extends Migration
     {
         Schema::create('subjects', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('name');
+            $table->foreignUuid('teacher_id')->constrained('teachers')->onDelete('cascade');
+            $table->string('title');
             $table->text('description')->nullable();
             $table->timestamps();
+
+            $table->index('id');
+            $table->index('teacher_id');
         });
     }
 

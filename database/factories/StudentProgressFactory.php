@@ -2,14 +2,13 @@
 
 namespace Database\Factories;
 
-use App\Models\Student;
-use App\Models\StudentActivity;
+use App\Models\StudentProgress;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<StudentActivity>
+ * @extends Factory<StudentProgress>
  */
-class StudentActivityFactory extends Factory
+class StudentProgressFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -19,8 +18,7 @@ class StudentActivityFactory extends Factory
     public function definition(): array
     {
         return [
-            'student_id' => Student::factory(),
-            'activity_type' => fake()->randomElement(['watch_video', 'view_material']),
+            //
         ];
     }
 }
