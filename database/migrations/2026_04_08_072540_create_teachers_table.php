@@ -14,13 +14,15 @@ return new class extends Migration
         Schema::create('teachers', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('nip')->unique();
-            $table->string('specialization')->nullable();
+            $table->string('nip', 18)->unique();
             $table->string('photo')->nullable();
+            $table->string('bio')->nullable();
+            $table->string('specialization')->nullable();
             $table->timestamps();
 
-            $table->index('nip');
+            $table->index('id');
             $table->index('user_id');
+            $table->index('nip');
         });
     }
 

@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('materials', function (Blueprint $table) {
+        Schema::create('enrollments', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->foreignUuid('student_id')->constrained('students')->onDelete('cascade');
             $table->foreignUuid('subject_id')->constrained('subjects')->onDelete('cascade');
-            $table->string('title');
-            $table->enum('content_type', ['video', 'document', 'url']);
-            $table->string('content_body')->nullable();
-            $table->text('description')->nullable();
+            $table->enum('status', ['enrolled', 'completed', 'dropped'])->default('enrolled');
+            $table->timestamp('enrolled_at')->useCurrent();
             $table->timestamps();
 
             $table->index('id');
+            $table->index('student_id');
             $table->index('subject_id');
         });
     }
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('materials');
+        Schema::dropIfExists('enrollments');
     }
 };

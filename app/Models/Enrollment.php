@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use Database\Factories\LearningProgressFactory;
+use Database\Factories\EnrollmentFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class LearningProgress extends Model
+class Enrollment extends Model
 {
-    /** @use HasFactory<LearningProgressFactory> */
+    /** @use HasFactory<EnrollmentFactory> */
     use HasFactory, HasUuids;
 }
