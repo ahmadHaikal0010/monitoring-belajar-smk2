@@ -23,6 +23,23 @@ class MysqlTeacherRepository implements TeacherRepositoryInterface
         ]);
     }
 
+    public function update($id, array $data)
+    {
+        $updateData = [
+            'bio' => $data['bio'] ?? null,
+            'specialization' => $data['specialization'] ?? null,
+            'updated_at' => now(),
+        ];
+
+        if (isset($data['photo'])) {
+            $updateData['photo'] = $data['photo'];
+        }
+
+        DB::table('teachers')
+            ->where('id', $id)
+            ->update($updateData);
+    }
+
     public function getByUserId($userId)
     {
         $teacher = DB::table('teachers')

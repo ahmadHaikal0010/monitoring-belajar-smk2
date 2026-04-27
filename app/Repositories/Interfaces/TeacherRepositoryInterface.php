@@ -7,4 +7,6 @@ interface TeacherRepositoryInterface
     public function create(array $data);
 
     public function getByUserId($userId);
+
+    public function update($id, array $data);
 }

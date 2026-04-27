@@ -26,6 +26,7 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
         Route::post('/store', [TeacherController::class, 'store'])->name('store');
         Route::get('/profile', [TeacherController::class, 'profile'])->name('profile');
         Route::get('/edit', [TeacherController::class, 'edit'])->name('edit');
+        Route::post('/update', [TeacherController::class, 'update'])->name('update');
     });
 });
 

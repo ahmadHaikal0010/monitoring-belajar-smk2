@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Repositories\Interfaces\TeacherRepositoryInterface;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class TeacherService
 {
@@ -21,6 +22,21 @@ class TeacherService
         }
 
         return $this->teacherRepository->create($data);
+    }
+
+    public function updateTeacher($data, $userId)
+    {
+        $teacher = $this->teacherRepository->getByUserId($userId);
+
+        if (! empty($data['photo']) && $data['photo'] instanceof UploadedFile) {
+            if ($teacher->photo) {
+                Storage::disk('public')->delete($teacher->photo);
+            }
+
+            $data['photo'] = $this->storePhoto($data['photo']);
+        }
+
+        return $this->teacherRepository->update($teacher->id, $data);
     }
 
     public function isProfileCompleted($userId): bool

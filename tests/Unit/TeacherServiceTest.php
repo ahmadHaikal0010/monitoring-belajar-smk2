@@ -11,24 +11,52 @@ class TeacherServiceTest extends TestCase
     public function test_insert_teacher()
     {
         $teacherRepositoryMock = $this->createMock(TeacherRepositoryInterface::class);
-
-        $teacherRepositoryMock->expects($this->once())
-            ->method('create')
-            ->with($this->equalTo([
-                'user_id' => 2,
-                'nip' => '111111111111111111',
-                'photo' => 'teacher_photo.jpg',
-                'bio' => 'Experienced science teacher',
-                'specialization' => 'Science',
-            ]));
-
-        $teacherService = new TeacherService($teacherRepositoryMock);
-        $teacherService->createTeacher([
+        $data = [
             'user_id' => 2,
             'nip' => '111111111111111111',
-            'photo' => 'teacher_photo.jpg',
-            'bio' => 'Experienced science teacher',
             'specialization' => 'Science',
-        ]);
+            'bio' => 'Experienced teacher',
+        ];
+
+        // Memastikan repository dipanggil dengan data yang sama persis
+        $teacherRepositoryMock->expects($this->once())
+            ->method('create')
+            ->with($data)
+            ->willReturn(true); // Asumsikan mengembalikan true jika berhasil
+
+        $teacherService = new TeacherService($teacherRepositoryMock);
+        $result = $teacherService->createTeacher($data);
+
+        $this->assertTrue($result);
+    }
+
+    public function test_update_teacher()
+    {
+        $teacherRepositoryMock = $this->createMock(TeacherRepositoryInterface::class);
+        $userId = 2;
+        $teacherId = 'teacher-uuid';
+
+        $existingTeacher = (object) [
+            'id' => $teacherId,
+            'user_id' => $userId,
+            'photo' => 'old_photo.jpg',
+        ];
+
+        $updateData = [
+            'bio' => 'Updated bio',
+            'specialization' => 'Mathematics',
+        ];
+
+        $teacherRepositoryMock->expects($this->once())
+            ->method('getByUserId')
+            ->with($userId)
+            ->willReturn($existingTeacher);
+
+        $teacherRepositoryMock->expects($this->once())
+            ->method('update')
+            ->with($teacherId, $updateData);
+
+        $teacherService = new TeacherService($teacherRepositoryMock);
+        $teacherService->updateTeacher($updateData, $userId);
     }
 }
