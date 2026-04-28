@@ -24,14 +24,22 @@ class DatabaseSeeder extends Seeder
         // EnrollmentFactory::factory(100)->create();
         // Student::factory(82)->create();
         // Subject::factory(5)->create();
-        // Teacher::factory(10)->create();
+        Teacher::factory(100)->create();
 
-        User::factory()->create([
-            'name' => 'guru',
-            'email' => 'guru@gmail.com',
-            'password' => bcrypt('guru1234'),
-            'role' => 'guru',
-            'is_approved' => true,
-        ]);
+        // User::factory()->create([
+        //     'name' => 'guru',
+        //     'email' => 'guru@gmail.com',
+        //     'password' => bcrypt('guru12345'),
+        //     'role' => 'guru',
+        //     'is_approved' => true,
+        // ]);
+
+        // User::factory()->create([
+        //     'name' => 'admin',
+        //     'email' => 'admin@gmail.com',
+        //     'password' => bcrypt('admin12345'),
+        //     'role' => 'admin',
+        //     'is_approved' => true,
+        // ]);
     }
 }

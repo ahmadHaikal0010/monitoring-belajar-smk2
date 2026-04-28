@@ -61,4 +61,9 @@ class TeacherService
     {
         return $this->teacherRepository->getByUserId($userId);
     }
+
+    public function getTeacherList($perPage = 10)
+    {
+        return $this->teacherRepository->getPaginated($perPage);
+    }
 }
