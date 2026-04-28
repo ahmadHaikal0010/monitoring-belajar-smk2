@@ -1,6 +1,22 @@
-import { Head, Link, setLayoutProps, router } from '@inertiajs/react';
-import { motion } from 'framer-motion';
-import { Search, Filter, MoreVertical, GraduationCap, Mail, UserCheck, UserX, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, UserPlus } from 'lucide-react';
+import { Head, Link, setLayoutProps, router, usePage } from '@inertiajs/react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+    Search, 
+    Filter, 
+    MoreVertical, 
+    GraduationCap, 
+    Mail, 
+    UserCheck, 
+    UserX, 
+    ChevronLeft, 
+    ChevronRight, 
+    ArrowUpDown, 
+    ArrowUp, 
+    ArrowDown, 
+    UserPlus,
+    Check,
+    X
+} from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -63,7 +79,36 @@ return <ArrowUpDown className="w-3 h-3 ml-1 opacity-50" />;
 };
 
 export default function TeacherList({ teachers, filters }: Props) {
+    const { flash } = usePage().props as any;
     const [search, setSearch] = useState(filters.search || '');
+    const [showSuccess, setShowSuccess] = useState(false);
+
+    useEffect(() => {
+        let hideTimer: ReturnType<typeof setTimeout>;
+        let showTimer: ReturnType<typeof setTimeout>;
+
+        if (flash?.success) {
+            // Gunakan timeout 0 untuk memindahkan setState ke antrean tugas berikutnya (asinkron)
+            // Ini mencegah cascading renders dan memperbaiki error linting
+            showTimer = setTimeout(() => {
+                setShowSuccess(true);
+            }, 0);
+
+            hideTimer = setTimeout(() => {
+                setShowSuccess(false);
+            }, 5000);
+        }
+
+        return () => {
+            if (showTimer) {
+                clearTimeout(showTimer);
+            }
+
+            if (hideTimer) {
+                clearTimeout(hideTimer);
+            }
+        };
+    }, [flash?.success]);
 
     setLayoutProps({
         breadcrumbs: [
@@ -107,6 +152,32 @@ export default function TeacherList({ teachers, filters }: Props) {
             <Head title="Daftar Guru" />
             
             <div className="flex flex-col gap-6 p-6">
+                <AnimatePresence>
+                    {showSuccess && flash?.success && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0, y: -20 }}
+                            animate={{ opacity: 1, height: 'auto', y: 0 }}
+                            exit={{ opacity: 0, height: 0, y: -20 }}
+                            className="overflow-hidden"
+                        >
+                            <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 p-4 rounded-xl flex items-start gap-3 shadow-sm mb-2">
+                                <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                                <div className="flex-1">
+                                    <p className="text-sm font-medium text-emerald-800 dark:text-emerald-200">
+                                        {flash.success}
+                                    </p>
+                                </div>
+                                <button 
+                                    onClick={() => setShowSuccess(false)}
+                                    className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 p-1 rounded-lg transition-colors"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Daftar Guru</h1>

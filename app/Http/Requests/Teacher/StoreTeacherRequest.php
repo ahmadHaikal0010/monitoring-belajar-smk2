@@ -24,6 +24,7 @@ class StoreTeacherRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'user_id' => ['required', 'exists:users,id', 'unique:teachers,user_id'],
             'nip' => ['required', 'string', 'size:18', 'unique:teachers,nip'],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'bio' => ['nullable', 'string', 'max:255'],
@@ -39,6 +40,9 @@ class StoreTeacherRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'user_id.required' => 'Akun user harus dipilih.',
+            'user_id.exists' => 'User tidak ditemukan.',
+            'user_id.unique' => 'User ini sudah terdaftar sebagai guru.',
             'nip.required' => 'Nomor Induk Pegawai (NIP) wajib diisi.',
             'nip.size' => 'NIP harus berjumlah tepat 18 karakter.',
             'nip.unique' => 'NIP ini sudah terdaftar di sistem kami.',

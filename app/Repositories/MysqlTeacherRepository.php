@@ -95,7 +95,7 @@ class MysqlTeacherRepository implements TeacherRepositoryInterface
         if ($teacher) {
             $user = DB::table('users')
                 ->where('id', $userId)
-                ->select('name', 'email', 'created_at')
+                ->select(['name', 'email', 'created_at'])
                 ->first();
 
             $teacher->user = $user;
@@ -103,5 +103,25 @@ class MysqlTeacherRepository implements TeacherRepositoryInterface
         }
 
         return $teacher;
+    }
+
+    public function getAssignableUsers(array $filter = [], int $perPage = 10)
+    {
+        $query = DB::table('users')
+            ->leftJoin('teachers', 'users.id', '=', 'teachers.user_id')
+            ->whereNull('teachers.user_id') // Hanya ambil user yang belum jadi guru
+            ->where('users.role', 'guru')
+            ->where('users.is_approved', true)
+            ->select(['users.id', 'users.name', 'users.email']);
+
+        if (! empty($filter['search'])) {
+            $query->where(function ($q) use ($filter) {
+                $q->where('users.name', 'like', '%'.$filter['search'].'%')
+                    ->orWhere('users.email', 'like', '%'.$filter['search'].'%');
+            });
+        }
+
+        return $query->paginate($perPage)
+            ->withQueryString();
     }
 }
