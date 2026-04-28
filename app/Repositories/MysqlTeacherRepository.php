@@ -40,9 +40,9 @@ class MysqlTeacherRepository implements TeacherRepositoryInterface
             ->update($updateData);
     }
 
-    public function getPaginated($perPage = 10)
+    public function getPaginated(array $filters = [], $perPage = 10)
     {
-        return DB::table('teachers')
+        $query = DB::table('teachers')
             ->join('users', 'teachers.user_id', '=', 'users.id')
             ->select([
                 'teachers.id',
@@ -52,9 +52,32 @@ class MysqlTeacherRepository implements TeacherRepositoryInterface
                 'users.name as user_name',
                 'users.email as user_email',
                 'teachers.created_at',
-            ])
-            ->orderBy('users.name', 'asc')
-            ->paginate($perPage)
+            ]);
+
+        // Fitur Searching
+        if (! empty($filters['search'])) {
+            $query->where(function ($q) use ($filters) {
+                $q->where('users.name', 'like', '%'.$filters['search'].'%')
+                    ->orWhere('teachers.nip', 'like', '%'.$filters['search'].'%')
+                    ->orWhere('teachers.specialization', 'like', '%'.$filters['search'].'%')
+                    ->orWhere('users.email', 'like', '%'.$filters['search'].'%');
+            });
+        }
+
+        // Fitur Sorting
+        $sortField = $filters['sort'] ?? 'users.name';
+        $sortDirection = $filters['direction'] ?? 'asc';
+
+        // Memastikan field yang di-sort valid (security)
+        $allowedSorts = ['users.name', 'teachers.nip', 'teachers.created_at'];
+        if (in_array($sortField, $allowedSorts)) {
+            $query->orderBy($sortField, $sortDirection);
+        } else {
+            $query->orderBy('users.name', 'asc');
+        }
+
+        return $query->paginate($perPage)
+            ->withQueryString() // Agar parameter ?search=... tidak hilang saat pindah halaman
             ->through(function ($teacher) {
                 // Menambahkan URL foto secara on-the-fly
                 $teacher->photo_url = $teacher->photo ? Storage::disk('public')->url($teacher->photo) : null;

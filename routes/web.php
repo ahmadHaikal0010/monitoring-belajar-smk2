@@ -33,7 +33,7 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
 
     // * Admin Routes
     Route::prefix('admin')->name('admin.')->group(function () {
-        Route::get('/teachers', [AdminTeacherController::class, 'index'])->name('teachers.index');
+        Route::resource('teachers', AdminTeacherController::class);
     });
 });
 

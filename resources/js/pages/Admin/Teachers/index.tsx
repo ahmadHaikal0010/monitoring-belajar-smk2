@@ -1,6 +1,7 @@
-import { Head, Link, setLayoutProps } from '@inertiajs/react';
+import { Head, Link, setLayoutProps, router } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { Search, Filter, MoreVertical, GraduationCap, Mail, UserCheck, UserX, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Filter, MoreVertical, GraduationCap, Mail, UserCheck, UserX, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, UserPlus } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -40,19 +41,66 @@ interface PaginatedData<T> {
     to: number;
 }
 
-interface Props {
-    teachers: PaginatedData<Teacher>;
+interface Filters {
+    search?: string;
+    sort?: string;
+    direction?: 'asc' | 'desc';
 }
 
-export default function TeacherList({ teachers }: Props) {
+interface Props {
+    teachers: PaginatedData<Teacher>;
+    filters: Filters;
+}
+
+const SortIcon = ({ field, currentSort, direction }: { field: string; currentSort?: string; direction?: 'asc' | 'desc' }) => {
+    if (currentSort !== field) {
+return <ArrowUpDown className="w-3 h-3 ml-1 opacity-50" />;
+}
+
+    return direction === 'asc' 
+        ? <ArrowUp className="w-3 h-3 ml-1 text-primary" /> 
+        : <ArrowDown className="w-3 h-3 ml-1 text-primary" />;
+};
+
+export default function TeacherList({ teachers, filters }: Props) {
+    const [search, setSearch] = useState(filters.search || '');
+
     setLayoutProps({
         breadcrumbs: [
             {
                 title: 'Daftar Guru',
-                href: admin.teachers.index(),
+                href: admin.teachers.index.url(),
             },
         ],
     });
+
+    const handleSearch = useCallback((value: string) => {
+        router.get(
+            admin.teachers.index.url(),
+            { ...filters, search: value, page: 1 },
+            { preserveState: true, replace: true }
+        );
+    }, [filters]);
+
+    // Simple debounce effect
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (search !== (filters.search || '')) {
+                handleSearch(search);
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [search, handleSearch, filters.search]);
+
+    const handleSort = (field: string) => {
+        const direction = filters.sort === field && filters.direction === 'asc' ? 'desc' : 'asc';
+        router.get(
+            admin.teachers.index.url(),
+            { ...filters, sort: field, direction },
+            { preserveState: true }
+        );
+    };
 
     return (
         <>
@@ -64,16 +112,35 @@ export default function TeacherList({ teachers }: Props) {
                         <h1 className="text-3xl font-bold tracking-tight">Daftar Guru</h1>
                         <p className="text-muted-foreground">Kelola semua data profil guru dalam satu tempat.</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <div className="relative w-full md:w-64">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input 
-                                placeholder="Cari nama atau NIP..." 
-                                className="pl-9 h-10 bg-background/50 backdrop-blur-sm border-zinc-200 dark:border-zinc-800"
-                            />
+                    <div className="flex flex-col sm:flex-row items-center gap-3">
+                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                            <div className="relative w-full md:w-64">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                <Input 
+                                    placeholder="Cari nama atau NIP..." 
+                                    className="pl-9 h-10 bg-background/50 backdrop-blur-sm border-zinc-200 dark:border-zinc-800"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                />
+                            </div>
+                            <Button 
+                                variant="outline" 
+                                size="icon" 
+                                className="h-10 w-10 shrink-0"
+                                onClick={() => {
+                                    setSearch('');
+                                    router.get(admin.teachers.index.url(), {}, { replace: true });
+                                }}
+                            >
+                                <Filter className="w-4 h-4" />
+                            </Button>
                         </div>
-                        <Button variant="outline" size="icon" className="h-10 w-10">
-                            <Filter className="w-4 h-4" />
+                        
+                        <Button className="w-full sm:w-auto h-10 gap-2 shadow-lg shadow-primary/20" asChild>
+                            <Link href={admin.teachers.create.url()}>
+                                <UserPlus className="w-4 h-4" />
+                                <span>Tambah Guru Baru</span>
+                            </Link>
                         </Button>
                     </div>
                 </div>
@@ -83,9 +150,30 @@ export default function TeacherList({ teachers }: Props) {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-muted/50 border-b border-zinc-200 dark:border-zinc-800">
-                                    <th className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Guru</th>
-                                    <th className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Detail Profil</th>
-                                    <th className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Terdaftar</th>
+                                    <th 
+                                        className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground cursor-pointer hover:text-primary transition-colors"
+                                        onClick={() => handleSort('users.name')}
+                                    >
+                                        <div className="flex items-center">
+                                            Guru <SortIcon field="users.name" currentSort={filters.sort} direction={filters.direction} />
+                                        </div>
+                                    </th>
+                                    <th 
+                                        className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground cursor-pointer hover:text-primary transition-colors"
+                                        onClick={() => handleSort('teachers.nip')}
+                                    >
+                                        <div className="flex items-center">
+                                            Detail Profil <SortIcon field="teachers.nip" currentSort={filters.sort} direction={filters.direction} />
+                                        </div>
+                                    </th>
+                                    <th 
+                                        className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground cursor-pointer hover:text-primary transition-colors"
+                                        onClick={() => handleSort('teachers.created_at')}
+                                    >
+                                        <div className="flex items-center">
+                                            Terdaftar <SortIcon field="teachers.created_at" currentSort={filters.sort} direction={filters.direction} />
+                                        </div>
+                                    </th>
                                     <th className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground text-right">Aksi</th>
                                 </tr>
                             </thead>

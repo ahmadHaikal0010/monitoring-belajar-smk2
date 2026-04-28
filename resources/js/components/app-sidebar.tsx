@@ -46,7 +46,7 @@ export function AppSidebar() {
     if (auth.user.role === 'admin') {
         mainNavItems.push({
             title: 'Daftar Guru',
-            href: adminRoutes.teachers.index(),
+            href: adminRoutes.teachers.index.url(),
             icon: Users,
         });
     }
