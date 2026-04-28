@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Teacher\StoreTeacherRequest;
 use App\Services\TeacherService;
 use Inertia\Inertia;
 
@@ -28,12 +29,22 @@ class TeacherController extends Controller
 
     public function create()
     {
-        return Inertia::render('Admin/Teachers/create');
+        $filters = request()->only(['search']);
+        $assignableUsers = $this->teacherService->getAssignableUsers($filters, 10);
+
+        return Inertia::render('Admin/Teachers/create', [
+            'assignableUsers' => $assignableUsers,
+            'filters' => $filters,
+        ]);
     }
 
-    public function store()
+    public function store(StoreTeacherRequest $request)
     {
-        // Akan diimplementasikan nanti
+        $data = $request->validated();
+        $this->teacherService->createTeacher($data);
+
+        return redirect()->route('admin.teachers.index')
+            ->with('success', 'Berhasil! Profil guru baru telah dibuat dan akun user sudah terhubung.');
     }
 
     public function show($id)
