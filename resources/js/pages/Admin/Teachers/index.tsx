@@ -1,6 +1,7 @@
 import { Head, Link, setLayoutProps, router } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { Search, Filter, MoreVertical, GraduationCap, Mail, UserCheck, UserX, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, UserPlus } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import admin from '@/routes/admin';
-import { useState, useEffect, useCallback } from 'react';
 
 interface Teacher {
     id: string;
@@ -52,6 +52,16 @@ interface Props {
     filters: Filters;
 }
 
+const SortIcon = ({ field, currentSort, direction }: { field: string; currentSort?: string; direction?: 'asc' | 'desc' }) => {
+    if (currentSort !== field) {
+return <ArrowUpDown className="w-3 h-3 ml-1 opacity-50" />;
+}
+
+    return direction === 'asc' 
+        ? <ArrowUp className="w-3 h-3 ml-1 text-primary" /> 
+        : <ArrowDown className="w-3 h-3 ml-1 text-primary" />;
+};
+
 export default function TeacherList({ teachers, filters }: Props) {
     const [search, setSearch] = useState(filters.search || '');
 
@@ -79,6 +89,7 @@ export default function TeacherList({ teachers, filters }: Props) {
                 handleSearch(search);
             }
         }, 500);
+
         return () => clearTimeout(timer);
     }, [search, handleSearch, filters.search]);
 
@@ -89,13 +100,6 @@ export default function TeacherList({ teachers, filters }: Props) {
             { ...filters, sort: field, direction },
             { preserveState: true }
         );
-    };
-
-    const SortIcon = ({ field }: { field: string }) => {
-        if (filters.sort !== field) return <ArrowUpDown className="w-3 h-3 ml-1 opacity-50" />;
-        return filters.direction === 'asc' 
-            ? <ArrowUp className="w-3 h-3 ml-1 text-primary" /> 
-            : <ArrowDown className="w-3 h-3 ml-1 text-primary" />;
     };
 
     return (
@@ -151,7 +155,7 @@ export default function TeacherList({ teachers, filters }: Props) {
                                         onClick={() => handleSort('users.name')}
                                     >
                                         <div className="flex items-center">
-                                            Guru <SortIcon field="users.name" />
+                                            Guru <SortIcon field="users.name" currentSort={filters.sort} direction={filters.direction} />
                                         </div>
                                     </th>
                                     <th 
@@ -159,7 +163,7 @@ export default function TeacherList({ teachers, filters }: Props) {
                                         onClick={() => handleSort('teachers.nip')}
                                     >
                                         <div className="flex items-center">
-                                            Detail Profil <SortIcon field="teachers.nip" />
+                                            Detail Profil <SortIcon field="teachers.nip" currentSort={filters.sort} direction={filters.direction} />
                                         </div>
                                     </th>
                                     <th 
@@ -167,7 +171,7 @@ export default function TeacherList({ teachers, filters }: Props) {
                                         onClick={() => handleSort('teachers.created_at')}
                                     >
                                         <div className="flex items-center">
-                                            Terdaftar <SortIcon field="teachers.created_at" />
+                                            Terdaftar <SortIcon field="teachers.created_at" currentSort={filters.sort} direction={filters.direction} />
                                         </div>
                                     </th>
                                     <th className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground text-right">Aksi</th>
