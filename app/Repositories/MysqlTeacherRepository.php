@@ -40,6 +40,29 @@ class MysqlTeacherRepository implements TeacherRepositoryInterface
             ->update($updateData);
     }
 
+    public function getPaginated($perPage = 10)
+    {
+        return DB::table('teachers')
+            ->join('users', 'teachers.user_id', '=', 'users.id')
+            ->select([
+                'teachers.id',
+                'teachers.nip',
+                'teachers.specialization',
+                'teachers.photo',
+                'users.name as user_name',
+                'users.email as user_email',
+                'teachers.created_at',
+            ])
+            ->orderBy('users.name', 'asc')
+            ->paginate($perPage)
+            ->through(function ($teacher) {
+                // Menambahkan URL foto secara on-the-fly
+                $teacher->photo_url = $teacher->photo ? Storage::disk('public')->url($teacher->photo) : null;
+
+                return $teacher;
+            });
+    }
+
     public function getByUserId($userId)
     {
         $teacher = DB::table('teachers')

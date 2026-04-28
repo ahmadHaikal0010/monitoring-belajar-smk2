@@ -8,5 +8,7 @@ interface TeacherRepositoryInterface
 
     public function getByUserId($userId);
 
+    public function getPaginated($perPage = 10);
+
     public function update($id, array $data);
 }
