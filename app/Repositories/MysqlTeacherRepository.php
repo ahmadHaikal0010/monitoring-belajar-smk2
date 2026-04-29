@@ -116,8 +116,8 @@ class MysqlTeacherRepository implements TeacherRepositoryInterface
 
         if (! empty($filter['search'])) {
             $query->where(function ($q) use ($filter) {
-                $q->where('users.name', 'like', '%'.$filter['search'].'%')
-                    ->orWhere('users.email', 'like', '%'.$filter['search'].'%');
+                $q->where('users.name', 'ilike', '%'.$filter['search'].'%')
+                    ->orWhere('users.email', 'ilike', '%'.$filter['search'].'%');
             });
         }
 
