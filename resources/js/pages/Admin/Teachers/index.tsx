@@ -409,11 +409,20 @@ export default function TeacherList({ teachers, filters }: Props) {
                                                                 </span>
                                                             </Link>
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem className="flex cursor-pointer items-center gap-2">
-                                                            <UserCheck className="h-4 w-4 text-emerald-500" />
-                                                            <span>
-                                                                Lihat Detail
-                                                            </span>
+                                                        <DropdownMenuItem
+                                                            className="flex cursor-pointer items-center gap-2"
+                                                            asChild
+                                                        >
+                                                            <Link
+                                                                href={admin.teachers.show.url(
+                                                                    teacher.id,
+                                                                )}
+                                                            >
+                                                                <UserCheck className="h-4 w-4 text-emerald-500" />
+                                                                <span>
+                                                                    Lihat Detail
+                                                                </span>
+                                                            </Link>
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem className="flex cursor-pointer items-center gap-2 text-destructive focus:text-destructive">
                                                             <UserX className="h-4 w-4" />

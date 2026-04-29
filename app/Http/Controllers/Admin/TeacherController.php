@@ -48,9 +48,13 @@ class TeacherController extends Controller
             ->with('success', 'Berhasil! Profil guru baru telah dibuat dan akun user sudah terhubung.');
     }
 
-    public function show($id)
+    public function show(string $id)
     {
-        // Akan diimplementasikan nanti
+        $teacher = $this->teacherService->findTeacher($id);
+
+        return Inertia::render('Admin/Teachers/show', [
+            'teacher' => $teacher,
+        ]);
     }
 
     public function edit(string $id)
