@@ -7,7 +7,6 @@ import {
     GraduationCap,
     Mail,
     UserCheck,
-    UserX,
     ChevronLeft,
     ChevronRight,
     ArrowUpDown,
@@ -17,12 +16,22 @@ import {
     Check,
     X,
     Pencil,
+    Trash2,
+    AlertTriangle,
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -93,6 +102,25 @@ export default function TeacherList({ teachers, filters }: Props) {
     const { flash } = usePage().props as any;
     const [search, setSearch] = useState(filters.search || '');
     const [showSuccess, setShowSuccess] = useState(false);
+    const [teacherToDelete, setTeacherToDelete] = useState<Teacher | null>(
+        null,
+    );
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleDelete = () => {
+        if (!teacherToDelete) {
+            return;
+        }
+
+        setIsDeleting(true);
+        router.delete(admin.teachers.destroy.url(teacherToDelete.id), {
+            onSuccess: () => {
+                setTeacherToDelete(null);
+                setIsDeleting(false);
+            },
+            onFinish: () => setIsDeleting(false),
+        });
+    };
 
     useEffect(() => {
         let hideTimer: ReturnType<typeof setTimeout>;
@@ -424,10 +452,17 @@ export default function TeacherList({ teachers, filters }: Props) {
                                                                 </span>
                                                             </Link>
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem className="flex cursor-pointer items-center gap-2 text-destructive focus:text-destructive">
-                                                            <UserX className="h-4 w-4" />
+                                                        <DropdownMenuItem
+                                                            className="flex cursor-pointer items-center gap-2 text-destructive focus:text-destructive"
+                                                            onSelect={() =>
+                                                                setTeacherToDelete(
+                                                                    teacher,
+                                                                )
+                                                            }
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
                                                             <span>
-                                                                Nonaktifkan Guru
+                                                                Hapus Profil
                                                             </span>
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
@@ -544,6 +579,51 @@ export default function TeacherList({ teachers, filters }: Props) {
                         </div>
                     </div>
                 </Card>
+
+                {/* Delete Confirmation Dialog */}
+                <Dialog
+                    open={!!teacherToDelete}
+                    onOpenChange={(open) => !open && setTeacherToDelete(null)}
+                >
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+                                <AlertTriangle className="h-6 w-6 text-destructive" />
+                            </div>
+                            <DialogTitle>Hapus Profil Guru</DialogTitle>
+                            <DialogDescription>
+                                Apakah Anda yakin ingin menghapus profil guru{' '}
+                                <span className="font-bold text-foreground">
+                                    {teacherToDelete?.user_name}
+                                </span>
+                                ? Tindakan ini tidak dapat dibatalkan dan akan
+                                memutuskan hubungan akun user dengan data guru.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter className="mt-4 gap-2 sm:gap-0">
+                            <Button
+                                variant="ghost"
+                                onClick={() => setTeacherToDelete(null)}
+                                disabled={isDeleting}
+                            >
+                                Batal
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                onClick={handleDelete}
+                                disabled={isDeleting}
+                                className="gap-2"
+                            >
+                                {isDeleting ? (
+                                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                )}
+                                Hapus Profil
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </>
     );
