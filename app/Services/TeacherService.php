@@ -91,4 +91,15 @@ class TeacherService
 
         return $this->teacherRepository->update($id, $data);
     }
+
+    public function deleteTeacher(string $id)
+    {
+        $teacher = $this->findTeacher($id);
+
+        if ($teacher->photo) {
+            Storage::disk('public')->delete($teacher->photo);
+        }
+
+        return $this->teacherRepository->delete($id);
+    }
 }

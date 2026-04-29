@@ -75,8 +75,11 @@ class TeacherController extends Controller
             ->with('success', 'Data profil guru telah berhasil diperbarui.');
     }
 
-    public function destroy($id)
+    public function destroy(string $id)
     {
-        // Akan diimplementasikan nanti
+        $this->teacherService->deleteTeacher($id);
+
+        return redirect()->route('admin.teachers.index')
+            ->with('success', 'Data profil guru telah berhasil dihapus.');
     }
 }

@@ -15,4 +15,6 @@ interface TeacherRepositoryInterface
     public function update(string $id, array $data);
 
     public function find(string $id);
+
+    public function delete(string $id);
 }

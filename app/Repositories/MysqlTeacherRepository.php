@@ -146,4 +146,9 @@ class MysqlTeacherRepository implements TeacherRepositoryInterface
 
         return $teacher;
     }
+
+    public function delete(string $id)
+    {
+        DB::table('teachers')->where('id', $id)->delete();
+    }
 }
