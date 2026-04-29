@@ -23,9 +23,13 @@ class MysqlTeacherRepository implements TeacherRepositoryInterface
         ]);
     }
 
-    public function update($id, array $data)
+    public function update(string $id, array $data)
     {
+        $teacher = DB::table('teachers')->where('id', $id)->first();
+
         $updateData = [
+            'user_id' => $data['user_id'] ?? $teacher->user_id,
+            'nip' => $data['nip'] ?? $teacher->nip,
             'bio' => $data['bio'] ?? null,
             'specialization' => $data['specialization'] ?? null,
             'updated_at' => now(),
@@ -40,7 +44,7 @@ class MysqlTeacherRepository implements TeacherRepositoryInterface
             ->update($updateData);
     }
 
-    public function getPaginated(array $filters = [], $perPage = 10)
+    public function getPaginated(array $filters = [], int $perPage = 10)
     {
         $query = DB::table('teachers')
             ->join('users', 'teachers.user_id', '=', 'users.id')
@@ -57,10 +61,10 @@ class MysqlTeacherRepository implements TeacherRepositoryInterface
         // Fitur Searching
         if (! empty($filters['search'])) {
             $query->where(function ($q) use ($filters) {
-                $q->where('users.name', 'like', '%'.$filters['search'].'%')
-                    ->orWhere('teachers.nip', 'like', '%'.$filters['search'].'%')
-                    ->orWhere('teachers.specialization', 'like', '%'.$filters['search'].'%')
-                    ->orWhere('users.email', 'like', '%'.$filters['search'].'%');
+                $q->where('users.name', 'ilike', '%'.$filters['search'].'%')
+                    ->orWhere('teachers.nip', 'ilike', '%'.$filters['search'].'%')
+                    ->orWhere('teachers.specialization', 'ilike', '%'.$filters['search'].'%')
+                    ->orWhere('users.email', 'ilike', '%'.$filters['search'].'%');
             });
         }
 
@@ -86,7 +90,7 @@ class MysqlTeacherRepository implements TeacherRepositoryInterface
             });
     }
 
-    public function getByUserId($userId)
+    public function getByUserId(int $userId)
     {
         $teacher = DB::table('teachers')
             ->where('user_id', $userId)
@@ -123,5 +127,23 @@ class MysqlTeacherRepository implements TeacherRepositoryInterface
 
         return $query->paginate($perPage)
             ->withQueryString();
+    }
+
+    public function find(string $id)
+    {
+        $teacher = DB::table('teachers')
+            ->where('id', $id)
+            ->first();
+
+        if ($teacher) {
+            $teacher->user = DB::table('users')
+                ->where('id', $teacher->user_id)
+                ->select(['id', 'name', 'email'])
+                ->first();
+
+            $teacher->photo_url = $teacher->photo ? Storage::disk('public')->url($teacher->photo) : null;
+        }
+
+        return $teacher;
     }
 }

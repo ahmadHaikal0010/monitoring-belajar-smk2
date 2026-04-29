@@ -1,21 +1,22 @@
 import { Head, Link, setLayoutProps, router, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    Search, 
-    Filter, 
-    MoreVertical, 
-    GraduationCap, 
-    Mail, 
-    UserCheck, 
-    UserX, 
-    ChevronLeft, 
-    ChevronRight, 
-    ArrowUpDown, 
-    ArrowUp, 
-    ArrowDown, 
+import {
+    Search,
+    Filter,
+    MoreVertical,
+    GraduationCap,
+    Mail,
+    UserCheck,
+    UserX,
+    ChevronLeft,
+    ChevronRight,
+    ArrowUpDown,
+    ArrowUp,
+    ArrowDown,
     UserPlus,
     Check,
-    X
+    X,
+    Pencil,
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -68,14 +69,24 @@ interface Props {
     filters: Filters;
 }
 
-const SortIcon = ({ field, currentSort, direction }: { field: string; currentSort?: string; direction?: 'asc' | 'desc' }) => {
+const SortIcon = ({
+    field,
+    currentSort,
+    direction,
+}: {
+    field: string;
+    currentSort?: string;
+    direction?: 'asc' | 'desc';
+}) => {
     if (currentSort !== field) {
-return <ArrowUpDown className="w-3 h-3 ml-1 opacity-50" />;
-}
+        return <ArrowUpDown className="ml-1 h-3 w-3 opacity-50" />;
+    }
 
-    return direction === 'asc' 
-        ? <ArrowUp className="w-3 h-3 ml-1 text-primary" /> 
-        : <ArrowDown className="w-3 h-3 ml-1 text-primary" />;
+    return direction === 'asc' ? (
+        <ArrowUp className="ml-1 h-3 w-3 text-primary" />
+    ) : (
+        <ArrowDown className="ml-1 h-3 w-3 text-primary" />
+    );
 };
 
 export default function TeacherList({ teachers, filters }: Props) {
@@ -119,13 +130,16 @@ export default function TeacherList({ teachers, filters }: Props) {
         ],
     });
 
-    const handleSearch = useCallback((value: string) => {
-        router.get(
-            admin.teachers.index.url(),
-            { ...filters, search: value, page: 1 },
-            { preserveState: true, replace: true }
-        );
-    }, [filters]);
+    const handleSearch = useCallback(
+        (value: string) => {
+            router.get(
+                admin.teachers.index.url(),
+                { ...filters, search: value, page: 1 },
+                { preserveState: true, replace: true },
+            );
+        },
+        [filters],
+    );
 
     // Simple debounce effect
     useEffect(() => {
@@ -139,18 +153,21 @@ export default function TeacherList({ teachers, filters }: Props) {
     }, [search, handleSearch, filters.search]);
 
     const handleSort = (field: string) => {
-        const direction = filters.sort === field && filters.direction === 'asc' ? 'desc' : 'asc';
+        const direction =
+            filters.sort === field && filters.direction === 'asc'
+                ? 'desc'
+                : 'asc';
         router.get(
             admin.teachers.index.url(),
             { ...filters, sort: field, direction },
-            { preserveState: true }
+            { preserveState: true },
         );
     };
 
     return (
         <>
             <Head title="Daftar Guru" />
-            
+
             <div className="flex flex-col gap-6 p-6">
                 <AnimatePresence>
                     {showSuccess && flash?.success && (
@@ -160,116 +177,159 @@ export default function TeacherList({ teachers, filters }: Props) {
                             exit={{ opacity: 0, height: 0, y: -20 }}
                             className="overflow-hidden"
                         >
-                            <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 p-4 rounded-xl flex items-start gap-3 shadow-sm mb-2">
-                                <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                            <div className="mb-2 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm dark:border-emerald-500/20 dark:bg-emerald-500/10">
+                                <Check className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
                                 <div className="flex-1">
                                     <p className="text-sm font-medium text-emerald-800 dark:text-emerald-200">
                                         {flash.success}
                                     </p>
                                 </div>
-                                <button 
+                                <button
                                     onClick={() => setShowSuccess(false)}
-                                    className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 p-1 rounded-lg transition-colors"
+                                    className="rounded-lg p-1 text-emerald-600 transition-colors hover:bg-emerald-100 dark:text-emerald-400 dark:hover:bg-emerald-500/20"
                                 >
-                                    <X className="w-4 h-4" />
+                                    <X className="h-4 w-4" />
                                 </button>
                             </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
 
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Daftar Guru</h1>
-                        <p className="text-muted-foreground">Kelola semua data profil guru dalam satu tempat.</p>
+                        <h1 className="text-3xl font-bold tracking-tight">
+                            Daftar Guru
+                        </h1>
+                        <p className="text-muted-foreground">
+                            Kelola semua data profil guru dalam satu tempat.
+                        </p>
                     </div>
-                    <div className="flex flex-col sm:flex-row items-center gap-3">
-                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <div className="flex flex-col items-center gap-3 sm:flex-row">
+                        <div className="flex w-full items-center gap-3 sm:w-auto">
                             <div className="relative w-full md:w-64">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                <Input 
-                                    placeholder="Cari nama atau NIP..." 
-                                    className="pl-9 h-10 bg-background/50 backdrop-blur-sm border-zinc-200 dark:border-zinc-800"
+                                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                <Input
+                                    placeholder="Cari nama atau NIP..."
+                                    className="h-10 border-zinc-200 bg-background/50 pl-9 backdrop-blur-sm dark:border-zinc-800"
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                 />
                             </div>
-                            <Button 
-                                variant="outline" 
-                                size="icon" 
+                            <Button
+                                variant="outline"
+                                size="icon"
                                 className="h-10 w-10 shrink-0"
                                 onClick={() => {
                                     setSearch('');
-                                    router.get(admin.teachers.index.url(), {}, { replace: true });
+                                    router.get(
+                                        admin.teachers.index.url(),
+                                        {},
+                                        { replace: true },
+                                    );
                                 }}
                             >
-                                <Filter className="w-4 h-4" />
+                                <Filter className="h-4 w-4" />
                             </Button>
                         </div>
-                        
-                        <Button className="w-full sm:w-auto h-10 gap-2 shadow-lg shadow-primary/20" asChild>
+
+                        <Button
+                            className="h-10 w-full gap-2 shadow-lg shadow-primary/20 sm:w-auto"
+                            asChild
+                        >
                             <Link href={admin.teachers.create.url()}>
-                                <UserPlus className="w-4 h-4" />
+                                <UserPlus className="h-4 w-4" />
                                 <span>Tambah Guru Baru</span>
                             </Link>
                         </Button>
                     </div>
                 </div>
 
-                <Card className="border-none shadow-xl bg-card/50 backdrop-blur-sm overflow-hidden">
+                <Card className="overflow-hidden border-none bg-card/50 shadow-xl backdrop-blur-sm">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                        <table className="w-full border-collapse text-left">
                             <thead>
-                                <tr className="bg-muted/50 border-b border-zinc-200 dark:border-zinc-800">
-                                    <th 
-                                        className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground cursor-pointer hover:text-primary transition-colors"
+                                <tr className="border-b border-zinc-200 bg-muted/50 dark:border-zinc-800">
+                                    <th
+                                        className="cursor-pointer p-4 text-xs font-bold tracking-wider text-muted-foreground uppercase transition-colors hover:text-primary"
                                         onClick={() => handleSort('users.name')}
                                     >
                                         <div className="flex items-center">
-                                            Guru <SortIcon field="users.name" currentSort={filters.sort} direction={filters.direction} />
+                                            Guru{' '}
+                                            <SortIcon
+                                                field="users.name"
+                                                currentSort={filters.sort}
+                                                direction={filters.direction}
+                                            />
                                         </div>
                                     </th>
-                                    <th 
-                                        className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground cursor-pointer hover:text-primary transition-colors"
-                                        onClick={() => handleSort('teachers.nip')}
+                                    <th
+                                        className="cursor-pointer p-4 text-xs font-bold tracking-wider text-muted-foreground uppercase transition-colors hover:text-primary"
+                                        onClick={() =>
+                                            handleSort('teachers.nip')
+                                        }
                                     >
                                         <div className="flex items-center">
-                                            Detail Profil <SortIcon field="teachers.nip" currentSort={filters.sort} direction={filters.direction} />
+                                            Detail Profil{' '}
+                                            <SortIcon
+                                                field="teachers.nip"
+                                                currentSort={filters.sort}
+                                                direction={filters.direction}
+                                            />
                                         </div>
                                     </th>
-                                    <th 
-                                        className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground cursor-pointer hover:text-primary transition-colors"
-                                        onClick={() => handleSort('teachers.created_at')}
+                                    <th
+                                        className="cursor-pointer p-4 text-xs font-bold tracking-wider text-muted-foreground uppercase transition-colors hover:text-primary"
+                                        onClick={() =>
+                                            handleSort('teachers.created_at')
+                                        }
                                     >
                                         <div className="flex items-center">
-                                            Terdaftar <SortIcon field="teachers.created_at" currentSort={filters.sort} direction={filters.direction} />
+                                            Terdaftar{' '}
+                                            <SortIcon
+                                                field="teachers.created_at"
+                                                currentSort={filters.sort}
+                                                direction={filters.direction}
+                                            />
                                         </div>
                                     </th>
-                                    <th className="p-4 text-xs font-bold uppercase tracking-wider text-muted-foreground text-right">Aksi</th>
+                                    <th className="p-4 text-right text-xs font-bold tracking-wider text-muted-foreground uppercase">
+                                        Aksi
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
                                 {teachers.data.length > 0 ? (
                                     teachers.data.map((teacher, index) => (
-                                        <motion.tr 
+                                        <motion.tr
                                             key={teacher.id}
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: index * 0.05 }}
-                                            className="hover:bg-muted/30 transition-colors group"
+                                            className="group transition-colors hover:bg-muted/30"
                                         >
                                             <td className="p-4">
                                                 <div className="flex items-center gap-3">
-                                                    <Avatar className="w-10 h-10 border-2 border-background shadow-sm">
-                                                        <AvatarImage src={teacher.photo_url} alt={teacher.user_name} />
-                                                        <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
-                                                            {teacher.user_name.charAt(0)}
+                                                    <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
+                                                        <AvatarImage
+                                                            src={
+                                                                teacher.photo_url
+                                                            }
+                                                            alt={
+                                                                teacher.user_name
+                                                            }
+                                                        />
+                                                        <AvatarFallback className="bg-primary/10 text-xs font-bold text-primary">
+                                                            {teacher.user_name.charAt(
+                                                                0,
+                                                            )}
                                                         </AvatarFallback>
                                                     </Avatar>
                                                     <div className="flex flex-col">
-                                                        <span className="font-semibold text-sm group-hover:text-primary transition-colors">{teacher.user_name}</span>
-                                                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                                            <Mail className="w-3 h-3" />
+                                                        <span className="text-sm font-semibold transition-colors group-hover:text-primary">
+                                                            {teacher.user_name}
+                                                        </span>
+                                                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                            <Mail className="h-3 w-3" />
                                                             {teacher.user_email}
                                                         </span>
                                                     </div>
@@ -277,11 +337,14 @@ export default function TeacherList({ teachers, filters }: Props) {
                                             </td>
                                             <td className="p-4">
                                                 <div className="flex flex-col gap-1">
-                                                    <Badge variant="outline" className="w-fit text-[10px] font-bold py-0 h-5 bg-muted/50 border-zinc-200 dark:border-zinc-800">
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="h-5 w-fit border-zinc-200 bg-muted/50 py-0 text-[10px] font-bold dark:border-zinc-800"
+                                                    >
                                                         {teacher.nip}
                                                     </Badge>
-                                                    <span className="text-xs font-medium text-foreground flex items-center gap-1">
-                                                        <GraduationCap className="w-3 h-3 text-muted-foreground" />
+                                                    <span className="flex items-center gap-1 text-xs font-medium text-foreground">
+                                                        <GraduationCap className="h-3 w-3 text-muted-foreground" />
                                                         {teacher.specialization}
                                                     </span>
                                                 </div>
@@ -289,35 +352,74 @@ export default function TeacherList({ teachers, filters }: Props) {
                                             <td className="p-4">
                                                 <div className="flex flex-col">
                                                     <span className="text-xs font-medium text-foreground">
-                                                        {new Date(teacher.created_at).toLocaleDateString('id-ID', {
-                                                            day: 'numeric',
-                                                            month: 'short',
-                                                            year: 'numeric'
-                                                        })}
+                                                        {new Date(
+                                                            teacher.created_at,
+                                                        ).toLocaleDateString(
+                                                            'id-ID',
+                                                            {
+                                                                day: 'numeric',
+                                                                month: 'short',
+                                                                year: 'numeric',
+                                                            },
+                                                        )}
                                                     </span>
-                                                    <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">
-                                                        {new Date(teacher.created_at).toLocaleTimeString('id-ID', {
-                                                            hour: '2-digit',
-                                                            minute: '2-digit'
-                                                        })} WIB
+                                                    <span className="text-[10px] font-bold tracking-tighter text-muted-foreground uppercase">
+                                                        {new Date(
+                                                            teacher.created_at,
+                                                        ).toLocaleTimeString(
+                                                            'id-ID',
+                                                            {
+                                                                hour: '2-digit',
+                                                                minute: '2-digit',
+                                                            },
+                                                        )}{' '}
+                                                        WIB
                                                     </span>
                                                 </div>
                                             </td>
                                             <td className="p-4 text-right">
                                                 <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-zinc-200 dark:hover:bg-zinc-800">
-                                                            <MoreVertical className="w-4 h-4" />
+                                                    <DropdownMenuTrigger
+                                                        asChild
+                                                    >
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 hover:bg-zinc-200 dark:hover:bg-zinc-800"
+                                                        >
+                                                            <MoreVertical className="h-4 w-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="w-48">
-                                                        <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
-                                                            <UserCheck className="w-4 h-4 text-emerald-500" />
-                                                            <span>Lihat Detail</span>
+                                                    <DropdownMenuContent
+                                                        align="end"
+                                                        className="w-48"
+                                                    >
+                                                        <DropdownMenuItem
+                                                            className="flex cursor-pointer items-center gap-2"
+                                                            asChild
+                                                        >
+                                                            <Link
+                                                                href={admin.teachers.edit.url(
+                                                                    teacher.id,
+                                                                )}
+                                                            >
+                                                                <Pencil className="h-4 w-4 text-primary" />
+                                                                <span>
+                                                                    Edit Profil
+                                                                </span>
+                                                            </Link>
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive">
-                                                            <UserX className="w-4 h-4" />
-                                                            <span>Nonaktifkan Guru</span>
+                                                        <DropdownMenuItem className="flex cursor-pointer items-center gap-2">
+                                                            <UserCheck className="h-4 w-4 text-emerald-500" />
+                                                            <span>
+                                                                Lihat Detail
+                                                            </span>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem className="flex cursor-pointer items-center gap-2 text-destructive focus:text-destructive">
+                                                            <UserX className="h-4 w-4" />
+                                                            <span>
+                                                                Nonaktifkan Guru
+                                                            </span>
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
@@ -326,7 +428,10 @@ export default function TeacherList({ teachers, filters }: Props) {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={4} className="p-8 text-center text-muted-foreground italic">
+                                        <td
+                                            colSpan={4}
+                                            className="p-8 text-center text-muted-foreground italic"
+                                        >
                                             Belum ada data guru yang terdaftar.
                                         </td>
                                     </tr>
@@ -336,20 +441,42 @@ export default function TeacherList({ teachers, filters }: Props) {
                     </div>
 
                     {/* Pagination */}
-                    <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-muted/10">
+                    <div className="flex items-center justify-between border-t border-zinc-200 bg-muted/10 p-4 dark:border-zinc-800">
                         <p className="text-xs text-muted-foreground">
-                            Menampilkan <span className="font-bold text-foreground">{teachers.from || 0}</span> sampai <span className="font-bold text-foreground">{teachers.to || 0}</span> dari <span className="font-bold text-foreground">{teachers.total}</span> guru
+                            Menampilkan{' '}
+                            <span className="font-bold text-foreground">
+                                {teachers.from || 0}
+                            </span>{' '}
+                            sampai{' '}
+                            <span className="font-bold text-foreground">
+                                {teachers.to || 0}
+                            </span>{' '}
+                            dari{' '}
+                            <span className="font-bold text-foreground">
+                                {teachers.total}
+                            </span>{' '}
+                            guru
                         </p>
                         <div className="flex items-center gap-1">
                             {teachers.links.map((link, i) => {
                                 const label = link.label.toLowerCase();
-                                const isPrev = label.includes('previous') || label.includes('prev') || label.includes('&laquo;') || label.includes('pagination.previous');
-                                const isNext = label.includes('next') || label.includes('&raquo;') || label.includes('pagination.next');
+                                const isPrev =
+                                    label.includes('previous') ||
+                                    label.includes('prev') ||
+                                    label.includes('&laquo;') ||
+                                    label.includes('pagination.previous');
+                                const isNext =
+                                    label.includes('next') ||
+                                    label.includes('&raquo;') ||
+                                    label.includes('pagination.next');
                                 const isEllipsis = link.label === '...';
-                                
+
                                 if (isEllipsis) {
                                     return (
-                                        <div key={i} className="flex h-8 w-8 items-center justify-center text-xs text-muted-foreground">
+                                        <div
+                                            key={i}
+                                            className="flex h-8 w-8 items-center justify-center text-xs text-muted-foreground"
+                                        >
                                             ...
                                         </div>
                                     );
@@ -358,23 +485,48 @@ export default function TeacherList({ teachers, filters }: Props) {
                                 return (
                                     <Button
                                         key={i}
-                                        variant={link.active ? 'default' : 'outline'}
-                                        size={isPrev || isNext ? 'default' : 'icon'}
+                                        variant={
+                                            link.active ? 'default' : 'outline'
+                                        }
+                                        size={
+                                            isPrev || isNext
+                                                ? 'default'
+                                                : 'icon'
+                                        }
                                         className={`h-8 ${isPrev || isNext ? 'px-3' : 'w-8'} text-xs transition-all`}
                                         asChild={!!link.url}
                                         disabled={!link.url || link.active}
                                     >
                                         {link.url ? (
-                                            <Link href={link.url} preserveScroll>
-                                                {isPrev && <ChevronLeft className="mr-1 h-4 w-4" />}
-                                                {isPrev ? 'Sebelumnya' : isNext ? 'Selanjutnya' : link.label}
-                                                {isNext && <ChevronRight className="ml-1 h-4 w-4" />}
+                                            <Link
+                                                href={link.url}
+                                                preserveScroll
+                                            >
+                                                {isPrev && (
+                                                    <ChevronLeft className="mr-1 h-4 w-4" />
+                                                )}
+                                                {isPrev
+                                                    ? 'Sebelumnya'
+                                                    : isNext
+                                                      ? 'Selanjutnya'
+                                                      : link.label}
+                                                {isNext && (
+                                                    <ChevronRight className="ml-1 h-4 w-4" />
+                                                )}
                                             </Link>
                                         ) : (
-                                            <span className="flex items-center opacity-50 px-2">
-                                                {isPrev && <ChevronLeft className="mr-1 h-4 w-4" />}
-                                                {isPrev ? 'Sebelumnya' : isNext ? 'Selanjutnya' : link.label}
-                                                {isNext && <ChevronRight className="ml-1 h-4 w-4" />}
+                                            <span className="flex items-center px-2 opacity-50">
+                                                {isPrev && (
+                                                    <ChevronLeft className="mr-1 h-4 w-4" />
+                                                )}
+                                                {isPrev
+                                                    ? 'Sebelumnya'
+                                                    : isNext
+                                                      ? 'Selanjutnya'
+                                                      : link.label}
+                                                {isNext && (
+                                                    <ChevronRight className="ml-1 h-4 w-4" />
+                                                )}
                                             </span>
                                         )}
                                     </Button>

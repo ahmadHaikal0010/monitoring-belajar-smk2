@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Teacher\UpdateTeacherRequest;
 use App\Http\Requests\Teacher\StoreTeacherRequest;
 use App\Services\TeacherService;
 use Inertia\Inertia;
@@ -52,14 +53,22 @@ class TeacherController extends Controller
         // Akan diimplementasikan nanti
     }
 
-    public function edit($id)
+    public function edit(string $id)
     {
-        // Akan diimplementasikan nanti
+        $teacher = $this->teacherService->findTeacher($id);
+
+        return Inertia::render('Admin/Teachers/edit', [
+            'teacher' => $teacher,
+        ]);
     }
 
-    public function update($id)
+    public function update(UpdateTeacherRequest $request, string $id)
     {
-        // Akan diimplementasikan nanti
+        $data = $request->validated();
+        $this->teacherService->updateByAdmin($data, $id);
+
+        return redirect()->route('admin.teachers.index')
+            ->with('success', 'Data profil guru telah berhasil diperbarui.');
     }
 
     public function destroy($id)
