@@ -43,6 +43,14 @@ export function AppSidebar() {
     ];
 
     // Tambahkan menu Admin jika role sesuai
+    if (auth.user.role === 'admin' || auth.user.role === 'guru') {
+        mainNavItems.push({
+            title: 'Mata Pelajaran',
+            href: '/teacher/subjects',
+            icon: BookOpen,
+        });
+    }
+
     if (auth.user.role === 'admin') {
         mainNavItems.push({
             title: 'Daftar Guru',

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\TeacherController as AdminTeacherController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Middleware\CheckAccount;
 use App\Http\Middleware\CheckTeacherProfile;
@@ -30,6 +31,8 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
         Route::get('/profile', [TeacherController::class, 'profile'])->name('profile');
         Route::get('/edit', [TeacherController::class, 'edit'])->name('edit');
         Route::post('/update', [TeacherController::class, 'update'])->name('update');
+
+        Route::resource('subjects', SubjectController::class);
     });
 
     // * Admin Routes

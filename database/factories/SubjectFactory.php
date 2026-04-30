@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Subject;
+use App\Models\Teacher;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,8 +19,10 @@ class SubjectFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->word(),
-            'description' => fake()->sentence(),
+            'id' => fake()->uuid(),
+            'teacher_id' => Teacher::factory(),
+            'title' => fake()->sentence(3),
+            'description' => fake()->paragraph(),
         ];
     }
 }

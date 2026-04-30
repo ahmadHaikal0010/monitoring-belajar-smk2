@@ -17,4 +17,9 @@ class SubjectService
     {
         $this->subjectRepository->create($data);
     }
+
+    public function getSubjectList(array $filters = [], int $perPage = 10)
+    {
+        return $this->subjectRepository->getPaginated($filters, $perPage);
+    }
 }
