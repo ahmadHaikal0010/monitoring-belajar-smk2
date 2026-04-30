@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\User\StoreUserRequest;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -35,15 +36,19 @@ class UserController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('Admin/Users/create');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        //
+        $data = $request->validated();
+        $this->userService->createUser($data);
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'Data pengguna baru telah berhasil disimpan ke dalam sistem.');
     }
 
     /**

@@ -43,4 +43,17 @@ class SqlUserRepository implements UserRepositoryInterface
         return $query->paginate($perPage)
             ->withQueryString();
     }
+
+    public function create(array $data)
+    {
+        DB::table('users')->insert([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => bcrypt($data['password']),
+            'role' => $data['role'] ?? 'user',
+            'is_approved' => $data['is_approved'] ?? false,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
 }
