@@ -32,7 +32,7 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
         Route::get('/edit', [TeacherController::class, 'edit'])->name('edit');
         Route::post('/update', [TeacherController::class, 'update'])->name('update');
 
-        Route::resource('subjects', SubjectController::class);
+        Route::resource('subjects', SubjectController::class)->middleware(CheckTeacherProfile::class);
     });
 
     // * Admin Routes
