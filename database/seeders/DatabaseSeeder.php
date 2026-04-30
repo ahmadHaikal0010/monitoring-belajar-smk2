@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
         // Student::factory(82)->create();
         // Subject::factory(5)->create();
         Teacher::factory(100)->create();
-        // User::factory(100)->create();
+        User::factory(100)->create();
 
         // User::factory()->create([
         //     'name' => 'guru',
@@ -35,12 +35,12 @@ class DatabaseSeeder extends Seeder
         //     'is_approved' => true,
         // ]);
 
-        // User::factory()->create([
-        //     'name' => 'admin',
-        //     'email' => 'admin@gmail.com',
-        //     'password' => bcrypt('admin12345'),
-        //     'role' => 'admin',
-        //     'is_approved' => true,
-        // ]);
+        User::factory()->create([
+            'name' => 'admin',
+            'email' => 'admin@gmail.com',
+            'password' => bcrypt('admin12345'),
+            'role' => 'admin',
+            'is_approved' => true,
+        ]);
     }
 }

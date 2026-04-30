@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\TeacherController as AdminTeacherController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Middleware\CheckAccount;
@@ -34,6 +35,7 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
     // * Admin Routes
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('teachers', AdminTeacherController::class);
+        Route::resource('users', AdminUserController::class);
     });
 });
 
