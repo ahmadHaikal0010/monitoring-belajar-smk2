@@ -5,7 +5,7 @@ namespace App\Providers;
 use App\Repositories\Interfaces\SubjectRepositoryInterface;
 use App\Repositories\Interfaces\TeacherRepositoryInterface;
 use App\Repositories\MysqlSubjectRepository;
-use App\Repositories\MysqlTeacherRepository;
+use App\Repositories\SqlTeacherRepository;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(
             TeacherRepositoryInterface::class,
-            MysqlTeacherRepository::class
+            SqlTeacherRepository::class
         );
     }
 
