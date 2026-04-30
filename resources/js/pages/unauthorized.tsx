@@ -8,8 +8,8 @@ export default function Unauthorized() {
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6 text-center">
             <Head title="Akses Tidak Diizinkan" />
-            
-            <motion.div 
+
+            <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4 }}
@@ -18,18 +18,23 @@ export default function Unauthorized() {
                 <div className="rounded-full bg-destructive/10 p-6 text-destructive">
                     <ShieldAlert className="h-16 w-16" />
                 </div>
-                
+
                 <div className="space-y-2">
-                    <h1 className="text-3xl font-bold tracking-tight text-destructive">Akses Ditolak</h1>
-                    <p className="text-muted-foreground text-lg">
-                        Maaf, Anda tidak memiliki izin untuk mengakses halaman ini.
+                    <h1 className="text-3xl font-bold tracking-tight text-destructive">
+                        Akses Ditolak
+                    </h1>
+                    <p className="text-lg text-muted-foreground">
+                        Maaf, Anda tidak memiliki izin untuk mengakses halaman
+                        ini.
                     </p>
                     <p className="text-sm text-muted-foreground">
-                        Halaman ini hanya dapat diakses oleh Guru atau Administrator. Jika Anda merasa ini adalah kesalahan, silakan hubungi tim IT.
+                        Halaman ini hanya dapat diakses oleh Guru atau
+                        Administrator. Jika Anda merasa ini adalah kesalahan,
+                        silakan hubungi tim IT.
                     </p>
                 </div>
 
-                <div className="flex flex-col w-full gap-3 sm:flex-row">
+                <div className="flex w-full flex-col gap-3 sm:flex-row">
                     <Button asChild variant="default" className="w-full">
                         <Link href={home()}>
                             <ArrowLeft className="mr-2 h-4 w-4" />

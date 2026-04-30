@@ -11,7 +11,7 @@ class SqlSubjectRepository implements SubjectRepositoryInterface
     public function create(array $data)
     {
         DB::table('subjects')->insert([
-            'id' => Str::uuid(),
+            'id' => (string) Str::uuid(),
             'teacher_id' => $data['teacher_id'],
             'title' => $data['title'],
             'description' => $data['description'] ?? null,
