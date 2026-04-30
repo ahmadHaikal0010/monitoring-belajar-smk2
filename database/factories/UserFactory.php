@@ -30,7 +30,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'role' => fake()->randomElement(['admin', 'guru', 'siswa']),
-            'is_approved' => fake()->boolean(80), // 80% chance approved
+            'is_approved' => true,
             'remember_token' => Str::random(10),
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
@@ -45,6 +45,16 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is not approved.
+     */
+    public function unapproved(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_approved' => false,
         ]);
     }
 

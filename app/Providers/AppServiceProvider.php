@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Repositories\Interfaces\SubjectRepositoryInterface;
 use App\Repositories\Interfaces\TeacherRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Repositories\MysqlSubjectRepository;
 use App\Repositories\SqlTeacherRepository;
+use App\Repositories\SqlUserRepository;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -27,6 +29,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             TeacherRepositoryInterface::class,
             SqlTeacherRepository::class
+        );
+
+        $this->app->bind(
+            UserRepositoryInterface::class,
+            SqlUserRepository::class
         );
     }
 
