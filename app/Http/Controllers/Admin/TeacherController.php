@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Teacher\StoreTeacherRequest as AdminStoreTeacherRequest;
 use App\Http\Requests\Admin\Teacher\UpdateTeacherRequest;
-use App\Http\Requests\Teacher\StoreTeacherRequest;
 use App\Services\TeacherService;
 use Inertia\Inertia;
 
@@ -39,7 +39,7 @@ class TeacherController extends Controller
         ]);
     }
 
-    public function store(StoreTeacherRequest $request)
+    public function store(AdminStoreTeacherRequest $request)
     {
         $data = $request->validated();
         $this->teacherService->createTeacher($data);
