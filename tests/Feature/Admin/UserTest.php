@@ -33,19 +33,20 @@ class UserTest extends TestCase
     public function test_admin_can_search_users()
     {
         $admin = User::factory()->create([
-            'name' => 'Admin User',
+            'name' => 'Sistem Administrator',
+            'email' => 'admin@sistem.com',
             'role' => 'admin',
             'is_approved' => true,
         ]);
 
         User::factory()->create([
             'name' => 'John Doe',
-            'email' => 'john@example.com',
+            'email' => 'johndoe@example.com',
         ]);
 
         User::factory()->create([
             'name' => 'Jane Smith',
-            'email' => 'jane@example.com',
+            'email' => 'janesmith@example.com',
         ]);
 
         $response = $this->actingAs($admin)->get(route('admin.users.index', ['search' => 'John']));

@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Support\Facades\DB;
+use Override;
 
 class SqlUserRepository implements UserRepositoryInterface
 {
@@ -89,5 +90,12 @@ class SqlUserRepository implements UserRepositoryInterface
             ])
             ->where('id', $id)
             ->first();
+    }
+
+    public function delete(int $id)
+    {
+        DB::table('users')
+            ->where('id', $id)
+            ->delete();
     }
 }
