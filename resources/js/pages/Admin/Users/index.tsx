@@ -18,6 +18,7 @@ import {
     Trash2,
     AlertTriangle,
     Shield,
+    Eye,
     User as UserIcon,
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
@@ -411,6 +412,15 @@ export default function UserList({ users, filters }: Props) {
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end" className="w-48">
+                                                        <DropdownMenuItem
+                                                            className="flex cursor-pointer items-center gap-2"
+                                                            asChild
+                                                        >
+                                                            <Link href={admin.users?.show?.url ? admin.users.show.url(user.id.toString()) : `/admin/users/${user.id}`}>
+                                                                <Eye className="h-4 w-4 text-primary" />
+                                                                <span>Lihat Detail</span>
+                                                            </Link>
+                                                        </DropdownMenuItem>
                                                         <DropdownMenuItem
                                                             className="flex cursor-pointer items-center gap-2"
                                                             asChild

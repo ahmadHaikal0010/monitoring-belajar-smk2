@@ -6,7 +6,6 @@ import {
     MoreVertical,
     GraduationCap,
     Mail,
-    UserCheck,
     ChevronLeft,
     ChevronRight,
     ArrowUpDown,
@@ -18,6 +17,7 @@ import {
     Pencil,
     Trash2,
     AlertTriangle,
+    Eye,
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -427,13 +427,13 @@ export default function TeacherList({ teachers, filters }: Props) {
                                                             asChild
                                                         >
                                                             <Link
-                                                                href={admin.teachers.edit.url(
+                                                                href={admin.teachers.show.url(
                                                                     teacher.id,
                                                                 )}
                                                             >
-                                                                <Pencil className="h-4 w-4 text-primary" />
+                                                                <Eye className="h-4 w-4 text-primary" />
                                                                 <span>
-                                                                    Edit Profil
+                                                                    Lihat Detail
                                                                 </span>
                                                             </Link>
                                                         </DropdownMenuItem>
@@ -442,13 +442,13 @@ export default function TeacherList({ teachers, filters }: Props) {
                                                             asChild
                                                         >
                                                             <Link
-                                                                href={admin.teachers.show.url(
+                                                                href={admin.teachers.edit.url(
                                                                     teacher.id,
                                                                 )}
                                                             >
-                                                                <UserCheck className="h-4 w-4 text-emerald-500" />
+                                                                <Pencil className="h-4 w-4 text-primary" />
                                                                 <span>
-                                                                    Lihat Detail
+                                                                    Edit Profil
                                                                 </span>
                                                             </Link>
                                                         </DropdownMenuItem>
