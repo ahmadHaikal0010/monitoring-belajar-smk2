@@ -22,4 +22,14 @@ class UserService
     {
         $this->userRepository->create($data);
     }
+
+    public function updateUser(int $id, array $data)
+    {
+        $this->userRepository->update($id, $data);
+    }
+
+    public function findUser(int $id)
+    {
+        return $this->userRepository->find($id);
+    }
 }
