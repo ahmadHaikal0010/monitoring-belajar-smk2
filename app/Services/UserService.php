@@ -17,4 +17,9 @@ class UserService
     {
         return $this->userRepository->getPaginated($filters, $perPage);
     }
+
+    public function createUser(array $data)
+    {
+        $this->userRepository->create($data);
+    }
 }
