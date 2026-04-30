@@ -34,7 +34,7 @@ export default function Login({
                 <h2 className="text-2xl font-bold tracking-tight text-foreground">
                     Masuk ke Akun
                 </h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-sm leading-relaxed text-muted-foreground">
                     Monitoring Pembelajaran Siswa
                     <br />
                     SMK Negeri 2 Lubuk Basung
@@ -52,16 +52,24 @@ export default function Login({
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className="p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-xl flex items-center gap-3 text-red-600 dark:text-red-400 text-sm font-medium"
+                                className="flex items-center gap-3 rounded-xl border border-red-100 bg-red-50 p-4 text-sm font-medium text-red-600 dark:border-red-900/20 dark:bg-red-900/10 dark:text-red-400"
                             >
-                                <Mail className="w-5 h-5 flex-shrink-0" />
-                                <span>Email atau kata sandi yang Anda masukkan salah.</span>
+                                <Mail className="h-5 w-5 flex-shrink-0" />
+                                <span>
+                                    Email atau kata sandi yang Anda masukkan
+                                    salah.
+                                </span>
                             </motion.div>
                         )}
                         <div className="space-y-2">
-                            <Label htmlFor="email" className="text-foreground text-sm font-semibold ml-1">Email</Label>
-                            <div className="relative group">
-                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors duration-200" />
+                            <Label
+                                htmlFor="email"
+                                className="ml-1 text-sm font-semibold text-foreground"
+                            >
+                                Email
+                            </Label>
+                            <div className="group relative">
+                                <Mail className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-muted-foreground transition-colors duration-200 group-focus-within:text-primary" />
                                 <Input
                                     id="email"
                                     type="email"
@@ -71,52 +79,72 @@ export default function Login({
                                     tabIndex={1}
                                     autoComplete="email"
                                     placeholder="nama@email.com"
-                                    className="pl-12 h-12 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-4 focus:ring-primary/10 transition-all duration-200 text-base shadow-sm"
+                                    className="h-12 rounded-xl border-zinc-200 bg-white pl-12 text-base shadow-sm transition-all duration-200 focus:ring-4 focus:ring-primary/10 dark:border-zinc-800 dark:bg-zinc-900"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <div className="flex items-center justify-between ml-1">
-                                <Label htmlFor="password" className="text-foreground text-sm font-semibold">Kata Sandi</Label>
+                            <div className="ml-1 flex items-center justify-between">
+                                <Label
+                                    htmlFor="password"
+                                    className="text-sm font-semibold text-foreground"
+                                >
+                                    Kata Sandi
+                                </Label>
                                 {canResetPassword && (
-                                    <Link href={request()} className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors duration-200" tabIndex={5}>
+                                    <Link
+                                        href={request()}
+                                        className="text-xs font-semibold text-primary transition-colors duration-200 hover:text-primary/80"
+                                        tabIndex={5}
+                                    >
                                         Lupa kata sandi?
                                     </Link>
                                 )}
                             </div>
-                            <div className="relative group">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors duration-200" />
+                            <div className="group relative">
+                                <Lock className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-muted-foreground transition-colors duration-200 group-focus-within:text-primary" />
                                 <Input
                                     id="password"
                                     name="password"
-                                    type={showPassword ? "text" : "password"}
+                                    type={showPassword ? 'text' : 'password'}
                                     required
                                     tabIndex={2}
                                     autoComplete="current-password"
                                     placeholder="••••••••"
-                                    className="pl-12 pr-12 h-12 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-4 focus:ring-primary/10 transition-all duration-200 text-base shadow-sm"
+                                    className="h-12 rounded-xl border-zinc-200 bg-white pr-12 pl-12 text-base shadow-sm transition-all duration-200 focus:ring-4 focus:ring-primary/10 dark:border-zinc-800 dark:bg-zinc-900"
                                 />
                                 <button
                                     type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors duration-200 focus:outline-none"
+                                    onClick={() =>
+                                        setShowPassword(!showPassword)
+                                    }
+                                    className="absolute top-1/2 right-4 -translate-y-1/2 text-muted-foreground transition-colors duration-200 hover:text-primary focus:outline-none"
                                     tabIndex={-1}
                                 >
-                                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                    {showPassword ? (
+                                        <EyeOff className="h-5 w-5" />
+                                    ) : (
+                                        <Eye className="h-5 w-5" />
+                                    )}
                                 </button>
                             </div>
                         </div>
 
                         <div className="pt-2">
-                            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                            <motion.div
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                            >
                                 <Button
                                     type="submit"
-                                    className="w-full h-12 text-base font-bold shadow-lg shadow-primary/25 rounded-xl transition-all duration-300 bg-primary hover:bg-primary/90 text-primary-foreground"
+                                    className="h-12 w-full rounded-xl bg-primary text-base font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 hover:bg-primary/90"
                                     tabIndex={4}
                                     disabled={processing}
                                 >
-                                    {processing && <Spinner className="mr-2 h-5 w-5 animate-spin" />}
+                                    {processing && (
+                                        <Spinner className="mr-2 h-5 w-5 animate-spin" />
+                                    )}
                                     Masuk
                                 </Button>
                             </motion.div>
@@ -126,7 +154,7 @@ export default function Login({
             </Form>
 
             {status && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600 bg-green-50 dark:bg-green-900/20 py-3 rounded-xl border border-green-100 dark:border-green-900/30">
+                <div className="mb-4 rounded-xl border border-green-100 bg-green-50 py-3 text-center text-sm font-medium text-green-600 dark:border-green-900/30 dark:bg-green-900/20">
                     {status}
                 </div>
             )}
@@ -136,7 +164,7 @@ export default function Login({
                     Belum punya akun?{' '}
                     <Link
                         href={register()}
-                        className="font-bold text-primary hover:underline transition-colors duration-200"
+                        className="font-bold text-primary transition-colors duration-200 hover:underline"
                     >
                         Daftar
                     </Link>

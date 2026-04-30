@@ -33,7 +33,7 @@ const footerNavItems: NavItem[] = [
 
 export function AppSidebar() {
     const { auth } = usePage().props as { auth: Auth };
-    
+
     const mainNavItems: NavItem[] = [
         {
             title: 'Dashboard',

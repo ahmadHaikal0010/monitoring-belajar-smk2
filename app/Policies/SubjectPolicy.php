@@ -28,7 +28,7 @@ class SubjectPolicy
      */
     public function create(User $user): bool
     {
-        return $user->role === 'guru' || $user->role === 'admin';
+        return $user->role === 'guru';
     }
 
     /**
@@ -36,7 +36,7 @@ class SubjectPolicy
      */
     public function update(User $user, Subject $subject): bool
     {
-        return false;
+        return $user->id === $subject->teacher_id;
     }
 
     /**

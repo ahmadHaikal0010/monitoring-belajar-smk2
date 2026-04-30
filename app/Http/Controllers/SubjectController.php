@@ -4,15 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Subject\StoreSubjectRequest;
 use App\Services\SubjectService;
+use App\Services\TeacherService;
 use Inertia\Inertia;
 
 class SubjectController extends Controller
 {
     protected SubjectService $subjectService;
 
-    public function __construct(SubjectService $subjectService)
+    protected TeacherService $teacherService;
+
+    public function __construct(SubjectService $subjectService, TeacherService $teacherService)
     {
         $this->subjectService = $subjectService;
+        $this->teacherService = $teacherService;
     }
 
     public function index()
@@ -26,8 +30,26 @@ class SubjectController extends Controller
         ]);
     }
 
+    public function create()
+    {
+        return Inertia::render('Subjects/create');
+    }
+
     public function store(StoreSubjectRequest $request)
     {
-        $this->subjectService->createSubject($request->validated());
+        $data = $request->validated();
+
+        $teacher = $this->teacherService->getTeacherByUserId(auth()->id());
+
+        if (! $teacher) {
+            return redirect()->back()->with('error', 'Profil pengajar Anda tidak ditemukan. Pastikan Anda sudah melengkapi profil guru.');
+        }
+
+        $data['teacher_id'] = $teacher->id;
+
+        $this->subjectService->createSubject($data);
+
+        return redirect()->route('teacher.subjects.index')
+            ->with('success', 'Mata pelajaran baru telah berhasil ditambahkan ke dalam daftar.');
     }
 }

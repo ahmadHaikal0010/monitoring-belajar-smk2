@@ -24,8 +24,37 @@ class StoreSubjectRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:1000'],
+        ];
+    }
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'title.required' => 'Judul mata pelajaran wajib diisi.',
+            'title.string' => 'Judul mata pelajaran harus berupa teks.',
+            'title.max' => 'Judul mata pelajaran tidak boleh lebih dari 255 karakter.',
+            'description.string' => 'Deskripsi harus berupa teks.',
+            'description.max' => 'Deskripsi tidak boleh lebih dari 1000 karakter.',
+        ];
+    }
+
+    /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return [
+            'title' => 'Judul Mata Pelajaran',
+            'description' => 'Deskripsi',
         ];
     }
 }

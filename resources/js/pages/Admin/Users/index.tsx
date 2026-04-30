@@ -170,14 +170,18 @@ export default function UserList({ users, filters }: Props) {
         breadcrumbs: [
             {
                 title: 'Manajemen User',
-                href: admin.users?.index?.url ? admin.users.index.url() : '/admin/users',
+                href: admin.users?.index?.url
+                    ? admin.users.index.url()
+                    : '/admin/users',
             },
         ],
     });
 
     const handleSearch = useCallback(
         (value: string) => {
-            const url = admin.users?.index?.url ? admin.users.index.url() : '/admin/users';
+            const url = admin.users?.index?.url
+                ? admin.users.index.url()
+                : '/admin/users';
             router.get(
                 url,
                 { ...filters, search: value, page: 1 },
@@ -202,7 +206,9 @@ export default function UserList({ users, filters }: Props) {
             filters.sort === field && filters.direction === 'asc'
                 ? 'desc'
                 : 'asc';
-        const url = admin.users?.index?.url ? admin.users.index.url() : '/admin/users';
+        const url = admin.users?.index?.url
+            ? admin.users.index.url()
+            : '/admin/users';
         router.get(
             url,
             { ...filters, sort: field, direction },
@@ -247,7 +253,8 @@ export default function UserList({ users, filters }: Props) {
                             Manajemen User
                         </h1>
                         <p className="text-muted-foreground">
-                            Kelola semua pengguna sistem, termasuk peran dan status persetujuan.
+                            Kelola semua pengguna sistem, termasuk peran dan
+                            status persetujuan.
                         </p>
                     </div>
                     <div className="flex flex-col items-center gap-3 sm:flex-row">
@@ -267,7 +274,9 @@ export default function UserList({ users, filters }: Props) {
                                 className="h-10 w-10 shrink-0"
                                 onClick={() => {
                                     setSearch('');
-                                    const url = admin.users?.index?.url ? admin.users.index.url() : '/admin/users';
+                                    const url = admin.users?.index?.url
+                                        ? admin.users.index.url()
+                                        : '/admin/users';
                                     router.get(url, {}, { replace: true });
                                 }}
                             >
@@ -279,7 +288,13 @@ export default function UserList({ users, filters }: Props) {
                             className="h-10 w-full gap-2 shadow-lg shadow-primary/20 sm:w-auto"
                             asChild
                         >
-                            <Link href={admin.users?.create?.url ? admin.users.create.url() : '/admin/users/create'}>
+                            <Link
+                                href={
+                                    admin.users?.create?.url
+                                        ? admin.users.create.url()
+                                        : '/admin/users/create'
+                                }
+                            >
                                 <UserPlus className="h-4 w-4" />
                                 <span>Tambah User Baru</span>
                             </Link>
@@ -350,7 +365,9 @@ export default function UserList({ users, filters }: Props) {
                                                 <div className="flex items-center gap-3">
                                                     <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
                                                         <AvatarFallback className="bg-primary/10 text-xs font-bold text-primary">
-                                                            {user.name.charAt(0)}
+                                                            {user.name.charAt(
+                                                                0,
+                                                            )}
                                                         </AvatarFallback>
                                                     </Avatar>
                                                     <div className="flex flex-col">
@@ -366,17 +383,23 @@ export default function UserList({ users, filters }: Props) {
                                             </td>
                                             <td className="p-4">
                                                 <div className="flex flex-col gap-1">
-                                                    <RoleBadge role={user.role} />
+                                                    <RoleBadge
+                                                        role={user.role}
+                                                    />
                                                     <div className="flex items-center gap-1.5">
                                                         {user.is_approved ? (
                                                             <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
                                                                 <Check className="h-3 w-3" />
-                                                                <span>TERSETUJUI</span>
+                                                                <span>
+                                                                    TERSETUJUI
+                                                                </span>
                                                             </div>
                                                         ) : (
                                                             <div className="flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-400">
                                                                 <AlertTriangle className="h-3 w-3" />
-                                                                <span>PENDING</span>
+                                                                <span>
+                                                                    PENDING
+                                                                </span>
                                                             </div>
                                                         )}
                                                     </div>
@@ -385,57 +408,102 @@ export default function UserList({ users, filters }: Props) {
                                             <td className="p-4">
                                                 <div className="flex flex-col">
                                                     <span className="text-xs font-medium text-foreground">
-                                                        {new Date(user.created_at).toLocaleDateString('id-ID', {
-                                                            day: 'numeric',
-                                                            month: 'short',
-                                                            year: 'numeric',
-                                                        })}
+                                                        {new Date(
+                                                            user.created_at,
+                                                        ).toLocaleDateString(
+                                                            'id-ID',
+                                                            {
+                                                                day: 'numeric',
+                                                                month: 'short',
+                                                                year: 'numeric',
+                                                            },
+                                                        )}
                                                     </span>
                                                     <span className="text-[10px] font-bold tracking-tighter text-muted-foreground uppercase">
-                                                        {new Date(user.created_at).toLocaleTimeString('id-ID', {
-                                                            hour: '2-digit',
-                                                            minute: '2-digit',
-                                                        })}{' '}
+                                                        {new Date(
+                                                            user.created_at,
+                                                        ).toLocaleTimeString(
+                                                            'id-ID',
+                                                            {
+                                                                hour: '2-digit',
+                                                                minute: '2-digit',
+                                                            },
+                                                        )}{' '}
                                                         WIB
                                                     </span>
                                                 </div>
                                             </td>
                                             <td className="p-4 text-right">
                                                 <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
+                                                    <DropdownMenuTrigger
+                                                        asChild
+                                                    >
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
                                                             className="h-8 w-8 hover:bg-zinc-200 dark:hover:bg-zinc-800"
                                                         >
-                                                            < MoreVertical className="h-4 w-4" />
+                                                            <MoreVertical className="h-4 w-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="w-48">
+                                                    <DropdownMenuContent
+                                                        align="end"
+                                                        className="w-48"
+                                                    >
                                                         <DropdownMenuItem
                                                             className="flex cursor-pointer items-center gap-2"
                                                             asChild
                                                         >
-                                                            <Link href={admin.users?.show?.url ? admin.users.show.url(user.id.toString()) : `/admin/users/${user.id}`}>
+                                                            <Link
+                                                                href={
+                                                                    admin.users
+                                                                        ?.show
+                                                                        ?.url
+                                                                        ? admin.users.show.url(
+                                                                              user.id.toString(),
+                                                                          )
+                                                                        : `/admin/users/${user.id}`
+                                                                }
+                                                            >
                                                                 <Eye className="h-4 w-4 text-primary" />
-                                                                <span>Lihat Detail</span>
+                                                                <span>
+                                                                    Lihat Detail
+                                                                </span>
                                                             </Link>
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem
                                                             className="flex cursor-pointer items-center gap-2"
                                                             asChild
                                                         >
-                                                            <Link href={admin.users?.edit?.url ? admin.users.edit.url(user.id.toString()) : `/admin/users/${user.id}/edit`}>
+                                                            <Link
+                                                                href={
+                                                                    admin.users
+                                                                        ?.edit
+                                                                        ?.url
+                                                                        ? admin.users.edit.url(
+                                                                              user.id.toString(),
+                                                                          )
+                                                                        : `/admin/users/${user.id}/edit`
+                                                                }
+                                                            >
                                                                 <Pencil className="h-4 w-4 text-primary" />
-                                                                <span>Edit User</span>
+                                                                <span>
+                                                                    Edit User
+                                                                </span>
                                                             </Link>
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem
                                                             className="flex cursor-pointer items-center gap-2 text-destructive focus:text-destructive"
-                                                            onSelect={() => setUserToDelete(user)}
+                                                            onSelect={() =>
+                                                                setUserToDelete(
+                                                                    user,
+                                                                )
+                                                            }
                                                         >
                                                             <Trash2 className="h-4 w-4" />
-                                                            <span>Hapus User</span>
+                                                            <span>
+                                                                Hapus User
+                                                            </span>
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
@@ -444,7 +512,10 @@ export default function UserList({ users, filters }: Props) {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={4} className="p-8 text-center text-muted-foreground italic">
+                                        <td
+                                            colSpan={4}
+                                            className="p-8 text-center text-muted-foreground italic"
+                                        >
                                             Tidak ada data user ditemukan.
                                         </td>
                                     </tr>
@@ -456,41 +527,87 @@ export default function UserList({ users, filters }: Props) {
                     {/* Pagination */}
                     <div className="flex items-center justify-between border-t border-zinc-200 bg-muted/10 p-4 dark:border-zinc-800">
                         <p className="text-xs text-muted-foreground">
-                            Menampilkan <span className="font-bold text-foreground">{users.from || 0}</span> sampai{' '}
-                            <span className="font-bold text-foreground">{users.to || 0}</span> dari{' '}
-                            <span className="font-bold text-foreground">{users.total}</span> user
+                            Menampilkan{' '}
+                            <span className="font-bold text-foreground">
+                                {users.from || 0}
+                            </span>{' '}
+                            sampai{' '}
+                            <span className="font-bold text-foreground">
+                                {users.to || 0}
+                            </span>{' '}
+                            dari{' '}
+                            <span className="font-bold text-foreground">
+                                {users.total}
+                            </span>{' '}
+                            user
                         </p>
                         <div className="flex items-center gap-1">
                             {users.links.map((link, i) => {
                                 const label = link.label.toLowerCase();
-                                const isPrev = label.includes('previous') || label.includes('&laquo;');
-                                const isNext = label.includes('next') || label.includes('&raquo;');
+                                const isPrev =
+                                    label.includes('previous') ||
+                                    label.includes('&laquo;');
+                                const isNext =
+                                    label.includes('next') ||
+                                    label.includes('&raquo;');
                                 const isEllipsis = link.label === '...';
 
                                 if (isEllipsis) {
-return <div key={i} className="flex h-8 w-8 items-center justify-center text-xs text-muted-foreground">...</div>;
-}
+                                    return (
+                                        <div
+                                            key={i}
+                                            className="flex h-8 w-8 items-center justify-center text-xs text-muted-foreground"
+                                        >
+                                            ...
+                                        </div>
+                                    );
+                                }
 
                                 return (
                                     <Button
                                         key={i}
-                                        variant={link.active ? 'default' : 'outline'}
-                                        size={isPrev || isNext ? 'default' : 'icon'}
+                                        variant={
+                                            link.active ? 'default' : 'outline'
+                                        }
+                                        size={
+                                            isPrev || isNext
+                                                ? 'default'
+                                                : 'icon'
+                                        }
                                         className={`h-8 ${isPrev || isNext ? 'px-3' : 'w-8'} text-xs`}
                                         asChild={!!link.url}
                                         disabled={!link.url || link.active}
                                     >
                                         {link.url ? (
-                                            <Link href={link.url} preserveScroll>
-                                                {isPrev && <ChevronLeft className="mr-1 h-4 w-4" />}
-                                                {isPrev ? 'Sebelumnya' : isNext ? 'Selanjutnya' : link.label}
-                                                {isNext && <ChevronRight className="ml-1 h-4 w-4" />}
+                                            <Link
+                                                href={link.url}
+                                                preserveScroll
+                                            >
+                                                {isPrev && (
+                                                    <ChevronLeft className="mr-1 h-4 w-4" />
+                                                )}
+                                                {isPrev
+                                                    ? 'Sebelumnya'
+                                                    : isNext
+                                                      ? 'Selanjutnya'
+                                                      : link.label}
+                                                {isNext && (
+                                                    <ChevronRight className="ml-1 h-4 w-4" />
+                                                )}
                                             </Link>
                                         ) : (
                                             <span className="flex items-center px-2 opacity-50">
-                                                {isPrev && <ChevronLeft className="mr-1 h-4 w-4" />}
-                                                {isPrev ? 'Sebelumnya' : isNext ? 'Selanjutnya' : link.label}
-                                                {isNext && <ChevronRight className="ml-1 h-4 w-4" />}
+                                                {isPrev && (
+                                                    <ChevronLeft className="mr-1 h-4 w-4" />
+                                                )}
+                                                {isPrev
+                                                    ? 'Sebelumnya'
+                                                    : isNext
+                                                      ? 'Selanjutnya'
+                                                      : link.label}
+                                                {isNext && (
+                                                    <ChevronRight className="ml-1 h-4 w-4" />
+                                                )}
                                             </span>
                                         )}
                                     </Button>
@@ -501,7 +618,10 @@ return <div key={i} className="flex h-8 w-8 items-center justify-center text-xs 
                 </Card>
 
                 {/* Delete Confirmation Dialog */}
-                <Dialog open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>
+                <Dialog
+                    open={!!userToDelete}
+                    onOpenChange={(open) => !open && setUserToDelete(null)}
+                >
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
                             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
@@ -509,16 +629,33 @@ return <div key={i} className="flex h-8 w-8 items-center justify-center text-xs 
                             </div>
                             <DialogTitle>Hapus User</DialogTitle>
                             <DialogDescription>
-                                Apakah Anda yakin ingin menghapus user <span className="font-bold text-foreground">{userToDelete?.name}</span>?
-                                Tindakan ini permanen dan tidak dapat dibatalkan.
+                                Apakah Anda yakin ingin menghapus user{' '}
+                                <span className="font-bold text-foreground">
+                                    {userToDelete?.name}
+                                </span>
+                                ? Tindakan ini permanen dan tidak dapat
+                                dibatalkan.
                             </DialogDescription>
                         </DialogHeader>
                         <DialogFooter className="mt-4 gap-2 sm:gap-0">
-                            <Button variant="ghost" onClick={() => setUserToDelete(null)} disabled={isDeleting}>
+                            <Button
+                                variant="ghost"
+                                onClick={() => setUserToDelete(null)}
+                                disabled={isDeleting}
+                            >
                                 Batal
                             </Button>
-                            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting} className="gap-2">
-                                {isDeleting ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" /> : <Trash2 className="h-4 w-4" />}
+                            <Button
+                                variant="destructive"
+                                onClick={handleDelete}
+                                disabled={isDeleting}
+                                className="gap-2"
+                            >
+                                {isDeleting ? (
+                                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                )}
                                 Hapus User
                             </Button>
                         </DialogFooter>
