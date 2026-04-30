@@ -4,5 +4,7 @@ namespace App\Repositories\Interfaces;
 
 interface SubjectRepositoryInterface
 {
+    public function getPaginated(array $filters = [], int $perPage = 10);
+
     public function create(array $data);
 }

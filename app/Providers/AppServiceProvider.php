@@ -5,7 +5,7 @@ namespace App\Providers;
 use App\Repositories\Interfaces\SubjectRepositoryInterface;
 use App\Repositories\Interfaces\TeacherRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
-use App\Repositories\MysqlSubjectRepository;
+use App\Repositories\SqlSubjectRepository;
 use App\Repositories\SqlTeacherRepository;
 use App\Repositories\SqlUserRepository;
 use Carbon\CarbonImmutable;
@@ -22,11 +22,6 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(
-            SubjectRepositoryInterface::class,
-            MysqlSubjectRepository::class
-        );
-
-        $this->app->bind(
             TeacherRepositoryInterface::class,
             SqlTeacherRepository::class
         );
@@ -34,6 +29,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             UserRepositoryInterface::class,
             SqlUserRepository::class
+        );
+
+        $this->app->bind(
+            SubjectRepositoryInterface::class,
+            SqlSubjectRepository::class
         );
     }
 
