@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-class MysqlTeacherRepository implements TeacherRepositoryInterface
+class SqlTeacherRepository implements TeacherRepositoryInterface
 {
     public function create(array $data)
     {
