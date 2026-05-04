@@ -32,4 +32,9 @@ class SubjectService
     {
         $this->subjectRepository->update($id, $data);
     }
+
+    public function deleteSubject(string $id)
+    {
+        $this->subjectRepository->delete($id);
+    }
 }

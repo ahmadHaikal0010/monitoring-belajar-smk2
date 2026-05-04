@@ -593,7 +593,7 @@ export default function TeacherList({ teachers, filters }: Props) {
                             <DialogTitle>Hapus Profil Guru</DialogTitle>
                             <DialogDescription>
                                 Apakah Anda yakin ingin menghapus profil guru{' '}
-                                <span className="font-bold text-foreground">
+                                <span className="font-bold text-foreground break-all">
                                     {teacherToDelete?.user_name}
                                 </span>
                                 ? Tindakan ini tidak dapat dibatalkan dan akan

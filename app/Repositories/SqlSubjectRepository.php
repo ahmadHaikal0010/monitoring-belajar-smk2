@@ -91,4 +91,11 @@ class SqlSubjectRepository implements SubjectRepositoryInterface
                 'updated_at' => now(),
             ]);
     }
+
+    public function delete(string $id)
+    {
+        DB::table('subjects')
+            ->where('id', $id)
+            ->delete();
+    }
 }

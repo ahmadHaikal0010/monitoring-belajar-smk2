@@ -7,6 +7,9 @@ use App\Http\Requests\Subject\UpdateSubjectRequest;
 use App\Models\Subject;
 use App\Services\SubjectService;
 use App\Services\TeacherService;
+use Exception;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class SubjectController extends Controller
@@ -109,6 +112,17 @@ class SubjectController extends Controller
      */
     public function destroy(Subject $subject)
     {
-        // Will implement later
+        try {
+            Gate::authorize('delete', $subject);
+            $this->subjectService->deleteSubject($subject->id);
+
+            return redirect()->route('teacher.subjects.index')
+                ->with('success', 'Mata pelajaran telah berhasil dihapus.');
+        } catch (Exception $e) {
+            Log::error('Error deleting subject: '.$e->getMessage());
+
+            return redirect()->route('teacher.subjects.index')
+                ->with('error', 'Terjadi kesalahan saat menghapus mata pelajaran. Silakan coba lagi.');
+        }
     }
 }

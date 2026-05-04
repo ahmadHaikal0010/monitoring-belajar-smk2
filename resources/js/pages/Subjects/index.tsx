@@ -28,6 +28,14 @@ import {
     CardHeader,
 } from '@/components/ui/card';
 import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
@@ -78,6 +86,25 @@ export default function SubjectList({ subjects, filters }: Props) {
     const { auth, flash } = usePage().props as any;
     const [search, setSearch] = useState(filters.search || '');
     const [showFlash, setShowFlash] = useState(false);
+    const [subjectToDelete, setSubjectToDelete] = useState<Subject | null>(
+        null,
+    );
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleDelete = () => {
+        if (!subjectToDelete) {
+return;
+}
+
+        setIsDeleting(true);
+        router.delete(`/teacher/subjects/${subjectToDelete.id}`, {
+            onSuccess: () => {
+                setSubjectToDelete(null);
+                setIsDeleting(false);
+            },
+            onFinish: () => setIsDeleting(false),
+        });
+    };
 
     useEffect(() => {
         if (flash?.success || flash?.error) {
@@ -360,14 +387,20 @@ export default function SubjectList({ subjects, filters }: Props) {
                                                                                 </span>
                                                                             </Link>
                                                                         </DropdownMenuItem>
-                                                                        <DropdownMenuItem className="text-destructive focus:text-destructive">
+                                                                        <DropdownMenuItem
+                                                                            className="text-destructive focus:text-destructive"
+                                                                            onSelect={() =>
+                                                                                setSubjectToDelete(
+                                                                                    subject,
+                                                                                )
+                                                                            }
+                                                                        >
                                                                             <Trash2 className="mr-2 h-4 w-4" />
                                                                             <span>
                                                                                 Hapus
                                                                                 Mapel
                                                                             </span>
-                                                                        </DropdownMenuItem>
-                                                                    </>
+                                                                        </DropdownMenuItem>                                                                    </>
                                                                 )}
                                                             </DropdownMenuContent>
                                                         </DropdownMenu>
@@ -532,6 +565,52 @@ export default function SubjectList({ subjects, filters }: Props) {
                         </div>
                     </div>
                 )}
+
+                {/* Delete Confirmation Dialog */}
+                <Dialog
+                    open={!!subjectToDelete}
+                    onOpenChange={(open) => !open && setSubjectToDelete(null)}
+                >
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+                                <AlertCircle className="h-6 w-6 text-destructive" />
+                            </div>
+                            <DialogTitle>Hapus Mata Pelajaran</DialogTitle>
+                            <DialogDescription>
+                                Apakah Anda yakin ingin menghapus mata
+                                pelajaran{' '}
+                                <span className="font-bold text-foreground break-all">
+                                    {subjectToDelete?.title}
+                                </span>
+                                ? Tindakan ini permanen dan tidak dapat
+                                dibatalkan.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter className="mt-4 gap-2 sm:gap-0">
+                            <Button
+                                variant="ghost"
+                                onClick={() => setSubjectToDelete(null)}
+                                disabled={isDeleting}
+                            >
+                                Batal
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                onClick={handleDelete}
+                                disabled={isDeleting}
+                                className="gap-2"
+                            >
+                                {isDeleting ? (
+                                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                )}
+                                Hapus Mapel
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </>
     );
