@@ -4,17 +4,15 @@ import {
     BookOpen,
     Calendar,
     Clock,
-    User,
     Pencil,
-    Trash2,
     FileText,
     Shield,
     Mail
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface Subject {
     id: string;

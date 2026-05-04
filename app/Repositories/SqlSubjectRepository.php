@@ -5,7 +5,6 @@ namespace App\Repositories;
 use App\Repositories\Interfaces\SubjectRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Override;
 
 class SqlSubjectRepository implements SubjectRepositoryInterface
 {
