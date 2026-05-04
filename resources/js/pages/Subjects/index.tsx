@@ -92,7 +92,9 @@ export default function SubjectList({ subjects, filters }: Props) {
     const [isDeleting, setIsDeleting] = useState(false);
 
     const handleDelete = () => {
-        if (!subjectToDelete) return;
+        if (!subjectToDelete) {
+return;
+}
 
         setIsDeleting(true);
         router.delete(`/teacher/subjects/${subjectToDelete.id}`, {

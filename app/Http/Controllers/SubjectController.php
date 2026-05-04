@@ -119,7 +119,7 @@ class SubjectController extends Controller
             return redirect()->route('teacher.subjects.index')
                 ->with('success', 'Mata pelajaran telah berhasil dihapus.');
         } catch (Exception $e) {
-            Log::error('Error deleting subject: ' . $e->getMessage());
+            Log::error('Error deleting subject: '.$e->getMessage());
 
             return redirect()->route('teacher.subjects.index')
                 ->with('error', 'Terjadi kesalahan saat menghapus mata pelajaran. Silakan coba lagi.');
