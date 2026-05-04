@@ -59,4 +59,22 @@ class SqlSubjectRepository implements SubjectRepositoryInterface
 
         return $query->paginate($perPage)->withQueryString();
     }
+
+    public function find(string $id)
+    {
+        return DB::table('subjects')
+            ->join('teachers', 'subjects.teacher_id', '=', 'teachers.id')
+            ->join('users', 'teachers.user_id', '=', 'users.id')
+            ->where('subjects.id', $id)
+            ->select([
+                'subjects.id',
+                'subjects.teacher_id',
+                'subjects.title',
+                'subjects.description',
+                'subjects.created_at',
+                'users.name as teacher_name',
+                'users.email as teacher_email',
+            ])
+            ->first();
+    }
 }

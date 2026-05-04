@@ -52,4 +52,13 @@ class SubjectController extends Controller
         return redirect()->route('teacher.subjects.index')
             ->with('success', 'Mata pelajaran baru telah berhasil ditambahkan ke dalam daftar.');
     }
+
+    public function show(string $id)
+    {
+        $subject = $this->subjectService->getSubjectById($id);
+
+        return Inertia::render('Subjects/show', [
+            'subject' => $subject,
+        ]);
+    }
 }
