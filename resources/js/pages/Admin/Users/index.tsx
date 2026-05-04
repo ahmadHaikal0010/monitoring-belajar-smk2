@@ -630,7 +630,7 @@ export default function UserList({ users, filters }: Props) {
                             <DialogTitle>Hapus User</DialogTitle>
                             <DialogDescription>
                                 Apakah Anda yakin ingin menghapus user{' '}
-                                <span className="font-bold text-foreground">
+                                <span className="font-bold text-foreground break-all">
                                     {userToDelete?.name}
                                 </span>
                                 ? Tindakan ini permanen dan tidak dapat
