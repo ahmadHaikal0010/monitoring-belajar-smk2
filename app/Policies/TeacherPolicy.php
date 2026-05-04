@@ -44,7 +44,7 @@ class TeacherPolicy
      */
     public function delete(User $user, Teacher $teacher): bool
     {
-        return false;
+        return $user->role === 'guru' || $user->role === 'admin';
     }
 
     /**

@@ -31,6 +31,7 @@ class SqlSubjectRepository implements SubjectRepositoryInterface
             ->select([
                 'subjects.id',
                 'subjects.teacher_id',
+                'teachers.user_id as teacher_user_id',
                 'subjects.title',
                 'subjects.description',
                 'subjects.created_at',
@@ -69,6 +70,7 @@ class SqlSubjectRepository implements SubjectRepositoryInterface
             ->select([
                 'subjects.id',
                 'subjects.teacher_id',
+                'teachers.user_id as teacher_user_id',
                 'subjects.title',
                 'subjects.description',
                 'subjects.created_at',
@@ -76,5 +78,17 @@ class SqlSubjectRepository implements SubjectRepositoryInterface
                 'users.email as teacher_email',
             ])
             ->first();
+    }
+
+    public function update(string $id, array $data)
+    {
+        DB::table('subjects')
+            ->where('id', $id)
+            ->update([
+                'teacher_id' => $data['teacher_id'],
+                'title' => $data['title'],
+                'description' => $data['description'] ?? null,
+                'updated_at' => now(),
+            ]);
     }
 }

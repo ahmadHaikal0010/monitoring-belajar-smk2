@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 interface Subject {
     id: string;
     teacher_id: string;
+    teacher_user_id: number;
     title: string;
     description: string;
     teacher_name: string;
@@ -72,9 +73,8 @@ export default function ShowSubject({ subject }: Props) {
                         </div>
                     </div>
 
-                    {(auth.user.role === 'admin' ||
-                        (auth.user.role === 'guru' &&
-                            auth.user.id === subject.teacher_id)) && (
+                    {(auth.user.role === 'guru' &&
+                        auth.user.id === subject.teacher_user_id) && (
                         <div className="flex items-center gap-2">
                             <Button variant="outline" className="gap-2" asChild>
                                 <Link href={`/teacher/subjects/${subject.id}/edit`}>

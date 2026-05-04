@@ -36,7 +36,8 @@ class SubjectPolicy
      */
     public function update(User $user, Subject $subject): bool
     {
-        return $user->id === $subject->teacher_id;
+        return $user->role === 'guru' &&
+            $user->teacher?->id === $subject->teacher_id;
     }
 
     /**
@@ -44,7 +45,8 @@ class SubjectPolicy
      */
     public function delete(User $user, Subject $subject): bool
     {
-        return false;
+        return $user->role === 'guru' &&
+            $user->teacher?->id === $subject->teacher_id;
     }
 
     /**
