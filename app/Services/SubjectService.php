@@ -27,4 +27,9 @@ class SubjectService
     {
         return $this->subjectRepository->find($id);
     }
+
+    public function updateSubject(string $id, array $data)
+    {
+        $this->subjectRepository->update($id, $data);
+    }
 }

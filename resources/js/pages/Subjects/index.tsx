@@ -39,6 +39,7 @@ import { cn } from '@/lib/utils';
 interface Subject {
     id: string;
     teacher_id: string;
+    teacher_user_id: number;
     title: string;
     description: string;
     teacher_name: string;
@@ -312,67 +313,66 @@ export default function SubjectList({ subjects, filters }: Props) {
                                                     <BookOpen className="h-5 w-5" />
                                                 </div>
                                                 <div onClick={(e) => e.stopPropagation()}>
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger
-                                                            asChild
-                                                        >
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                className="-mr-2 h-8 w-8"
-                                                            >
-                                                                <MoreVertical className="h-4 w-4" />
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent
-                                                            align="end"
-                                                            className="w-40"
-                                                        >
-                                                            <DropdownMenuItem
+                                                    {(auth.user.role === 'admin' || (auth.user.role === 'guru' && auth.user.id === subject.teacher_user_id)) && (
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger
                                                                 asChild
                                                             >
-                                                                <Link
-                                                                    href={`/teacher/subjects/${subject.id}`}
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="-mr-2 h-8 w-8"
                                                                 >
-                                                                    <BookCheck className="mr-2 h-4 w-4" />
-                                                                    <span>
-                                                                        Lihat Detail
-                                                                    </span>
-                                                                </Link>
-                                                            </DropdownMenuItem>
-                                                            {(auth.user.role ===
-                                                                'admin' ||
-                                                                (auth.user.role ===
+                                                                    <MoreVertical className="h-4 w-4" />
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent
+                                                                align="end"
+                                                                className="w-40"
+                                                            >
+                                                                <DropdownMenuItem
+                                                                    asChild
+                                                                >
+                                                                    <Link
+                                                                        href={`/teacher/subjects/${subject.id}`}
+                                                                    >
+                                                                        <BookCheck className="mr-2 h-4 w-4" />
+                                                                        <span>
+                                                                            Lihat Detail
+                                                                        </span>
+                                                                    </Link>
+                                                                </DropdownMenuItem>
+                                                                {(auth.user.role ===
                                                                     'guru' &&
                                                                     auth.user.id ===
-                                                                        subject.teacher_id)) && (
-                                                                <>
-                                                                    <DropdownMenuItem
-                                                                        asChild
-                                                                    >
-                                                                        <Link
-                                                                            href={`/teacher/subjects/${subject.id}/edit`}
+                                                                        subject.teacher_user_id) && (
+                                                                    <>
+                                                                        <DropdownMenuItem
+                                                                            asChild
                                                                         >
-                                                                            <Pencil className="mr-2 h-4 w-4" />
+                                                                            <Link
+                                                                                href={`/teacher/subjects/${subject.id}/edit`}
+                                                                            >
+                                                                                <Pencil className="mr-2 h-4 w-4" />
+                                                                                <span>
+                                                                                    Edit
+                                                                                    Mapel
+                                                                                </span>
+                                                                            </Link>
+                                                                        </DropdownMenuItem>
+                                                                        <DropdownMenuItem className="text-destructive focus:text-destructive">
+                                                                            <Trash2 className="mr-2 h-4 w-4" />
                                                                             <span>
-                                                                                Edit
+                                                                                Hapus
                                                                                 Mapel
                                                                             </span>
-                                                                        </Link>
-                                                                    </DropdownMenuItem>
-                                                                    <DropdownMenuItem className="text-destructive focus:text-destructive">
-                                                                        <Trash2 className="mr-2 h-4 w-4" />
-                                                                        <span>
-                                                                            Hapus
-                                                                            Mapel
-                                                                        </span>
-                                                                    </DropdownMenuItem>
-                                                                </>
-                                                            )}
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
-                                                </div>
-                                            </div>
+                                                                        </DropdownMenuItem>
+                                                                    </>
+                                                                )}
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                    )}
+                                                </div>                                            </div>
                                             <div className="pt-2">
                                                 <h3 className="line-clamp-1 text-lg leading-tight font-bold transition-colors group-hover:text-primary">
                                                     {subject.title}
