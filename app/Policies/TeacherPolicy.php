@@ -36,7 +36,11 @@ class TeacherPolicy
      */
     public function update(User $user, Teacher $teacher): bool
     {
-        return $user->role === 'guru' || $user->role === 'admin';
+        if ($user->role === 'guru') {
+            return $user->id === $teacher->user_id;
+        }
+
+        return $user->role === 'admin';
     }
 
     /**
@@ -44,7 +48,7 @@ class TeacherPolicy
      */
     public function delete(User $user, Teacher $teacher): bool
     {
-        return $user->role === 'guru' || $user->role === 'admin';
+        return $user->role === 'admin';
     }
 
     /**

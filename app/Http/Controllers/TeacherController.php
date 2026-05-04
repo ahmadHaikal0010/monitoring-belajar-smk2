@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Teacher\StoreTeacherRequest;
 use App\Http\Requests\Teacher\UpdateTeacherRequest;
+use App\Models\Teacher;
 use App\Services\TeacherService;
+use Exception;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class TeacherController extends Controller
 {
-    protected $teacherService;
+    protected TeacherService $teacherService;
 
     public function __construct(TeacherService $teacherService)
     {
@@ -26,9 +29,16 @@ class TeacherController extends Controller
         $data = $request->validated();
         $data['user_id'] = auth()->id();
 
-        $this->teacherService->createTeacher($data);
+        try {
+            $this->teacherService->createTeacher($data);
 
-        return redirect()->route('dashboard');
+            return redirect()->route('teacher.profile')->with('success', 'Profil guru Anda telah berhasil dibuat.');
+        } catch (Exception $e) {
+            Log::error('Error creating teacher profile: '.$e->getMessage());
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat membuat profil guru. Silakan coba lagi.');
+        }
+
     }
 
     public function profile()
@@ -51,13 +61,20 @@ class TeacherController extends Controller
         ]);
     }
 
-    public function update(UpdateTeacherRequest $request)
+    public function update(UpdateTeacherRequest $request, Teacher $teacher)
     {
         $data = $request->validated();
-        $userId = auth()->id();
 
-        $this->teacherService->updateTeacher($data, $userId);
+        try {
+            $this->teacherService->updateTeacher($data, $teacher->user_id);
 
-        return redirect()->route('teacher.profile');
+            return redirect()->route('teacher.profile')
+                ->with('success', 'Profil guru Anda telah berhasil diperbarui.');
+        } catch (Exception $e) {
+            Log::error('Error updating teacher profile: '.$e->getMessage());
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat memperbarui profil guru. Silakan coba lagi.');
+        }
     }
 }
