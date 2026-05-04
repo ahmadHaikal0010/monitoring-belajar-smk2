@@ -302,71 +302,76 @@ export default function SubjectList({ subjects, filters }: Props) {
                                     exit={{ opacity: 0, scale: 0.9 }}
                                     transition={{ delay: index * 0.05 }}
                                 >
-                                    <Card className="group flex h-full flex-col overflow-hidden border-none bg-card/50 shadow-lg backdrop-blur-sm transition-all hover:translate-y-[-2px] hover:shadow-xl">
+                                    <Card 
+                                        className="group flex h-full cursor-pointer flex-col overflow-hidden border-none bg-card/50 shadow-lg backdrop-blur-sm transition-all hover:translate-y-[-2px] hover:shadow-xl active:scale-[0.98]"
+                                        onClick={() => router.get(`/teacher/subjects/${subject.id}`)}
+                                    >
                                         <CardHeader className="pb-3">
                                             <div className="flex items-start justify-between gap-4">
                                                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                                                     <BookOpen className="h-5 w-5" />
                                                 </div>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger
-                                                        asChild
-                                                    >
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="-mr-2 h-8 w-8"
-                                                        >
-                                                            <MoreVertical className="h-4 w-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent
-                                                        align="end"
-                                                        className="w-40"
-                                                    >
-                                                        <DropdownMenuItem
+                                                <div onClick={(e) => e.stopPropagation()}>
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger
                                                             asChild
                                                         >
-                                                            <Link
-                                                                href={`/teacher/subjects/${subject.id}`}
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="-mr-2 h-8 w-8"
                                                             >
-                                                                <BookCheck className="mr-2 h-4 w-4" />
-                                                                <span>
-                                                                    Lihat Detail
-                                                                </span>
-                                                            </Link>
-                                                        </DropdownMenuItem>
-                                                        {(auth.user.role ===
-                                                            'admin' ||
-                                                            (auth.user.role ===
-                                                                'guru' &&
-                                                                auth.user.id ===
-                                                                    subject.teacher_id)) && (
-                                                            <>
-                                                                <DropdownMenuItem
-                                                                    asChild
+                                                                <MoreVertical className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent
+                                                            align="end"
+                                                            className="w-40"
+                                                        >
+                                                            <DropdownMenuItem
+                                                                asChild
+                                                            >
+                                                                <Link
+                                                                    href={`/teacher/subjects/${subject.id}`}
                                                                 >
-                                                                    <Link
-                                                                        href={`/teacher/subjects/${subject.id}/edit`}
+                                                                    <BookCheck className="mr-2 h-4 w-4" />
+                                                                    <span>
+                                                                        Lihat Detail
+                                                                    </span>
+                                                                </Link>
+                                                            </DropdownMenuItem>
+                                                            {(auth.user.role ===
+                                                                'admin' ||
+                                                                (auth.user.role ===
+                                                                    'guru' &&
+                                                                    auth.user.id ===
+                                                                        subject.teacher_id)) && (
+                                                                <>
+                                                                    <DropdownMenuItem
+                                                                        asChild
                                                                     >
-                                                                        <Pencil className="mr-2 h-4 w-4" />
+                                                                        <Link
+                                                                            href={`/teacher/subjects/${subject.id}/edit`}
+                                                                        >
+                                                                            <Pencil className="mr-2 h-4 w-4" />
+                                                                            <span>
+                                                                                Edit
+                                                                                Mapel
+                                                                            </span>
+                                                                        </Link>
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem className="text-destructive focus:text-destructive">
+                                                                        <Trash2 className="mr-2 h-4 w-4" />
                                                                         <span>
-                                                                            Edit
+                                                                            Hapus
                                                                             Mapel
                                                                         </span>
-                                                                    </Link>
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem className="text-destructive focus:text-destructive">
-                                                                    <Trash2 className="mr-2 h-4 w-4" />
-                                                                    <span>
-                                                                        Hapus
-                                                                        Mapel
-                                                                    </span>
-                                                                </DropdownMenuItem>
-                                                            </>
-                                                        )}
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
+                                                                    </DropdownMenuItem>
+                                                                </>
+                                                            )}
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </div>
                                             </div>
                                             <div className="pt-2">
                                                 <h3 className="line-clamp-1 text-lg leading-tight font-bold transition-colors group-hover:text-primary">

@@ -6,7 +6,7 @@ use App\Repositories\Interfaces\SubjectRepositoryInterface;
 
 class SubjectService
 {
-    protected $subjectRepository;
+    protected SubjectRepositoryInterface $subjectRepository;
 
     public function __construct(SubjectRepositoryInterface $subjectRepository)
     {
@@ -21,5 +21,10 @@ class SubjectService
     public function getSubjectList(array $filters = [], int $perPage = 10)
     {
         return $this->subjectRepository->getPaginated($filters, $perPage);
+    }
+
+    public function getSubjectById(string $id)
+    {
+        return $this->subjectRepository->find($id);
     }
 }
