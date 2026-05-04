@@ -1,5 +1,5 @@
-import { Head, useForm, Link } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { Head, useForm, Link, usePage } from '@inertiajs/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     Briefcase,
     GraduationCap,
@@ -8,7 +8,10 @@ import {
     FileText,
     ArrowLeft,
     Settings2,
+    CheckCircle2,
+    X,
 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import {
@@ -36,19 +39,56 @@ interface EditTeacherProps {
 }
 
 export default function EditTeacher({ teacher }: EditTeacherProps) {
+    const { flash } = usePage().props as any;
+    const [showFlash, setShowFlash] = useState(false);
+
     const { data, setData, post, processing, errors, hasErrors } = useForm({
-        nip: teacher.nip || '',
-        specialization: teacher.specialization || '',
-        bio: teacher.bio || '',
+        nip: teacher?.nip || '',
+        specialization: teacher?.specialization || '',
+        bio: teacher?.bio || '',
         photo: null as File | null,
     });
 
+    useEffect(() => {
+        if (flash?.success || flash?.error) {
+            const showTimer = setTimeout(() => setShowFlash(true), 0);
+            const hideTimer = setTimeout(() => setShowFlash(false), 5000);
+
+            return () => {
+                clearTimeout(showTimer);
+                clearTimeout(hideTimer);
+            };
+        }
+    }, [flash?.success, flash?.error]);
+
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(update.url(), {
+
+        if (!teacher) {
+            return;
+        }
+
+        post(update.url(teacher.id), {
             forceFormData: true,
         });
     };
+
+    if (!teacher) {
+        return (
+            <div className="flex min-h-screen items-center justify-center p-6">
+                <Card className="max-w-md w-full p-8 text-center space-y-4">
+                    <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
+                    <h2 className="text-xl font-bold">Profil Tidak Ditemukan</h2>
+                    <p className="text-muted-foreground">
+                        Sistem tidak dapat menemukan data profil guru Anda.
+                    </p>
+                    <Button asChild>
+                        <Link href="/dashboard">Kembali ke Dashboard</Link>
+                    </Button>
+                </Card>
+            </div>
+        );
+    }
 
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 p-6 dark:bg-zinc-950">
@@ -60,7 +100,43 @@ export default function EditTeacher({ teacher }: EditTeacherProps) {
                 transition={{ duration: 0.5 }}
                 className="w-full max-w-lg"
             >
-                <div className="mb-6">
+                <AnimatePresence>
+                    {showFlash && (flash?.success || flash?.error) && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0, y: -20 }}
+                            animate={{ opacity: 1, height: 'auto', y: 0 }}
+                            exit={{ opacity: 0, height: 0, y: -20 }}
+                            className="mb-4 overflow-hidden"
+                        >
+                            <div
+                                className={`flex items-start gap-3 rounded-xl border p-4 shadow-sm dark:bg-opacity-10 ${
+                                    flash.success
+                                        ? 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-200'
+                                        : 'border-destructive/20 bg-destructive/10 text-destructive'
+                                }`}
+                            >
+                                {flash.success ? (
+                                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                                ) : (
+                                    <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+                                )}
+                                <div className="flex-1">
+                                    <p className="text-sm font-medium">
+                                        {flash.success || flash.error}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setShowFlash(false)}
+                                    className="rounded-lg p-1 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                <div className="mb-6 flex items-center justify-between">
                     <Button
                         asChild
                         variant="ghost"
@@ -249,5 +325,3 @@ export default function EditTeacher({ teacher }: EditTeacherProps) {
         </div>
     );
 }
-
-// Tambahkan Settings2 ke import lucide-react jika belum ada

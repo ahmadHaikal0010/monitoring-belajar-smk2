@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Admin\Teacher;
 
+use App\Models\Teacher;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateTeacherRequest extends FormRequest
 {
@@ -12,7 +14,9 @@ class UpdateTeacherRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->role === 'admin';
+        $teacher = $this->route('teacher');
+
+        return $this->user()->can('update', $teacher);
     }
 
     /**
@@ -22,10 +26,16 @@ class UpdateTeacherRequest extends FormRequest
      */
     public function rules(): array
     {
-        $teacherId = $this->route('teacher');
+        /** @var Teacher $teacher */
+        $teacher = $this->route('teacher');
 
         return [
-            'nip' => ['required', 'string', 'size:18', 'unique:teachers,nip,'.$teacherId],
+            'nip' => [
+                'required',
+                'string',
+                'size:18',
+                Rule::unique('teachers', 'nip')->ignore($teacher->id),
+            ],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'bio' => ['nullable', 'string', 'max:255'],
             'specialization' => ['required', 'string', 'max:100'],
@@ -41,12 +51,12 @@ class UpdateTeacherRequest extends FormRequest
     {
         return [
             'nip.required' => 'Nomor Induk Pegawai (NIP) wajib diisi.',
-            'nip.size' => 'Nomor Induk Pegawai (NIP) harus berjumlah 18 karakter.',
-            'nip.unique' => 'Nomor Induk Pegawai (NIP) ini sudah terdaftar di sistem.',
-            'specialization.required' => 'Bidang spesialisasi wajib diisi.',
-            'bio.string' => 'Bio harus berupa format teks.',
-            'photo.image' => 'File yang diunggah harus berupa gambar.',
-            'photo.mimes' => 'Format foto yang diizinkan adalah JPG, JPEG, PNG, atau WEBP.',
+            'nip.size' => 'Nomor Induk Pegawai (NIP) harus berjumlah tepat 18 karakter.',
+            'nip.unique' => 'NIP ini sudah terdaftar di sistem kami.',
+            'specialization.required' => 'Bidang keahlian atau spesialisasi wajib diisi.',
+            'bio.string' => 'Bio harus berupa teks.',
+            'photo.image' => 'File harus berupa gambar.',
+            'photo.mimes' => 'Format foto yang diizinkan hanya: JPG, JPEG, PNG, dan WEBP.',
             'photo.max' => 'Ukuran foto maksimal adalah 2MB.',
         ];
     }

@@ -1,4 +1,5 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     User,
     Briefcase,
@@ -6,7 +7,11 @@ import {
     Mail,
     Calendar,
     Settings2,
+    CheckCircle2,
+    AlertCircle,
+    X,
 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -31,6 +36,21 @@ interface TeacherProfileProps {
 export default function TeacherProfile({
     teacher: teacherData,
 }: TeacherProfileProps) {
+    const { flash } = usePage().props as any;
+    const [showFlash, setShowFlash] = useState(false);
+
+    useEffect(() => {
+        if (flash?.success || flash?.error) {
+            const showTimer = setTimeout(() => setShowFlash(true), 0);
+            const hideTimer = setTimeout(() => setShowFlash(false), 5000);
+
+            return () => {
+                clearTimeout(showTimer);
+                clearTimeout(hideTimer);
+            };
+        }
+    }, [flash?.success, flash?.error]);
+
     if (!teacherData) {
         return (
             <>
@@ -49,6 +69,42 @@ export default function TeacherProfile({
             <Head title="Data Diri" />
 
             <div className="flex flex-col gap-8 p-6">
+                <AnimatePresence>
+                    {showFlash && (flash?.success || flash?.error) && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0, y: -20 }}
+                            animate={{ opacity: 1, height: 'auto', y: 0 }}
+                            exit={{ opacity: 0, height: 0, y: -20 }}
+                            className="overflow-hidden"
+                        >
+                            <div
+                                className={`mb-2 flex items-start gap-3 rounded-xl border p-4 shadow-sm backdrop-blur-sm ${
+                                    flash.success
+                                        ? 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-200'
+                                        : 'border-destructive/20 bg-destructive/10 text-destructive'
+                                }`}
+                            >
+                                {flash.success ? (
+                                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                                ) : (
+                                    <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+                                )}
+                                <div className="flex-1">
+                                    <p className="text-sm font-medium">
+                                        {flash.success || flash.error}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setShowFlash(false)}
+                                    className="rounded-lg p-1 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div className="flex flex-col gap-1">
                         <h1 className="text-3xl font-bold tracking-tight text-foreground">

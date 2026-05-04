@@ -61,10 +61,17 @@ class SubjectController extends Controller
 
         $data['teacher_id'] = $teacher->id;
 
-        $this->subjectService->createSubject($data);
+        try {
+            $this->subjectService->createSubject($data);
 
-        return redirect()->route('teacher.subjects.index')
-            ->with('success', 'Mata pelajaran baru telah berhasil ditambahkan ke dalam daftar.');
+            return redirect()->route('teacher.subjects.index')
+                ->with('success', 'Mata pelajaran baru telah berhasil ditambahkan ke dalam daftar.');
+        } catch (Exception $e) {
+            Log::error('Error creating subject: '.$e->getMessage());
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat menambahkan mata pelajaran. Silakan coba lagi.');
+        }
     }
 
     /**
@@ -101,10 +108,17 @@ class SubjectController extends Controller
         // Ensure teacher_id is preserved
         $data['teacher_id'] = $subject->teacher_id;
 
-        $this->subjectService->updateSubject($subject->id, $data);
+        try {
+            $this->subjectService->updateSubject($subject->id, $data);
 
-        return redirect()->route('teacher.subjects.index')
-            ->with('success', 'Data mata pelajaran telah berhasil diperbarui.');
+            return redirect()->route('teacher.subjects.index')
+                ->with('success', 'Data mata pelajaran telah berhasil diperbarui.');
+        } catch (Exception $e) {
+            Log::error('Error updating subject: '.$e->getMessage());
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat memperbarui data mata pelajaran. Silakan coba lagi.');
+        }
     }
 
     /**
@@ -112,8 +126,9 @@ class SubjectController extends Controller
      */
     public function destroy(Subject $subject)
     {
+        Gate::authorize('delete', $subject);
+
         try {
-            Gate::authorize('delete', $subject);
             $this->subjectService->deleteSubject($subject->id);
 
             return redirect()->route('teacher.subjects.index')

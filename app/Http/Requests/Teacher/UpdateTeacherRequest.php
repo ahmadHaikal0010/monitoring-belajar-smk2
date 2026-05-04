@@ -12,9 +12,9 @@ class UpdateTeacherRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Karena kita menggunakan auth()->id() di controller,
-        // kita cukup pastikan user memiliki role guru/admin
-        return $this->user()->role === 'guru';
+        $teacher = $this->route('teacher');
+
+        return $this->user()->can('update', $teacher);
     }
 
     /**
