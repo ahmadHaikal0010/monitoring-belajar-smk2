@@ -3,7 +3,6 @@
 namespace App\Policies;
 
 use App\Models\Subject;
-use App\Models\Teacher;
 use App\Models\User;
 
 class SubjectPolicy

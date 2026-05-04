@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Subject;
 
 use App\Models\Subject;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateSubjectRequest extends FormRequest
@@ -15,7 +16,7 @@ class UpdateSubjectRequest extends FormRequest
         // Get the subject model instance from the route
         $subject = $this->route('subject');
 
-        // If for some reason it's still a string (though unlikely with type hinting in controller), 
+        // If for some reason it's still a string (though unlikely with type hinting in controller),
         // we can fetch it. But with Subject $subject in controller, this will be the model.
         return $this->user()->can('update', $subject);
     }
@@ -23,7 +24,7 @@ class UpdateSubjectRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
