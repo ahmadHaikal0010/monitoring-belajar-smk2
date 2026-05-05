@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid, Users, Shield } from 'lucide-react';
+import { BookOpen, FolderGit2, LayoutGrid, Users, Shield, FileText } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -50,6 +50,12 @@ export function AppSidebar() {
             icon: BookOpen,
         });
     }
+
+    mainNavItems.push({
+        title: 'Materi Pembelajaran',
+        href: '/teacher/materials',
+        icon: FileText,
+    });
 
     if (auth.user.role === 'admin') {
         mainNavItems.push({

@@ -19,6 +19,7 @@ class TeacherFactory extends Factory
     public function definition(): array
     {
         return [
+            'id' => fake()->uuid(),
             'user_id' => User::factory(),
             'nip' => $this->faker->unique()->numerify('##################'), // 18 digits
             'specialization' => $this->faker->randomElement(['Rekayasa Perangkat Lunak', 'Teknik Komputer dan Jaringan', 'Multimedia', 'Sistem Informasi']),
