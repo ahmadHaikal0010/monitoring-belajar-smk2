@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Material;
 use App\Models\Subject;
-use App\Models\Teacher;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,12 +18,20 @@ class MaterialFactory extends Factory
      */
     public function definition(): array
     {
+        $type = fake()->randomElement(['video', 'document', 'url']);
+
+        $body = match ($type) {
+            'video' => 'https://www.youtube.com/embed/'.fake()->bothify('??##??##??'),
+            'url' => fake()->url(),
+            'document' => 'materials/files/'.fake()->uuid().'.pdf',
+        };
+
         return [
+            'id' => fake()->uuid(),
             'subject_id' => Subject::factory(),
-            'teacher_id' => Teacher::factory(),
-            'title' => fake()->sentence(),
-            'type' => fake()->randomElement(['video', 'document', 'url']),
-            'content_path' => fake()->optional()->url(),
+            'title' => fake()->sentence(4),
+            'content_type' => $type,
+            'content_body' => $body,
             'description' => fake()->optional()->paragraph(),
         ];
     }

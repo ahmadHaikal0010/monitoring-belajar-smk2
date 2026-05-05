@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Repositories\Interfaces\MaterialRepositoryInterface;
 use App\Repositories\Interfaces\SubjectRepositoryInterface;
 use App\Repositories\Interfaces\TeacherRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
+use App\Repositories\SqlMaterialRepository;
 use App\Repositories\SqlSubjectRepository;
 use App\Repositories\SqlTeacherRepository;
 use App\Repositories\SqlUserRepository;
@@ -34,6 +36,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             SubjectRepositoryInterface::class,
             SqlSubjectRepository::class
+        );
+
+        $this->app->bind(
+            MaterialRepositoryInterface::class,
+            SqlMaterialRepository::class
         );
     }
 
