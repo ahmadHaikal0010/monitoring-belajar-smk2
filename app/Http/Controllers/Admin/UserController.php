@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\User\StoreUserRequest;
 use App\Http\Requests\Admin\User\UpdateUserRequest;
 use App\Services\UserService;
+use Exception;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -45,10 +47,18 @@ class UserController extends Controller
     public function store(StoreUserRequest $request)
     {
         $data = $request->validated();
-        $this->userService->createUser($data);
 
-        return redirect()->route('admin.users.index')
-            ->with('success', 'Data pengguna baru telah berhasil disimpan ke dalam sistem.');
+        try {
+            $this->userService->createUser($data);
+
+            return redirect()->route('admin.users.index')
+                ->with('success', 'Data pengguna baru telah berhasil disimpan ke dalam sistem.');
+        } catch (Exception $e) {
+            Log::error('Error creating user: '.$e->getMessage());
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat menyimpan data pengguna baru. Silakan coba lagi.');
+        }
     }
 
     /**
@@ -81,10 +91,19 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, int $id)
     {
         $data = $request->validated();
-        $this->userService->updateUser($id, $data);
 
-        return redirect()->route('admin.users.index')
-            ->with('success', 'Data pengguna telah berhasil diperbarui di dalam sistem.');
+        try {
+            $this->userService->updateUser($id, $data);
+
+            return redirect()->route('admin.users.index')
+                ->with('success', 'Data pengguna telah berhasil diperbarui di dalam sistem.');
+        } catch (Exception $e) {
+            Log::error('Error updating user: '.$e->getMessage());
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat memperbarui data pengguna. Silakan coba lagi.');
+        }
+
     }
 
     /**
@@ -92,9 +111,16 @@ class UserController extends Controller
      */
     public function destroy(int $id)
     {
-        $this->userService->deleteUser($id);
+        try {
+            $this->userService->deleteUser($id);
 
-        return redirect()->route('admin.users.index')
-            ->with('success', 'Data pengguna telah berhasil dihapus dari dalam sistem.');
+            return redirect()->route('admin.users.index')
+                ->with('success', 'Data pengguna telah berhasil dihapus dari dalam sistem.');
+        } catch (Exception $e) {
+            Log::error('Error deleting user: '.$e->getMessage());
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat menghapus data pengguna. Silakan coba lagi.');
+        }
     }
 }
