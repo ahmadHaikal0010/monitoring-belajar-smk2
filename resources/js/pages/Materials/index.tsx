@@ -351,19 +351,15 @@ return <div key={i} className="flex h-8 w-8 items-center justify-center text-xs 
                                     className="h-10 border-zinc-200 bg-background/50 pl-9 backdrop-blur-sm dark:border-zinc-800"
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    />
-                                    </div>
-                                    <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        className="h-10 w-10 shrink-0"
-                                    >
+                                />
+                            </div>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="icon" className="h-10 w-10 shrink-0">
                                         <Filter className="h-4 w-4" />
                                     </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="w-48">
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
                                     <div className="p-2 text-xs font-bold tracking-wider text-muted-foreground uppercase">
                                         Urutkan Berdasarkan
                                     </div>
@@ -470,16 +466,26 @@ return <div key={i} className="flex h-8 w-8 items-center justify-center text-xs 
                                         <X className="mr-2 h-4 w-4" />
                                         <span>Reset Filter</span>
                                     </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                    </DropdownMenu>
-                                    </div>
-                        {auth.user.role === 'guru' && mode === 'materials' && (
-                            <Button className="h-10 w-full gap-2 shadow-lg shadow-primary/20 sm:w-auto" asChild>
-                                <Link href={`/teacher/materials/create?subject_id=${selectedSubject?.id}`}>
-                                    <Plus className="h-4 w-4" />
-                                    <span>Tambah Materi</span>
-                                </Link>
-                            </Button>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+
+                        {mode === 'materials' && selectedSubject && (
+                            <>
+                                {auth.user.role === 'guru' && auth.user.id === selectedSubject.teacher_user_id ? (
+                                    <Button className="h-10 w-full gap-2 shadow-lg shadow-primary/20 sm:w-auto" asChild>
+                                        <Link href={`/teacher/materials/create?subject_id=${selectedSubject.id}`}>
+                                            <Plus className="h-4 w-4" />
+                                            <span>Tambah Materi</span>
+                                        </Link>
+                                    </Button>
+                                ) : (
+                                    <Badge variant="outline" className="h-10 px-4 bg-muted/50 border-zinc-200 dark:border-zinc-800 text-muted-foreground gap-2">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <span>Tidak Berhak Menambah Materi</span>
+                                    </Badge>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>

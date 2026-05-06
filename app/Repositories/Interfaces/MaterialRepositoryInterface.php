@@ -6,7 +6,7 @@ interface MaterialRepositoryInterface
 {
     public function getPaginated(array $filters = [], int $perPage = 10);
 
-    // public function create(array $data);
+    public function create(array $data);
 
     public function find(string $id);
 

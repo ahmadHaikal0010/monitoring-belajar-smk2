@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignUuid('subject_id')->constrained('subjects')->onDelete('cascade');
             $table->string('title');
             $table->enum('content_type', ['video', 'document', 'url']);
-            $table->string('content_body')->nullable();
+            $table->text('content_body')->nullable();
             $table->text('description')->nullable();
             $table->timestamps();
 

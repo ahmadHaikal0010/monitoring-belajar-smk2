@@ -39,6 +39,10 @@ class SqlSubjectRepository implements SubjectRepositoryInterface
                 'users.email as teacher_email',
             ]);
 
+        if (! empty($filters['teacher_id'])) {
+            $query->where('subjects.teacher_id', $filters['teacher_id']);
+        }
+
         if (! empty($filters['search'])) {
             $query->where(function ($q) use ($filters, $likeOperator) {
                 $q->where('subjects.title', $likeOperator, '%'.$filters['search'].'%')
@@ -97,5 +101,14 @@ class SqlSubjectRepository implements SubjectRepositoryInterface
         DB::table('subjects')
             ->where('id', $id)
             ->delete();
+    }
+
+    public function getTeacherSubjects(string $teacherId)
+    {
+        return DB::table('subjects')
+            ->where('teacher_id', $teacherId)
+            ->select(['id', 'title'])
+            ->orderBy('title', 'asc')
+            ->get();
     }
 }
