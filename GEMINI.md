@@ -28,6 +28,12 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - eslint (ESLINT) - v9
 - prettier (PRETTIER) - v3
 
+## Target Audience & Architectural Mandate
+
+- **Admin & Guru Only:** Aplikasi web ini (Inertia/React) dirancang secara eksklusif untuk peran **Administrator** dan **Guru**. Seluruh bahasa, petunjuk, alur kerja, dan fitur dikhususkan untuk manajemen dan administrasi pembelajaran.
+- **Siswa (Mobile/API):** Pengguna dengan peran **Siswa** tidak mengakses website ini. Mereka menggunakan aplikasi mobile yang terhubung melalui API. Jangan pernah membuat fitur atau menulis teks instruksional yang ditujukan untuk siswa di dalam aplikasi web ini.
+- **Formal & Professional:** Gunakan bahasa Indonesia yang formal, natural, dan berorientasi pada manajemen data untuk seluruh elemen antarmuka.
+
 ## Skills Activation
 
 This project has domain-specific skills available. You MUST activate the relevant skill whenever you work in that domain—don't wait until you're stuck.

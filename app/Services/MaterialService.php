@@ -17,4 +17,9 @@ class MaterialService
     {
         return $this->materialRepository->getPaginated($filters, $perPage);
     }
+
+    public function findMaterial(string $id)
+    {
+        return $this->materialRepository->find($id);
+    }
 }
