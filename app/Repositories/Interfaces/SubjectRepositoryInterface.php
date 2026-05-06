@@ -13,4 +13,6 @@ interface SubjectRepositoryInterface
     public function update(string $id, array $data);
 
     public function delete(string $id);
+
+    public function getTeacherSubjects(string $teacherId);
 }

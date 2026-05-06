@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Repositories\Interfaces\MaterialRepositoryInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class SqlMaterialRepository implements MaterialRepositoryInterface
 {
@@ -26,6 +27,10 @@ class SqlMaterialRepository implements MaterialRepositoryInterface
 
         if (! empty($filters['subject_id'])) {
             $query->where('materials.subject_id', $filters['subject_id']);
+        }
+
+        if (! empty($filters['teacher_id'])) {
+            $query->where('subjects.teacher_id', $filters['teacher_id']);
         }
 
         if (! empty($filters['search'])) {
@@ -73,5 +78,19 @@ class SqlMaterialRepository implements MaterialRepositoryInterface
                 'subjects.title as subject_title',
             ])
             ->first();
+    }
+
+    public function create(array $data)
+    {
+        DB::table('materials')->insert([
+            'id' => (string) Str::uuid(),
+            'subject_id' => $data['subject_id'],
+            'title' => $data['title'],
+            'content_type' => $data['content_type'],
+            'content_body' => $data['content_body'],
+            'description' => $data['description'],
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 }

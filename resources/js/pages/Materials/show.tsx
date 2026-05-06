@@ -42,7 +42,7 @@ const TypeBadge = ({ type }: { type: Material['content_type'] }) => {
     const labels = {
         video: 'Video Pembelajaran',
         document: 'Dokumen / Modul',
-        url: 'Tautan Eksternal',
+        url: 'Tautan / Embed',
     };
 
     return (
@@ -71,6 +71,9 @@ export default function ShowMaterial({ material }: Props) {
         ],
     });
 
+    const isIframe = material.content_body.trim().startsWith('<iframe');
+    const isPdf = material.content_body.toLowerCase().endsWith('.pdf');
+
     return (
         <>
             <Head title={`Detail Materi: ${material.title}`} />
@@ -89,12 +92,11 @@ export default function ShowMaterial({ material }: Props) {
                             </Link>
                         </Button>
                         <div>
-                            <h1 className="text-3xl font-bold tracking-tight">
+                            <h1 className="text-3xl font-bold tracking-tight text-foreground">
                                 Detail Materi
                             </h1>
-                            <p className="text-muted-foreground">
-                                Pelajari konten materi yang tersedia di bawah
-                                ini.
+                            <p className="text-muted-foreground text-sm">
+                                Pengelolaan materi pembelajaran untuk para pengajar.
                             </p>
                         </div>
                     </div>
@@ -118,71 +120,118 @@ export default function ShowMaterial({ material }: Props) {
                     <div className="lg:col-span-2 space-y-6">
                         {/* Content Preview/Player Card */}
                         <Card className="overflow-hidden border-none bg-card/50 shadow-xl backdrop-blur-sm">
-                            <div className="flex aspect-video w-full items-center justify-center border-b border-zinc-200 bg-muted dark:border-zinc-800">
+                            <div className={cn(
+                                "flex w-full items-center justify-center border-b border-zinc-200 bg-muted dark:border-zinc-800 overflow-hidden",
+                                (material.content_type === 'video' || isIframe || (material.content_type === 'document' && isPdf)) ? "aspect-[4/3] sm:aspect-video" : "min-h-[300px]"
+                            )}>
                                 {material.content_type === 'video' ? (
-                                    <iframe
-                                        src={material.content_body}
-                                        className="h-full w-full"
-                                        allowFullScreen
-                                        title={material.title}
+                                    <video
+                                        src={`/storage/${material.content_body}`}
+                                        className="h-full w-full object-contain"
+                                        controls
+                                        controlsList="nodownload"
                                     />
                                 ) : material.content_type === 'document' ? (
-                                    <div className="flex flex-col items-center gap-4 p-12 text-center">
-                                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
-                                            <FileText className="h-10 w-10 text-blue-600 dark:text-blue-400" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-bold">
-                                                File Dokumen Tersedia
-                                            </h3>
-                                            <p className="mt-1 text-sm text-muted-foreground">
-                                                Unduh modul atau dokumen
-                                                pembelajaran untuk dipelajari
-                                                secara offline.
-                                            </p>
-                                        </div>
-                                        <Button className="gap-2" asChild>
-                                            <a
-                                                href={`/storage/${material.content_body}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                            >
-                                                <Download className="h-4 w-4" />
-                                                Unduh Dokumen
-                                            </a>
-                                        </Button>
+                                    <div className="flex flex-col items-center gap-4 w-full h-full">
+                                        {isPdf ? (
+                                            <iframe
+                                                src={`/storage/${material.content_body}#toolbar=0`}
+                                                className="w-full h-full border-none"
+                                                title={material.title}
+                                            />
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center gap-4 p-12 text-center h-full">
+                                                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
+                                                    <FileText className="h-10 w-10 text-blue-600 dark:text-blue-400" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-lg font-bold text-foreground">Berkas Dokumen Tersedia</h3>
+                                                    <p className="mt-1 text-sm text-muted-foreground">
+                                                        Dokumen ini dapat Anda lihat atau unduh untuk dipelajari.
+                                                    </p>
+                                                </div>
+                                                <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
+                                                    <Button variant="outline" className="gap-2" asChild>
+                                                        <a href={`/storage/${material.content_body}`} target="_blank" rel="noopener noreferrer">
+                                                            <Eye className="h-4 w-4" />
+                                                            Lihat Dokumen
+                                                        </a>
+                                                    </Button>
+                                                    <Button className="gap-2" asChild>
+                                                        <a href={`/storage/${material.content_body}`} download={material.title}>
+                                                            <Download className="h-4 w-4" />
+                                                            Unduh Dokumen
+                                                        </a>
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 ) : (
-                                    <div className="flex flex-col items-center gap-4 p-12 text-center">
-                                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-                                            <LinkIcon className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-bold">
-                                                Tautan Eksternal
-                                            </h3>
-                                            <p className="mt-1 text-sm text-muted-foreground">
-                                                Akses sumber referensi materi
-                                                melalui tautan di bawah ini.
-                                            </p>
-                                        </div>
-                                        <Button
-                                            className="gap-2"
-                                            variant="outline"
-                                            asChild
-                                        >
-                                            <a
-                                                href={material.content_body}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                            >
-                                                <ExternalLink className="h-4 w-4" />
-                                                Buka Tautan
-                                            </a>
-                                        </Button>
+                                    /* Tautan / Iframe Mode */
+                                    <div className="w-full h-full">
+                                        {isIframe ? (
+                                            <div 
+                                                className="w-full h-full [&>iframe]:w-full [&>iframe]:h-full"
+                                                dangerouslySetInnerHTML={{ __html: material.content_body }} 
+                                            />
+                                        ) : (
+                                            <div className="flex flex-col items-center gap-4 p-12 text-center h-full justify-center">
+                                                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+                                                    <LinkIcon className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-lg font-bold text-foreground">Tautan Eksternal</h3>
+                                                    <p className="mt-1 text-sm text-muted-foreground">
+                                                        Akses sumber referensi materi melalui tautan eksternal.
+                                                    </p>
+                                                </div>
+                                                <Button
+                                                    className="gap-2"
+                                                    variant="outline"
+                                                    asChild
+                                                >
+                                                    <a
+                                                        href={material.content_body}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                    >
+                                                        <ExternalLink className="h-4 w-4" />
+                                                        Buka Tautan
+                                                    </a>
+                                                </Button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
+                            
+                            {/* Document Actions Bar (Only for PDFs or as additional footer) */}
+                            {material.content_type === 'document' && isPdf && (
+                                <div className="flex items-center justify-between px-8 py-4 bg-muted/30 border-b border-zinc-200 dark:border-zinc-800">
+                                    <div className="flex items-center gap-2">
+                                        <FileText className="h-4 w-4 text-blue-500" />
+                                        <span className="text-xs font-medium text-muted-foreground truncate max-w-[200px] sm:max-w-md">
+                                            Pratinjau: {material.title}.pdf
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Button variant="ghost" size="sm" className="h-8 text-xs gap-2" asChild>
+                                            <a href={`/storage/${material.content_body}`} target="_blank" rel="noopener noreferrer">
+                                                <Eye className="h-3.5 w-3.5" />
+                                                Buka Full
+                                            </a>
+                                        </Button>
+                                        <Button size="sm" className="h-8 text-xs gap-2" asChild>
+                                            <a href={`/storage/${material.content_body}`} download={material.title}>
+                                                <Download className="h-3.5 w-3.5" />
+                                                Unduh
+                                            </a>
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+
                             <CardHeader className="p-8">
                                 <div className="mb-4 flex flex-wrap items-center gap-3">
                                     <TypeBadge type={material.content_type} />
@@ -194,7 +243,7 @@ export default function ShowMaterial({ material }: Props) {
                                         {material.subject_title}
                                     </Badge>
                                 </div>
-                                <CardTitle className="text-2xl font-bold leading-tight">
+                                <CardTitle className="text-2xl font-bold leading-tight text-foreground">
                                     {material.title}
                                 </CardTitle>
                             </CardHeader>
@@ -202,7 +251,7 @@ export default function ShowMaterial({ material }: Props) {
                                 <div className="space-y-4">
                                     <h4 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
                                         <FileText className="h-4 w-4" />
-                                        Ringkasan Materi
+                                        Deskripsi Materi
                                     </h4>
                                     <div className="prose prose-zinc dark:prose-invert max-w-none">
                                         <p className="whitespace-pre-wrap text-base italic leading-relaxed text-foreground/80">
@@ -270,7 +319,7 @@ export default function ShowMaterial({ material }: Props) {
                                     Mata Pelajaran
                                 </h4>
                                 <Link
-                                    href={`/teacher/subjects`} // Bisa diarahkan ke detail subject jika sudah ada
+                                    href={`/teacher/materials?subject_id=${material.id}`} // Sebaiknya ini subject_id jika ada relasi
                                     className="group flex items-center justify-between rounded-xl border border-primary/10 bg-primary/5 p-3 transition-colors hover:bg-primary/10"
                                 >
                                     <div className="flex items-center gap-3">

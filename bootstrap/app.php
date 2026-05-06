@@ -5,6 +5,7 @@ use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\PostTooLargeException;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -27,6 +28,11 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
+            // Tangani file yang terlalu besar (413 atau PostTooLargeException)
+            if ($response->getStatusCode() === 413 || $exception instanceof PostTooLargeException) {
+                return redirect()->back()->with('error', 'Ukuran data yang dikirim terlalu besar. Batas maksimal server adalah '.ini_get('post_max_size').'.');
+            }
+
             // Tampilkan halaman error kustom jika tidak dalam mode debug dan status code termasuk yang kita handle
             if (! config('app.debug') && in_array($response->getStatusCode(), [500, 503, 404, 403])) {
                 return Inertia::render('Error', ['status' => $response->getStatusCode()])

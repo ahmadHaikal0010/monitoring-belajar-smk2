@@ -28,6 +28,11 @@ class SubjectService
         return $this->subjectRepository->find($id);
     }
 
+    public function getSubjectsByTeacher(string $teacherId)
+    {
+        return $this->subjectRepository->getTeacherSubjects($teacherId);
+    }
+
     public function updateSubject(string $id, array $data)
     {
         $this->subjectRepository->update($id, $data);
