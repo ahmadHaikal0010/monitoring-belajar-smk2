@@ -87,7 +87,7 @@ export default function ShowMaterial({ material }: Props) {
                             asChild
                             className="shrink-0"
                         >
-                            <Link href="/teacher/materials">
+                            <Link href={`/teacher/materials?subject_id=${material.subject_id}`}>
                                 <ArrowLeft className="h-4 w-4" />
                             </Link>
                         </Button>

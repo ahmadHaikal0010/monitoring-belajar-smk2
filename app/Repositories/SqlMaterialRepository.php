@@ -17,13 +17,17 @@ class SqlMaterialRepository implements MaterialRepositoryInterface
             ->join('subjects', 'materials.subject_id', '=', 'subjects.id')
             ->select([
                 'materials.id',
+                'materials.subject_id',
                 'materials.title',
                 'materials.content_type',
                 'materials.content_body',
                 'materials.description',
                 'materials.created_at',
                 'subjects.title as subject_title',
-            ]);
+                'subjects.teacher_id',
+            ])
+            ->join('teachers', 'subjects.teacher_id', '=', 'teachers.id')
+            ->addSelect(['teachers.user_id as teacher_user_id']);
 
         if (! empty($filters['subject_id'])) {
             $query->where('materials.subject_id', $filters['subject_id']);
@@ -70,12 +74,14 @@ class SqlMaterialRepository implements MaterialRepositoryInterface
             ->where('materials.id', $id)
             ->select([
                 'materials.id',
+                'materials.subject_id',
                 'materials.title',
                 'materials.content_type',
                 'materials.content_body',
                 'materials.description',
                 'materials.created_at',
                 'subjects.title as subject_title',
+                'subjects.teacher_id',
             ])
             ->first();
     }
@@ -92,5 +98,25 @@ class SqlMaterialRepository implements MaterialRepositoryInterface
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+    }
+
+    public function update(string $id, array $data)
+    {
+        DB::table('materials')
+            ->where('id', $id)
+            ->update([
+                'title' => $data['title'],
+                'content_type' => $data['content_type'],
+                'content_body' => $data['content_body'],
+                'description' => $data['description'] ?? null,
+                'updated_at' => now(),
+            ]);
+    }
+
+    public function delete(string $id)
+    {
+        DB::table('materials')
+            ->where('id', $id)
+            ->delete();
     }
 }
