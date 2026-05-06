@@ -10,6 +10,23 @@ Aplikasi ini merupakan bagian dari **Tugas Akhir** oleh **Ahmad Haikal**.
 
 ---
 
+## 🏗️ Arsitektur Proyek & Batasan Scope
+
+Aplikasi ini dikembangkan dengan sistem **Hybrid Architecture**:
+
+1.  **Web Dashboard (Platform Ini):**
+    *   **Target Pengguna:** Hanya **Administrator** dan **Guru**.
+    *   **Fungsi:** Manajemen data user, kurikulum (mapel), materi pembelajaran, dan monitoring progres siswa.
+    *   **Teknologi:** Laravel 13, Inertia.js v3, dan React 19.
+2.  **Mobile App (Client Siswa):**
+    *   **Target Pengguna:** **Siswa**.
+    *   **Fungsi:** Mengakses materi, mengerjakan tugas, dan melihat progres pribadi.
+    *   **Koneksi:** Terhubung melalui REST API yang disediakan oleh server ini.
+
+> **Penting:** Website ini **TIDAK** ditujukan untuk akses siswa. Seluruh instruksi, bahasa, dan alur kerja di web ini dirancang secara profesional untuk kebutuhan manajemen sekolah.
+
+---
+
 ## 🌟 Fitur Utama
 
 ### 1. Multi-Role & Authentication

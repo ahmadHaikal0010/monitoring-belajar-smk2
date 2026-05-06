@@ -57,4 +57,21 @@ class SqlMaterialRepository implements MaterialRepositoryInterface
             ->paginate($perPage)
             ->withQueryString();
     }
+
+    public function find(string $id)
+    {
+        return DB::table('materials')
+            ->join('subjects', 'materials.subject_id', '=', 'subjects.id')
+            ->where('materials.id', $id)
+            ->select([
+                'materials.id',
+                'materials.title',
+                'materials.content_type',
+                'materials.content_body',
+                'materials.description',
+                'materials.created_at',
+                'subjects.title as subject_title',
+            ])
+            ->first();
+    }
 }

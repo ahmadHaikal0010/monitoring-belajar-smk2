@@ -70,7 +70,11 @@ class MaterialController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $material = $this->materialService->findMaterial($id);
+
+        return Inertia::render('Materials/show', [
+            'material' => $material,
+        ]);
     }
 
     /**
