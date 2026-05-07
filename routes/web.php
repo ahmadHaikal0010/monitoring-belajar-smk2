@@ -30,12 +30,16 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
     Route::prefix('teacher')->name('teacher.')->group(function () {
         Route::get('/create', [TeacherController::class, 'create'])->name('create');
         Route::post('/store', [TeacherController::class, 'store'])->name('store');
-        Route::get('/profile', [TeacherController::class, 'profile'])->name('profile');
-        Route::get('/edit', [TeacherController::class, 'edit'])->name('edit');
-        Route::post('/update/{teacher}', [TeacherController::class, 'update'])->name('update');
 
-        Route::resource('subjects', SubjectController::class)->middleware(CheckTeacherProfile::class);
-        Route::resource('materials', MaterialController::class)->middleware(CheckTeacherProfile::class);
+        Route::middleware(CheckTeacherProfile::class)->group(function () {
+            Route::get('/profile', [TeacherController::class, 'profile'])->name('profile');
+            Route::get('/edit', [TeacherController::class, 'edit'])->name('edit');
+            Route::put('/update/{teacher}', [TeacherController::class, 'update'])->name('update');
+
+            Route::resource('subjects', SubjectController::class);
+            Route::resource('materials', MaterialController::class);
+        });
+
     });
 
     // * Admin Routes
