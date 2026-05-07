@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckTeacherProfile
 {
-    protected $teacherService;
+    protected TeacherService $teacherService;
 
     public function __construct(TeacherService $teacherService)
     {
