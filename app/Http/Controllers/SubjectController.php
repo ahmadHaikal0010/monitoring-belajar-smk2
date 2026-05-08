@@ -30,6 +30,12 @@ class SubjectController extends Controller
     public function index()
     {
         $filters = request()->only(['search', 'sort', 'direction']);
+
+        if (auth()->user()->role === 'guru') {
+            $teacher = $this->teacherService->getTeacherByUserId(auth()->id());
+            $filters['teacher_id'] = $teacher?->id;
+        }
+
         $subjects = $this->subjectService->getSubjectList($filters, 12);
 
         return Inertia::render('Subjects/index', [
@@ -43,6 +49,8 @@ class SubjectController extends Controller
      */
     public function create()
     {
+        Gate::authorize('create', Subject::class);
+
         return Inertia::render('Subjects/create');
     }
 
@@ -91,6 +99,8 @@ class SubjectController extends Controller
      */
     public function edit(Subject $subject)
     {
+        Gate::authorize('update', $subject);
+
         $subjectData = $this->subjectService->getSubjectById($subject->id);
 
         return Inertia::render('Subjects/edit', [
