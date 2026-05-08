@@ -111,6 +111,10 @@ class UserController extends Controller
      */
     public function destroy(int $id)
     {
+        if (auth()->id() === $id) {
+            abort(403);
+        }
+
         try {
             $this->userService->deleteUser($id);
 
