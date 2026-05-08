@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
+use App\Http\Middleware\AdminAccess;
 use App\Http\Middleware\CheckAccount;
 use App\Http\Middleware\CheckTeacherProfile;
 use Illuminate\Support\Facades\Route;
@@ -43,7 +44,7 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
     });
 
     // * Admin Routes
-    Route::prefix('admin')->name('admin.')->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware(AdminAccess::class)->group(function () {
         Route::resource('teachers', AdminTeacherController::class);
         Route::resource('users', AdminUserController::class);
     });
