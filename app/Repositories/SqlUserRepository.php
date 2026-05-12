@@ -22,6 +22,14 @@ class SqlUserRepository implements UserRepositoryInterface
                 'created_at',
             ]);
 
+        if (! empty($filters['status'])) {
+            if ($filters['status'] === 'pending') {
+                $query->where('is_approved', false);
+            } elseif ($filters['status'] === 'approved') {
+                $query->where('is_approved', true);
+            }
+        }
+
         if (! empty($filters['search'])) {
             $query->where(function ($q) use ($filters, $likeOperator) {
                 $q->where('name', $likeOperator, '%'.$filters['search'].'%')
@@ -96,5 +104,14 @@ class SqlUserRepository implements UserRepositoryInterface
         DB::table('users')
             ->where('id', $id)
             ->delete();
+    }
+
+    public function approve(int $id)
+    {
+        DB::table('users')
+            ->where('id', $id)
+            ->update([
+                'is_approved' => true,
+            ]);
     }
 }

@@ -47,6 +47,8 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
     Route::prefix('admin')->name('admin.')->middleware(AdminAccess::class)->group(function () {
         Route::resource('teachers', AdminTeacherController::class);
         Route::resource('users', AdminUserController::class);
+        Route::get('/approval', [AdminUserController::class, 'approval'])->name('users.approval');
+        Route::put('/users/{id}/approve', [AdminUserController::class, 'approve'])->name('users.approve');
     });
 });
 

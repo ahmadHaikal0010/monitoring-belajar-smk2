@@ -1,4 +1,4 @@
-import { Head, Link, setLayoutProps } from '@inertiajs/react';
+import { Head, Link, setLayoutProps, router } from '@inertiajs/react';
 import {
     ArrowLeft,
     Pencil,
@@ -9,6 +9,7 @@ import {
     Calendar,
     User as UserIcon,
     Clock,
+    UserCheck,
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -107,21 +108,38 @@ export default function ShowUser({ user }: Props) {
                             </p>
                         </div>
                     </div>
-                    <Button
-                        className="gap-2 shadow-lg shadow-primary/20"
-                        asChild
-                    >
-                        <Link
-                            href={
-                                admin.users?.edit?.url
-                                    ? admin.users.edit.url(user.id.toString())
-                                    : `/admin/users/${user.id}/edit`
-                            }
+                    <div className="flex flex-col items-center gap-3 sm:flex-row">
+                        {!user.is_approved && (
+                            <Button
+                                variant="outline"
+                                className="gap-2 border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20"
+                                onClick={() => {
+                                    const url = admin.users?.approve?.url
+                                        ? admin.users.approve.url(user.id.toString())
+                                        : `/admin/users/${user.id}/approve`;
+                                    router.put(url, {}, { preserveScroll: true });
+                                }}
+                            >
+                                <UserCheck className="h-4 w-4" />
+                                Setujui Akun
+                            </Button>
+                        )}
+                        <Button
+                            className="gap-2 shadow-lg shadow-primary/20"
+                            asChild
                         >
-                            <Pencil className="h-4 w-4" />
-                            Edit Profil
-                        </Link>
-                    </Button>
+                            <Link
+                                href={
+                                    admin.users?.edit?.url
+                                        ? admin.users.edit.url(user.id.toString())
+                                        : `/admin/users/${user.id}/edit`
+                                }
+                            >
+                                <Pencil className="h-4 w-4" />
+                                Edit Profil
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="grid gap-6">

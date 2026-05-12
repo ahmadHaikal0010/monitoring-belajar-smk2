@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid, Users, Shield, FileText } from 'lucide-react';
+import { BookOpen, FolderGit2, LayoutGrid, Users, Shield, FileText, UserCheck } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -68,6 +68,12 @@ export function AppSidebar() {
             title: 'Manajemen User',
             href: adminRoutes.users.index.url(),
             icon: Shield,
+        });
+
+        mainNavItems.push({
+            title: 'Persetujuan User',
+            href: adminRoutes.users.approval.url(),
+            icon: UserCheck,
         });
     }
 

@@ -13,4 +13,6 @@ interface UserRepositoryInterface
     public function find(int $id);
 
     public function delete(int $id);
+
+    public function approve(int $id);
 }
