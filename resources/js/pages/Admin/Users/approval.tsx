@@ -10,14 +10,11 @@ import {
     ArrowDown,
     Check,
     X,
-    AlertTriangle,
-    Shield,
-    User as UserIcon,
     Mail,
     ArrowLeft,
     CheckCircle2,
 } from 'lucide-react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -87,6 +84,7 @@ export default function UserApprovalList({ users, filters }: Props) {
     const [search, setSearch] = useState(filters.search || '');
     const [showSuccess, setShowSuccess] = useState(false);
     const [processingId, setProcessingId] = useState<number | null>(null);
+    const lastFlash = useRef<string | null>(null);
 
     const handleApprove = (id: number) => {
         setProcessingId(id);
@@ -104,10 +102,15 @@ export default function UserApprovalList({ users, filters }: Props) {
     };
 
     useEffect(() => {
-        if (flash?.success) {
-            setShowSuccess(true);
-            const timer = setTimeout(() => setShowSuccess(false), 5000);
-            return () => clearTimeout(timer);
+        if (flash?.success && flash.success !== lastFlash.current) {
+            lastFlash.current = flash.success;
+            const showTimer = setTimeout(() => setShowSuccess(true), 0);
+            const hideTimer = setTimeout(() => setShowSuccess(false), 5000);
+
+            return () => {
+                clearTimeout(showTimer);
+                clearTimeout(hideTimer);
+            };
         }
     }, [flash?.success]);
 
@@ -142,6 +145,7 @@ export default function UserApprovalList({ users, filters }: Props) {
                 handleSearch(search);
             }
         }, 500);
+
         return () => clearTimeout(timer);
     }, [search, handleSearch, filters.search]);
 

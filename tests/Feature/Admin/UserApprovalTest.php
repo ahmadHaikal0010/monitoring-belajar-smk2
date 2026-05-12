@@ -50,7 +50,7 @@ class UserApprovalTest extends TestCase
 
         $response->assertRedirect(route('admin.users.approval'));
         $response->assertSessionHas('success');
-        
+
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
             'is_approved' => true,

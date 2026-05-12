@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 
 interface Material {
     id: string;
+    subject_id: string;
     title: string;
     content_type: 'video' | 'document' | 'url';
     content_body: string;
@@ -319,7 +320,7 @@ export default function ShowMaterial({ material }: Props) {
                                     Mata Pelajaran
                                 </h4>
                                 <Link
-                                    href={`/teacher/materials?subject_id=${material.id}`} // Sebaiknya ini subject_id jika ada relasi
+                                    href={`/teacher/materials?subject_id=${material.subject_id}`}
                                     className="group flex items-center justify-between rounded-xl border border-primary/10 bg-primary/5 p-3 transition-colors hover:bg-primary/10"
                                 >
                                     <div className="flex items-center gap-3">
