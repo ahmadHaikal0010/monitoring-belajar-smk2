@@ -127,4 +127,31 @@ class UserController extends Controller
                 ->with('error', 'Terjadi kesalahan saat menghapus data pengguna. Silakan coba lagi.');
         }
     }
+
+    public function approval()
+    {
+        $filters = request()->only(['search', 'sort', 'direction']);
+        $filters['status'] = 'pending';
+        $users = $this->userService->getUserList($filters);
+
+        return Inertia::render('Admin/Users/approval', [
+            'users' => $users,
+            'filters' => $filters,
+        ]);
+    }
+
+    public function approve(int $id)
+    {
+        try {
+            $this->userService->approveUser($id);
+
+            return redirect()->route('admin.users.approval')
+                ->with('success', 'Pengguna telah berhasil disetujui dan diaktifkan di dalam sistem.');
+        } catch (Exception $e) {
+            Log::error('Error approving user: '.$e->getMessage());
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat menyetujui pengguna. Silakan coba lagi.');
+        }
+    }
 }

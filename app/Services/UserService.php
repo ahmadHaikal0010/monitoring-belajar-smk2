@@ -37,4 +37,9 @@ class UserService
     {
         $this->userRepository->delete($id);
     }
+
+    public function approveUser(int $id)
+    {
+        $this->userRepository->approve($id);
+    }
 }

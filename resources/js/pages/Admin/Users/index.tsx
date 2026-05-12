@@ -450,6 +450,20 @@ export default function UserList({ users, filters }: Props) {
                                                         align="end"
                                                         className="w-48"
                                                     >
+                                                        {!user.is_approved && (
+                                                            <DropdownMenuItem
+                                                                className="flex cursor-pointer items-center gap-2 text-emerald-600 focus:text-emerald-600"
+                                                                onSelect={() => {
+                                                                    const url = admin.users?.approve?.url
+                                                                        ? admin.users.approve.url(user.id.toString())
+                                                                        : `/admin/users/${user.id}/approve`;
+                                                                    router.put(url, {}, { preserveScroll: true });
+                                                                }}
+                                                            >
+                                                                <UserCheck className="h-4 w-4" />
+                                                                <span>Setujui User</span>
+                                                            </DropdownMenuItem>
+                                                        )}
                                                         <DropdownMenuItem
                                                             className="flex cursor-pointer items-center gap-2"
                                                             asChild
@@ -546,10 +560,13 @@ export default function UserList({ users, filters }: Props) {
                                 const label = link.label.toLowerCase();
                                 const isPrev =
                                     label.includes('previous') ||
-                                    label.includes('&laquo;');
+                                    label.includes('prev') ||
+                                    label.includes('&laquo;') ||
+                                    label.includes('pagination.previous');
                                 const isNext =
                                     label.includes('next') ||
-                                    label.includes('&raquo;');
+                                    label.includes('&raquo;') ||
+                                    label.includes('pagination.next');
                                 const isEllipsis = link.label === '...';
 
                                 if (isEllipsis) {
