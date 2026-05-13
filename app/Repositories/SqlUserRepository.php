@@ -5,7 +5,7 @@ namespace App\Repositories;
 use App\Models\User;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Support\Facades\DB;
-use Override;
+use Illuminate\Support\Str;
 
 class SqlUserRepository implements UserRepositoryInterface
 {
@@ -140,7 +140,7 @@ class SqlUserRepository implements UserRepositoryInterface
             ]);
 
             DB::table('students')->insert([
-                'id' => \Illuminate\Support\Str::uuid(),
+                'id' => Str::uuid(),
                 'user_id' => $userId,
                 'nisn' => $data['nisn'],
                 'address' => $data['address'],

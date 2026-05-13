@@ -33,8 +33,8 @@ class Authentication extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'role' => $user->role,
-                ]
-            ]
+                ],
+            ],
         ]);
     }
 
@@ -44,7 +44,7 @@ class Authentication extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Berhasil keluar dari sistem.'
+            'message' => 'Berhasil keluar dari sistem.',
         ]);
     }
 
