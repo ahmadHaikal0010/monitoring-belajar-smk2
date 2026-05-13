@@ -142,16 +142,9 @@ class UserController extends Controller
 
     public function approve(int $id)
     {
-        try {
-            $this->userService->approveUser($id);
+        $this->userService->approveUser($id);
 
-            return redirect()->route('admin.users.approval')
-                ->with('success', 'Pengguna telah berhasil disetujui dan diaktifkan di dalam sistem.');
-        } catch (Exception $e) {
-            Log::error('Error approving user: '.$e->getMessage());
-
-            return redirect()->back()
-                ->with('error', 'Terjadi kesalahan saat menyetujui pengguna. Silakan coba lagi.');
-        }
+        return redirect()->route('admin.users.approval')
+            ->with('success', 'Pengguna telah berhasil disetujui dan diaktifkan di dalam sistem.');
     }
 }

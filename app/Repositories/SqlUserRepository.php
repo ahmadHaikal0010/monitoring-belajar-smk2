@@ -2,8 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Models\User;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Support\Facades\DB;
+use Override;
 
 class SqlUserRepository implements UserRepositoryInterface
 {
@@ -113,5 +115,38 @@ class SqlUserRepository implements UserRepositoryInterface
             ->update([
                 'is_approved' => true,
             ]);
+    }
+
+    public function authenticate(string $email)
+    {
+        $userRaw = DB::table('users')
+            ->where('email', $email)
+            ->first();
+
+        return User::hydrate([(array) $userRaw])->first();
+    }
+
+    public function register(array $data)
+    {
+        DB::transaction(function () use ($data) {
+            $userId = DB::table('users')->insertGetId([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => bcrypt($data['password']),
+                'role' => 'siswa',
+                'is_approved' => false,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DB::table('students')->insert([
+                'id' => \Illuminate\Support\Str::uuid(),
+                'user_id' => $userId,
+                'nisn' => $data['nisn'],
+                'address' => $data['address'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        });
     }
 }
