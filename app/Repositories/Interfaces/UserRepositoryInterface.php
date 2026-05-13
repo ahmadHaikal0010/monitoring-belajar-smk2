@@ -15,4 +15,8 @@ interface UserRepositoryInterface
     public function delete(int $id);
 
     public function approve(int $id);
+
+    public function authenticate(string $email);
+
+    public function register(array $data);
 }

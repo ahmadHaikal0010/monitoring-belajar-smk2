@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
@@ -28,12 +29,20 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
-            // Tangani file yang terlalu besar (413 atau PostTooLargeException)
-            if ($response->getStatusCode() === 413 || $exception instanceof PostTooLargeException) {
-                return redirect()->back()->with('error', 'Ukuran data yang dikirim terlalu besar. Batas maksimal server adalah '.ini_get('post_max_size').'.');
+            // Jika permintaan datang dari API (Flutter)
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $exception->getMessage() ?: 'Terjadi kesalahan pada server.',
+                    'status' => $response->getStatusCode(),
+                ], $response->getStatusCode());
             }
 
-            // Tampilkan halaman error kustom jika tidak dalam mode debug dan status code termasuk yang kita handle
+            // Jika permintaan dari Web (Inertia)
+            if ($response->getStatusCode() === 413 || $exception instanceof PostTooLargeException) {
+                return redirect()->back()->with('error', 'Ukuran data terlalu besar.');
+            }
+
             if (! config('app.debug') && in_array($response->getStatusCode(), [500, 503, 404, 403])) {
                 return Inertia::render('Error', ['status' => $response->getStatusCode()])
                     ->toResponse($request)

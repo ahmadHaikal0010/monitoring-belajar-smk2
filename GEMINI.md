@@ -14,25 +14,20 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - laravel/fortify (FORTIFY) - v1
 - laravel/framework (LARAVEL) - v13
 - laravel/prompts (PROMPTS) - v0
+- laravel/sanctum (SANCTUM) - v4
 - laravel/wayfinder (WAYFINDER) - v0
 - laravel/boost (BOOST) - v2
 - laravel/mcp (MCP) - v0
 - laravel/pail (PAIL) - v1
 - laravel/pint (PINT) - v1
 - laravel/sail (SAIL) - v1
-- phpunit/phpunit (PHPUNIT) - v12
+- phpunit/phpunit (PHPUNIT) - v11
 - \@inertiajs/react (INERTIA_REACT) - v3
 - react (REACT) - v19
 - tailwindcss (TAILWINDCSS) - v4
 - \@laravel/vite-plugin-wayfinder (WAYFINDER_VITE) - v0
 - eslint (ESLINT) - v9
 - prettier (PRETTIER) - v3
-
-## Target Audience & Architectural Mandate
-
-- **Admin & Guru Only:** Aplikasi web ini (Inertia/React) dirancang secara eksklusif untuk peran **Administrator** dan **Guru**. Seluruh bahasa, petunjuk, alur kerja, dan fitur dikhususkan untuk manajemen dan administrasi pembelajaran.
-- **Siswa (Mobile/API):** Pengguna dengan peran **Siswa** tidak mengakses website ini. Mereka menggunakan aplikasi mobile yang terhubung melalui API. Jangan pernah membuat fitur atau menulis teks instruksional yang ditujukan untuk siswa di dalam aplikasi web ini.
-- **Formal & Professional:** Gunakan bahasa Indonesia yang formal, natural, dan berorientasi pada manajemen data untuk seluruh elemen antarmuka.
 
 ## Skills Activation
 
@@ -120,6 +115,13 @@ This project has domain-specific skills available. You MUST activate the relevan
 - Use TitleCase for Enum keys: `FavoritePerson`, `BestLake`, `Monthly`.
 - Prefer PHPDoc blocks over inline comments. Only add inline comments for exceptionally complex logic.
 - Use array shape type definitions in PHPDoc blocks.
+
+=== tests rules ===
+
+# Test Enforcement
+
+- Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
+- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test --compact` with a specific filename or filter.
 
 === inertia-laravel/core rules ===
 
