@@ -4,11 +4,10 @@ namespace App\Models;
 
 use Database\Factories\StudentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Support\Facades\Storage;
 
 #[Fillable(['user_id', 'nisn', 'address', 'photo'])]
 class Student extends Model
@@ -33,8 +32,7 @@ class Student extends Model
      */
     protected function photoUrl(): Attribute
     {
-        return Attribute::get(fn () => 
-            $this->photo ? asset('storage/' . $this->photo) : null
+        return Attribute::get(fn () => $this->photo ? asset('storage/'.$this->photo) : null
         );
     }
 }
