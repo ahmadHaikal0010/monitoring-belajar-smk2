@@ -69,21 +69,34 @@ class SqlUserRepository implements UserRepositoryInterface
 
     public function update(int $id, array $data)
     {
-        $updateData = [
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'role' => $data['role'] ?? 'user',
-            'is_approved' => $data['is_approved'] ?? false,
-            'updated_at' => now(),
-        ];
+        $updateData = [];
+
+        if (isset($data['name'])) {
+            $updateData['name'] = $data['name'];
+        }
+
+        if (isset($data['email'])) {
+            $updateData['email'] = $data['email'];
+        }
+
+        if (isset($data['role'])) {
+            $updateData['role'] = $data['role'];
+        }
+
+        if (isset($data['is_approved'])) {
+            $updateData['is_approved'] = $data['is_approved'];
+        }
 
         if (! empty($data['password'])) {
             $updateData['password'] = bcrypt($data['password']);
         }
 
-        DB::table('users')
-            ->where('id', $id)
-            ->update($updateData);
+        if (! empty($updateData)) {
+            $updateData['updated_at'] = now();
+            DB::table('users')
+                ->where('id', $id)
+                ->update($updateData);
+        }
     }
 
     public function find(int $id)
