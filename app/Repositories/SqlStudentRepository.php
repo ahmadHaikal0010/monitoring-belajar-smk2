@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use App\Repositories\Interfaces\StudentRepositoryInterface;
 use Illuminate\Support\Facades\DB;
-use Override;
 
 class SqlStudentRepository implements StudentRepositoryInterface
 {

@@ -3,15 +3,15 @@
 namespace App\Services;
 
 use App\Repositories\Interfaces\StudentRepositoryInterface;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-
 use App\Repositories\Interfaces\UserRepositoryInterface;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class StudentService
 {
     protected StudentRepositoryInterface $studentRepository;
+
     protected UserRepositoryInterface $userRepository;
 
     public function __construct(

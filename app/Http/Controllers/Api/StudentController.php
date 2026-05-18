@@ -22,12 +22,12 @@ class StudentController extends Controller
     public function profile(Request $request)
     {
         $user = $request->user()->load('student');
-        
+
         return response()->json([
             'success' => true,
             'data' => [
                 'user' => $user,
-            ]
+            ],
         ]);
     }
 
