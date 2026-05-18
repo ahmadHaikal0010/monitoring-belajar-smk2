@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid, Users, Shield, FileText, UserCheck } from 'lucide-react';
+import { BookOpen, FolderGit2, LayoutGrid, Users, Shield, FileText, UserCheck, GraduationCap } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -62,6 +62,12 @@ export function AppSidebar() {
             title: 'Daftar Guru',
             href: adminRoutes.teachers.index.url(),
             icon: Users,
+        });
+
+        mainNavItems.push({
+            title: 'Daftar Siswa',
+            href: adminRoutes.students.index.url(),
+            icon: GraduationCap,
         });
 
         mainNavItems.push({

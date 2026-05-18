@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\TeacherController as AdminTeacherController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\SubjectController;
@@ -47,6 +48,7 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
     Route::prefix('admin')->name('admin.')->middleware(AdminAccess::class)->group(function () {
         Route::resource('teachers', AdminTeacherController::class);
         Route::resource('users', AdminUserController::class);
+        Route::resource('students', AdminStudentController::class);
         Route::get('/approval', [AdminUserController::class, 'approval'])->name('users.approval');
         Route::put('/users/{id}/approve', [AdminUserController::class, 'approve'])->name('users.approve');
     });
