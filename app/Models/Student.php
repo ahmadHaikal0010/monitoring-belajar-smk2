@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable(['user_id', 'nisn', 'address', 'photo'])]
 class Student extends Model
@@ -14,8 +16,25 @@ class Student extends Model
     /** @use HasFactory<StudentFactory> */
     use HasFactory, HasUuids;
 
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['photo_url'];
+
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the full URL for the student's photo.
+     */
+    protected function photoUrl(): Attribute
+    {
+        return Attribute::get(fn () => 
+            $this->photo ? asset('storage/' . $this->photo) : null
+        );
     }
 }
