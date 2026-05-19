@@ -9,4 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 // Jadwal reset semester: Berjalan setiap 6 bulan (1 Januari & 1 Juli) pukul 00:00
-Schedule::command('app:reset-semester --force')->twiceYearly(1, 1);
+Schedule::command('app:reset-semester --force')->cron('0 0 1 1,7 *');
