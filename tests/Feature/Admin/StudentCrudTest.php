@@ -58,7 +58,7 @@ class StudentCrudTest extends TestCase
             'user_id' => $user->id,
             'nisn' => '1234567890',
         ]);
-        
+
         $student = Student::where('user_id', $user->id)->first();
         Storage::disk('public')->assertExists($student->photo);
     }
