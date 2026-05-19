@@ -15,11 +15,13 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('teacher_id')->constrained('teachers')->onDelete('cascade');
             $table->string('title');
+            $table->string('code')->unique();
             $table->text('description')->nullable();
             $table->timestamps();
 
             $table->index('id');
             $table->index('teacher_id');
+            $table->index('code');
         });
     }
 

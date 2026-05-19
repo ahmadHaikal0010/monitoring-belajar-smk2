@@ -20,6 +20,7 @@ import {
     AlertCircle,
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -49,6 +50,7 @@ interface Subject {
     teacher_id: string;
     teacher_user_id: number;
     title: string;
+    code: string;
     description: string;
     teacher_name: string;
     teacher_email: string;
@@ -93,8 +95,8 @@ export default function SubjectList({ subjects, filters }: Props) {
 
     const handleDelete = () => {
         if (!subjectToDelete) {
-return;
-}
+            return;
+        }
 
         setIsDeleting(true);
         router.delete(`/teacher/subjects/${subjectToDelete.id}`, {
@@ -336,8 +338,13 @@ return;
                                     >
                                         <CardHeader className="pb-3">
                                             <div className="flex items-start justify-between gap-4">
-                                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                                                    <BookOpen className="h-5 w-5" />
+                                                <div className="flex flex-col gap-2">
+                                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                                                        <BookOpen className="h-5 w-5" />
+                                                    </div>
+                                                    <Badge variant="outline" className="w-fit font-mono text-[10px] font-bold tracking-wider">
+                                                        #{subject.code}
+                                                    </Badge>
                                                 </div>
                                                 <div onClick={(e) => e.stopPropagation()}>
                                                     {(auth.user.role === 'admin' || (auth.user.role === 'guru' && auth.user.id === subject.teacher_user_id)) && (
@@ -473,7 +480,7 @@ return;
                 )}
 
                 {/* Pagination */}
-                {subjects.total > subjects.data.length && (
+                {subjects.total > 0 && (
                     <div className="flex items-center justify-between rounded-xl border-t border-zinc-200 bg-muted/10 p-4 dark:border-zinc-800">
                         <p className="text-xs text-muted-foreground">
                             Menampilkan{' '}
@@ -495,10 +502,13 @@ return;
                                 const label = link.label.toLowerCase();
                                 const isPrev =
                                     label.includes('previous') ||
-                                    label.includes('&laquo;');
+                                    label.includes('prev') ||
+                                    label.includes('&laquo;') ||
+                                    label.includes('pagination.previous');
                                 const isNext =
                                     label.includes('next') ||
-                                    label.includes('&raquo;');
+                                    label.includes('&raquo;') ||
+                                    label.includes('pagination.next');
                                 const isEllipsis = link.label === '...';
 
                                 if (isEllipsis) {

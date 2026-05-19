@@ -7,7 +7,8 @@ import {
     Pencil,
     FileText,
     Shield,
-    Mail
+    Mail,
+    Fingerprint
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +20,7 @@ interface Subject {
     teacher_id: string;
     teacher_user_id: number;
     title: string;
+    code: string;
     description: string;
     teacher_name: string;
     teacher_email: string;
@@ -147,6 +149,15 @@ export default function ShowSubject({ subject }: Props) {
                                 </div>
 
                                 <div className="space-y-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                                    <div className="flex items-center gap-3 text-sm">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                                            <Fingerprint className="h-4 w-4 text-primary" />
+                                        </div>
+                                        <div className="flex flex-col min-w-0">
+                                            <span className="text-[10px] font-bold text-muted-foreground uppercase">Kode Pendaftaran</span>
+                                            <span className="text-sm font-mono font-bold text-primary tracking-wider">{subject.code}</span>
+                                        </div>
+                                    </div>
                                     <div className="flex items-center gap-3 text-sm">
                                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
                                             <Mail className="h-4 w-4 text-muted-foreground" />
