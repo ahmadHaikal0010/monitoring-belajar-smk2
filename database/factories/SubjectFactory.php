@@ -22,6 +22,7 @@ class SubjectFactory extends Factory
             'id' => fake()->uuid(),
             'teacher_id' => Teacher::factory(),
             'title' => fake()->sentence(3),
+            'code' => strtoupper(fake()->unique()->bothify('??####')),
             'description' => fake()->paragraph(),
         ];
     }

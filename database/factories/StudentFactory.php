@@ -19,10 +19,11 @@ class StudentFactory extends Factory
     public function definition(): array
     {
         return [
+            'id' => fake()->uuid(),
             'user_id' => User::factory(),
-            'nis' => fake()->unique()->numerify('NIS-#####'),
-            'class' => fake()->randomElement(['X', 'XI', 'XII']),
-            'photo' => fake()->imageUrl(640, 480, 'people', true),
+            'nisn' => fake()->unique()->numerify('##########'),
+            'address' => fake()->address(),
+            'photo' => null,
         ];
     }
 }
