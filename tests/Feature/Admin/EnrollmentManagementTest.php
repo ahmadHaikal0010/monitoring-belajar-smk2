@@ -16,7 +16,9 @@ class EnrollmentManagementTest extends TestCase
     use RefreshDatabase;
 
     protected User $admin;
+
     protected User $teacherUser;
+
     protected Teacher $teacher;
 
     protected function setUp(): void
@@ -24,7 +26,7 @@ class EnrollmentManagementTest extends TestCase
         parent::setUp();
 
         $this->admin = User::factory()->create(['role' => 'admin', 'is_approved' => true]);
-        
+
         $this->teacherUser = User::factory()->create(['role' => 'guru', 'is_approved' => true]);
         $this->teacher = Teacher::factory()->create(['user_id' => $this->teacherUser->id]);
     }
@@ -47,7 +49,7 @@ class EnrollmentManagementTest extends TestCase
     {
         // Their subject
         Subject::factory()->create(['teacher_id' => $this->teacher->id]);
-        
+
         // Other subject
         Subject::factory()->create();
 
@@ -65,10 +67,10 @@ class EnrollmentManagementTest extends TestCase
     {
         $subject = Subject::factory()->create();
         $student = Student::factory()->create();
-        
+
         Enrollment::factory()->create([
             'subject_id' => $subject->id,
-            'student_id' => $student->id
+            'student_id' => $student->id,
         ]);
 
         $response = $this->actingAs($this->admin)->get(route('admin.enrollments.index', ['subject_id' => $subject->id]));
