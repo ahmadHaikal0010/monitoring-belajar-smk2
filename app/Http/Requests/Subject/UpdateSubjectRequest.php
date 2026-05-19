@@ -28,9 +28,18 @@ class UpdateSubjectRequest extends FormRequest
      */
     public function rules(): array
     {
+        $subject = $this->route('subject');
+
         return [
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
+            'code' => [
+                'required',
+                'string',
+                'min:3',
+                'max:10',
+                'unique:subjects,code,'.$subject->id,
+            ],
         ];
     }
 

@@ -49,6 +49,12 @@ export function AppSidebar() {
             href: '/teacher/subjects',
             icon: BookOpen,
         });
+
+        mainNavItems.push({
+            title: 'Data Pendaftaran',
+            href: '/admin/enrollments',
+            icon: Users,
+        });
     }
 
     mainNavItems.push({

@@ -7,7 +7,8 @@ import {
     FileText,
     AlertCircle,
     Loader2,
-    X
+    X,
+    Fingerprint
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import InputError from '@/components/input-error';
@@ -20,6 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 interface Subject {
     id: string;
     title: string;
+    code: string;
     description: string;
 }
 
@@ -33,6 +35,7 @@ export default function EditSubject({ subject }: Props) {
 
     const { data, setData, patch, processing, errors } = useForm({
         title: subject.title || '',
+        code: subject.code || '',
         description: subject.description || '',
     });
 
@@ -81,7 +84,7 @@ export default function EditSubject({ subject }: Props) {
                             className="mb-2 flex items-center justify-between rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-destructive"
                         >
                             <div className="flex items-center gap-3">
-                                <AlertCircle className="w-5 h-5" />
+                                <AlertCircle className="h-5 w-5" />
                                 <p className="text-sm font-medium">
                                     {flash.error}
                                 </p>
@@ -104,7 +107,7 @@ export default function EditSubject({ subject }: Props) {
                         className="shrink-0"
                     >
                         <Link href="/teacher/subjects">
-                            <ArrowLeft className="w-4 h-4" />
+                            <ArrowLeft className="h-4 w-4" />
                         </Link>
                     </Button>
                     <div>
@@ -141,6 +144,31 @@ export default function EditSubject({ subject }: Props) {
                                     autoFocus
                                 />
                                 <InputError message={errors.title} />
+                            </div>
+
+                            {/* Kode Mata Pelajaran */}
+                            <div className="grid gap-2">
+                                <Label
+                                    htmlFor="code"
+                                    className="flex items-center gap-2 text-sm font-semibold"
+                                >
+                                    <Fingerprint className="h-4 w-4 text-primary" />
+                                    Kode Mata Pelajaran (Enrollment Code)
+                                </Label>
+                                <Input
+                                    id="code"
+                                    placeholder="Contoh: MTK001"
+                                    className="h-11 font-mono border-zinc-200 bg-background/50 dark:border-zinc-800"
+                                    value={data.code}
+                                    onChange={(e) =>
+                                        setData('code', e.target.value.toUpperCase())
+                                    }
+                                    required
+                                />
+                                <InputError message={errors.code} />
+                                <p className="text-[11px] text-muted-foreground">
+                                    Siswa akan menggunakan kode ini untuk bergabung ke kelas Anda.
+                                </p>
                             </div>
 
                             {/* Deskripsi */}

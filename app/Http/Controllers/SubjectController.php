@@ -7,9 +7,7 @@ use App\Http\Requests\Subject\UpdateSubjectRequest;
 use App\Models\Subject;
 use App\Services\SubjectService;
 use App\Services\TeacherService;
-use Exception;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class SubjectController extends Controller
@@ -69,17 +67,10 @@ class SubjectController extends Controller
 
         $data['teacher_id'] = $teacher->id;
 
-        try {
-            $this->subjectService->createSubject($data);
+        $this->subjectService->createSubject($data);
 
-            return redirect()->route('teacher.subjects.index')
-                ->with('success', 'Mata pelajaran baru telah berhasil ditambahkan ke dalam daftar.');
-        } catch (Exception $e) {
-            Log::error('Error creating subject: '.$e->getMessage());
-
-            return redirect()->back()
-                ->with('error', 'Terjadi kesalahan saat menambahkan mata pelajaran. Silakan coba lagi.');
-        }
+        return redirect()->route('teacher.subjects.index')
+            ->with('success', 'Mata pelajaran baru telah berhasil ditambahkan ke dalam daftar.');
     }
 
     /**
@@ -118,17 +109,10 @@ class SubjectController extends Controller
         // Ensure teacher_id is preserved
         $data['teacher_id'] = $subject->teacher_id;
 
-        try {
-            $this->subjectService->updateSubject($subject->id, $data);
+        $this->subjectService->updateSubject($subject->id, $data);
 
-            return redirect()->route('teacher.subjects.index')
-                ->with('success', 'Data mata pelajaran telah berhasil diperbarui.');
-        } catch (Exception $e) {
-            Log::error('Error updating subject: '.$e->getMessage());
-
-            return redirect()->back()
-                ->with('error', 'Terjadi kesalahan saat memperbarui data mata pelajaran. Silakan coba lagi.');
-        }
+        return redirect()->route('teacher.subjects.index')
+            ->with('success', 'Data mata pelajaran telah berhasil diperbarui.');
     }
 
     /**
@@ -138,16 +122,9 @@ class SubjectController extends Controller
     {
         Gate::authorize('delete', $subject);
 
-        try {
-            $this->subjectService->deleteSubject($subject->id);
+        $this->subjectService->deleteSubject($subject->id);
 
-            return redirect()->route('teacher.subjects.index')
-                ->with('success', 'Mata pelajaran telah berhasil dihapus.');
-        } catch (Exception $e) {
-            Log::error('Error deleting subject: '.$e->getMessage());
-
-            return redirect()->route('teacher.subjects.index')
-                ->with('error', 'Terjadi kesalahan saat menghapus mata pelajaran. Silakan coba lagi.');
-        }
+        return redirect()->route('teacher.subjects.index')
+            ->with('success', 'Mata pelajaran telah berhasil dihapus.');
     }
 }

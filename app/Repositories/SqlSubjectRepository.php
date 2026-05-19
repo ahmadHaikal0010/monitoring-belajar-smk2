@@ -10,14 +10,26 @@ class SqlSubjectRepository implements SubjectRepositoryInterface
 {
     public function create(array $data)
     {
+        $code = $this->generateUniqueCode();
+
         DB::table('subjects')->insert([
             'id' => (string) Str::uuid(),
             'teacher_id' => $data['teacher_id'],
             'title' => $data['title'],
+            'code' => $data['code'] ?? $code,
             'description' => $data['description'] ?? null,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+    }
+
+    private function generateUniqueCode(): string
+    {
+        do {
+            $code = strtoupper(Str::random(6));
+        } while (DB::table('subjects')->where('code', $code)->exists());
+
+        return $code;
     }
 
     public function getPaginated(array $filters = [], int $perPage = 10)
@@ -33,6 +45,7 @@ class SqlSubjectRepository implements SubjectRepositoryInterface
                 'subjects.teacher_id',
                 'teachers.user_id as teacher_user_id',
                 'subjects.title',
+                'subjects.code',
                 'subjects.description',
                 'subjects.created_at',
                 'users.name as teacher_name',
@@ -76,6 +89,7 @@ class SqlSubjectRepository implements SubjectRepositoryInterface
                 'subjects.teacher_id',
                 'teachers.user_id as teacher_user_id',
                 'subjects.title',
+                'subjects.code',
                 'subjects.description',
                 'subjects.created_at',
                 'users.name as teacher_name',
@@ -86,14 +100,20 @@ class SqlSubjectRepository implements SubjectRepositoryInterface
 
     public function update(string $id, array $data)
     {
+        $updateData = [
+            'teacher_id' => $data['teacher_id'],
+            'title' => $data['title'],
+            'description' => $data['description'] ?? null,
+            'updated_at' => now(),
+        ];
+
+        if (isset($data['code'])) {
+            $updateData['code'] = $data['code'];
+        }
+
         DB::table('subjects')
             ->where('id', $id)
-            ->update([
-                'teacher_id' => $data['teacher_id'],
-                'title' => $data['title'],
-                'description' => $data['description'] ?? null,
-                'updated_at' => now(),
-            ]);
+            ->update($updateData);
     }
 
     public function delete(string $id)
