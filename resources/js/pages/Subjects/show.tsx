@@ -51,7 +51,8 @@ export default function ShowSubject({ subject }: Props) {
         <>
             <Head title={`Detail Mapel: ${subject.title}`} />
 
-            <div className="mx-auto flex max-w-4xl flex-col gap-6 p-6">
+            <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6">
+
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div className="flex items-center gap-4">
                         <Button

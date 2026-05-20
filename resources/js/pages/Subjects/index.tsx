@@ -86,7 +86,7 @@ interface Props {
 
 export default function SubjectList({ subjects, filters }: Props) {
     const { auth, flash } = usePage().props as any;
-    const [search, setSearch] = useState(filters.search || '');
+    const [search, setSearch] = useState(filters?.search || '');
     const [showFlash, setShowFlash] = useState(false);
     const [subjectToDelete, setSubjectToDelete] = useState<Subject | null>(
         null,
@@ -95,8 +95,8 @@ export default function SubjectList({ subjects, filters }: Props) {
 
     const handleDelete = () => {
         if (!subjectToDelete) {
-            return;
-        }
+return;
+}
 
         setIsDeleting(true);
         router.delete(`/teacher/subjects/${subjectToDelete.id}`, {
@@ -114,8 +114,13 @@ export default function SubjectList({ subjects, filters }: Props) {
             const hideTimer = setTimeout(() => setShowFlash(false), 5000);
 
             return () => {
-                clearTimeout(showTimer);
-                clearTimeout(hideTimer);
+                if (showTimer) {
+clearTimeout(showTimer);
+}
+
+                if (hideTimer) {
+clearTimeout(hideTimer);
+}
             };
         }
     }, [flash?.success, flash?.error]);
@@ -142,17 +147,17 @@ export default function SubjectList({ subjects, filters }: Props) {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            if (search !== (filters.search || '')) {
+            if (search !== (filters?.search || '')) {
                 handleSearch(search);
             }
         }, 500);
 
         return () => clearTimeout(timer);
-    }, [search, handleSearch, filters.search]);
+    }, [search, handleSearch, filters?.search]);
 
     const handleSort = (field: string) => {
         const direction =
-            filters.sort === field && filters.direction === 'asc'
+            filters?.sort === field && filters?.direction === 'asc'
                 ? 'desc'
                 : 'asc';
         router.get(
@@ -249,9 +254,9 @@ export default function SubjectList({ subjects, filters }: Props) {
                                     >
                                         <div className="flex w-full items-center justify-between">
                                             <span>Judul Mapel</span>
-                                            {filters.sort ===
+                                            {filters?.sort ===
                                                 'subjects.title' &&
-                                                (filters.direction === 'asc' ? (
+                                                (filters?.direction === 'asc' ? (
                                                     <ArrowUp className="h-3 w-3" />
                                                 ) : (
                                                     <ArrowDown className="h-3 w-3" />
@@ -263,24 +268,8 @@ export default function SubjectList({ subjects, filters }: Props) {
                                     >
                                         <div className="flex w-full items-center justify-between">
                                             <span>Nama Pengajar</span>
-                                            {filters.sort === 'users.name' &&
-                                                (filters.direction === 'asc' ? (
-                                                    <ArrowUp className="h-3 w-3" />
-                                                ) : (
-                                                    <ArrowDown className="h-3 w-3" />
-                                                ))}
-                                        </div>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        onClick={() =>
-                                            handleSort('subjects.created_at')
-                                        }
-                                    >
-                                        <div className="flex w-full items-center justify-between">
-                                            <span>Tanggal Dibuat</span>
-                                            {filters.sort ===
-                                                'subjects.created_at' &&
-                                                (filters.direction === 'asc' ? (
+                                            {filters?.sort === 'users.name' &&
+                                                (filters?.direction === 'asc' ? (
                                                     <ArrowUp className="h-3 w-3" />
                                                 ) : (
                                                     <ArrowDown className="h-3 w-3" />
@@ -306,7 +295,7 @@ export default function SubjectList({ subjects, filters }: Props) {
                             </DropdownMenu>
                         </div>
 
-                        {auth.user.role === 'guru' ? (
+                        {auth?.user?.role === 'guru' ? (
                             <Button
                                 className="h-10 w-full gap-2 shadow-lg shadow-primary/20 sm:w-auto"
                                 asChild
@@ -320,7 +309,7 @@ export default function SubjectList({ subjects, filters }: Props) {
                     </div>
                 </div>
 
-                {subjects.data.length > 0 ? (
+                {subjects?.data?.length > 0 ? (
                     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         <AnimatePresence mode="popLayout">
                             {subjects.data.map((subject, index) => (
@@ -343,11 +332,11 @@ export default function SubjectList({ subjects, filters }: Props) {
                                                         <BookOpen className="h-5 w-5" />
                                                     </div>
                                                     <Badge variant="outline" className="w-fit font-mono text-[10px] font-bold tracking-wider">
-                                                        #{subject.code}
+                                                        #{subject?.code}
                                                     </Badge>
                                                 </div>
                                                 <div onClick={(e) => e.stopPropagation()}>
-                                                    {(auth.user.role === 'admin' || (auth.user.role === 'guru' && auth.user.id === subject.teacher_user_id)) && (
+                                                    {(auth?.user?.role === 'admin' || (auth?.user?.role === 'guru' && auth?.user?.id === subject?.teacher_user_id)) && (
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger
                                                                 asChild
@@ -376,10 +365,10 @@ export default function SubjectList({ subjects, filters }: Props) {
                                                                         </span>
                                                                     </Link>
                                                                 </DropdownMenuItem>
-                                                                {(auth.user.role ===
+                                                                {(auth?.user?.role ===
                                                                     'guru' &&
-                                                                    auth.user.id ===
-                                                                        subject.teacher_user_id) && (
+                                                                    auth?.user?.id ===
+                                                                        subject?.teacher_user_id) && (
                                                                     <>
                                                                         <DropdownMenuItem
                                                                             asChild
@@ -415,13 +404,13 @@ export default function SubjectList({ subjects, filters }: Props) {
                                                 </div>                                            </div>
                                             <div className="pt-2">
                                                 <h3 className="line-clamp-1 text-lg leading-tight font-bold transition-colors group-hover:text-primary">
-                                                    {subject.title}
+                                                    {subject?.title}
                                                 </h3>
                                             </div>
                                         </CardHeader>
                                         <CardContent className="flex-1 pb-4">
                                             <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
-                                                {subject.description ||
+                                                {subject?.description ||
                                                     'Tidak ada deskripsi untuk mata pelajaran ini.'}
                                             </p>
                                         </CardContent>
@@ -432,13 +421,13 @@ export default function SubjectList({ subjects, filters }: Props) {
                                                         <User className="h-3 w-3" />
                                                     </div>
                                                     <span className="max-w-[120px] truncate font-medium">
-                                                        {subject.teacher_name}
+                                                        {subject?.teacher_name}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center gap-1.5 text-muted-foreground">
                                                     <Calendar className="h-3.5 w-3.5" />
                                                     <span>
-                                                        {new Date(
+                                                        {subject?.created_at ? new Date(
                                                             subject.created_at,
                                                         ).toLocaleDateString(
                                                             'id-ID',
@@ -446,7 +435,7 @@ export default function SubjectList({ subjects, filters }: Props) {
                                                                 month: 'short',
                                                                 year: 'numeric',
                                                             },
-                                                        )}
+                                                        ) : '-'}
                                                     </span>
                                                 </div>
                                             </div>
@@ -465,40 +454,31 @@ export default function SubjectList({ subjects, filters }: Props) {
                             Mata Pelajaran Kosong
                         </h3>
                         <p className="mb-6 max-w-xs text-muted-foreground">
-                            Belum ada mata pelajaran yang terdaftar. Mulai
-                            dengan menambahkan mata pelajaran baru.
+                            Belum ada mata pelajaran yang terdaftar.
                         </p>
-                        {auth.user.role === 'guru' ? (
-                            <Button asChild>
-                                <Link href="/teacher/subjects/create">
-                                    <Plus className="mr-2 h-4 w-4" />
-                                    Tambah Mapel
-                                </Link>
-                            </Button>
-                        ) : null}
                     </Card>
                 )}
 
                 {/* Pagination */}
-                {subjects.total > 0 && (
+                {subjects?.total > subjects?.data?.length && (
                     <div className="flex items-center justify-between rounded-xl border-t border-zinc-200 bg-muted/10 p-4 dark:border-zinc-800">
                         <p className="text-xs text-muted-foreground">
                             Menampilkan{' '}
                             <span className="font-bold text-foreground">
-                                {subjects.from || 0}
+                                {subjects?.from || 0}
                             </span>{' '}
                             sampai{' '}
                             <span className="font-bold text-foreground">
-                                {subjects.to || 0}
+                                {subjects?.to || 0}
                             </span>{' '}
                             dari{' '}
                             <span className="font-bold text-foreground">
-                                {subjects.total}
+                                {subjects?.total}
                             </span>{' '}
                             mapel
                         </p>
                         <div className="flex items-center gap-1">
-                            {subjects.links.map((link, i) => {
+                            {subjects?.links?.map((link, i) => {
                                 const label = link.label.toLowerCase();
                                 const isPrev =
                                     label.includes('previous') ||

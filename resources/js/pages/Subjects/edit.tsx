@@ -3,12 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
     ArrowLeft, 
     Save, 
-    BookOpen, 
     FileText,
-    AlertCircle,
     Loader2,
     X,
-    Fingerprint
+    AlertCircle,
+    Fingerprint,
+    BookOpen
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import InputError from '@/components/input-error';
@@ -31,18 +31,18 @@ interface Props {
 
 export default function EditSubject({ subject }: Props) {
     const { flash } = usePage().props as any;
-    const [showError, setShowError] = useState(false);
+    const [showFlash, setShowFlash] = useState(false);
 
     const { data, setData, patch, processing, errors } = useForm({
-        title: subject.title || '',
-        code: subject.code || '',
-        description: subject.description || '',
+        title: subject?.title || '',
+        code: subject?.code || '',
+        description: subject?.description || '',
     });
 
     useEffect(() => {
         if (flash?.error) {
-            const showTimer = setTimeout(() => setShowError(true), 0);
-            const hideTimer = setTimeout(() => setShowError(false), 5000);
+            const showTimer = setTimeout(() => setShowFlash(true), 0);
+            const hideTimer = setTimeout(() => setShowFlash(false), 5000);
 
             return () => {
                 clearTimeout(showTimer);
@@ -53,163 +53,95 @@ export default function EditSubject({ subject }: Props) {
 
     setLayoutProps({
         breadcrumbs: [
-            {
-                title: 'Mata Pelajaran',
-                href: '/teacher/subjects',
-            },
-            {
-                title: 'Edit Mapel',
-                href: `/teacher/subjects/${subject.id}/edit`,
-            },
+            { title: 'Mata Pelajaran', href: '/teacher/subjects' },
+            { title: 'Edit', href: `/teacher/subjects/${subject?.id}/edit` },
         ],
     });
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        patch(`/teacher/subjects/${subject.id}`);
+        patch(`/teacher/subjects/${subject?.id}`);
     };
 
     return (
         <>
-            <Head title={`Edit Mata Pelajaran: ${subject.title}`} />
-
-            <div className="mx-auto flex max-w-3xl flex-col gap-6 p-6">
-                {/* Global Error Message */}
+            <Head title="Edit Mata Pelajaran" />
+            <div className="mx-auto flex max-w-6xl w-full flex-col gap-6 p-6">
                 <AnimatePresence>
-                    {showError && flash?.error && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className="mb-2 flex items-center justify-between rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-destructive"
-                        >
-                            <div className="flex items-center gap-3">
-                                <AlertCircle className="h-5 w-5" />
-                                <p className="text-sm font-medium">
-                                    {flash.error}
-                                </p>
+                    {showFlash && flash?.error && (
+                        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                            <div className="flex items-center justify-between rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-destructive w-full">
+                                <div className="flex items-center gap-3">
+                                    <AlertCircle className="h-5 w-5" />
+                                    <p className="text-sm font-medium">{flash?.error}</p>
+                                </div>
+                                <button onClick={() => setShowFlash(false)}><X className="h-4 w-4" /></button>
                             </div>
-                            <button
-                                onClick={() => setShowError(false)}
-                                className="transition-opacity hover:opacity-70"
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
                         </motion.div>
                     )}
                 </AnimatePresence>
 
-                <div className="flex items-center gap-4">
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        asChild
-                        className="shrink-0"
-                    >
+                <div className="flex items-center gap-4 w-full">
+                    <Button variant="outline" size="icon" asChild className="shrink-0">
                         <Link href="/teacher/subjects">
                             <ArrowLeft className="h-4 w-4" />
                         </Link>
                     </Button>
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            Edit Mata Pelajaran
-                        </h1>
-                        <p className="text-muted-foreground">
-                            Perbarui informasi materi atau judul mata pelajaran yang sudah ada.
-                        </p>
-                    </div>
+                    <h1 className="text-2xl font-bold">Edit Mata Pelajaran</h1>
                 </div>
 
-                <form onSubmit={submit} className="grid gap-6">
-                    <Card className="border-none bg-card/50 p-6 shadow-xl backdrop-blur-sm">
+                <form onSubmit={submit} className="grid gap-6 w-full">
+                    <Card className="w-full p-6 border-none shadow-xl bg-card/50 backdrop-blur-sm">
                         <div className="grid gap-6">
-                            {/* Judul Mata Pelajaran */}
                             <div className="grid gap-2">
-                                <Label
-                                    htmlFor="title"
-                                    className="flex items-center gap-2 text-sm font-semibold"
-                                >
-                                    <BookOpen className="h-4 w-4 text-primary" />
-                                    Nama Mata Pelajaran
+                                <Label htmlFor="title" className="flex items-center gap-2 font-semibold">
+                                    <BookOpen className="h-4 w-4 text-primary" /> 
+                                    Nama Mapel
                                 </Label>
-                                <Input
-                                    id="title"
-                                    placeholder="Contoh: Pemrograman Dasar Berbasis Objek"
+                                <Input 
+                                    id="title" 
                                     className="h-11 border-zinc-200 bg-background/50 dark:border-zinc-800"
-                                    value={data.title}
-                                    onChange={(e) =>
-                                        setData('title', e.target.value)
-                                    }
-                                    required
-                                    autoFocus
+                                    value={data.title} 
+                                    onChange={e => setData('title', e.target.value)} 
+                                    required 
                                 />
                                 <InputError message={errors.title} />
                             </div>
-
-                            {/* Kode Mata Pelajaran */}
                             <div className="grid gap-2">
-                                <Label
-                                    htmlFor="code"
-                                    className="flex items-center gap-2 text-sm font-semibold"
-                                >
-                                    <Fingerprint className="h-4 w-4 text-primary" />
-                                    Kode Mata Pelajaran (Enrollment Code)
+                                <Label htmlFor="code" className="flex items-center gap-2 font-semibold">
+                                    <Fingerprint className="h-4 w-4 text-primary" /> 
+                                    Kode Enrollment
                                 </Label>
-                                <Input
-                                    id="code"
-                                    placeholder="Contoh: MTK001"
+                                <Input 
+                                    id="code" 
                                     className="h-11 font-mono border-zinc-200 bg-background/50 dark:border-zinc-800"
-                                    value={data.code}
-                                    onChange={(e) =>
-                                        setData('code', e.target.value.toUpperCase())
-                                    }
-                                    required
+                                    value={data.code} 
+                                    onChange={e => setData('code', e.target.value.toUpperCase())} 
+                                    required 
                                 />
                                 <InputError message={errors.code} />
-                                <p className="text-[11px] text-muted-foreground">
-                                    Siswa akan menggunakan kode ini untuk bergabung ke kelas Anda.
-                                </p>
                             </div>
-
-                            {/* Deskripsi */}
                             <div className="grid gap-2">
-                                <Label
-                                    htmlFor="description"
-                                    className="flex items-center gap-2 text-sm font-semibold"
-                                >
-                                    <FileText className="h-4 w-4 text-primary" />
-                                    Deskripsi Singkat
+                                <Label htmlFor="description" className="flex items-center gap-2 font-semibold">
+                                    <FileText className="h-4 w-4 text-primary" /> 
+                                    Deskripsi
                                 </Label>
-                                <Textarea
-                                    id="description"
-                                    placeholder="Berikan ringkasan materi atau tujuan dari mata pelajaran ini..."
-                                    className="min-h-[150px] resize-none border-zinc-200 bg-background/50 dark:border-zinc-800"
-                                    value={data.description}
-                                    onChange={(e) =>
-                                        setData('description', e.target.value)
-                                    }
+                                <Textarea 
+                                    id="description" 
+                                    value={data.description} 
+                                    onChange={e => setData('description', e.target.value)} 
+                                    className="min-h-[120px] resize-none border-zinc-200 bg-background/50 dark:border-zinc-800" 
                                 />
                                 <InputError message={errors.description} />
-                                <p className="text-right text-[11px] text-muted-foreground">
-                                    {data.description.length}/1000 karakter
-                                </p>
                             </div>
                         </div>
                     </Card>
-
-                    <div className="flex justify-end gap-3">
+                    <div className="flex justify-end gap-3 w-full">
                         <Button variant="ghost" asChild disabled={processing}>
                             <Link href="/teacher/subjects">Batal</Link>
                         </Button>
-                        <Button
-                            className="gap-2 px-8 shadow-lg shadow-primary/20"
-                            disabled={processing}
-                        >
-                            {processing ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                                <Save className="h-4 w-4" />
-                            )}
+                        <Button className="px-8 shadow-lg shadow-primary/20" disabled={processing}>
+                            {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4 mr-2" />} 
                             Simpan Perubahan
                         </Button>
                     </div>

@@ -128,7 +128,8 @@ export default function CreateStudent({ assignableUsers, filters }: Props) {
         <>
             <Head title="Tambah Siswa Baru" />
 
-            <div className="mx-auto flex max-w-4xl flex-col gap-6 p-6">
+            <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6">
+
                 <div className="flex items-center gap-4">
                     <Button
                         variant="outline"

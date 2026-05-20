@@ -35,7 +35,7 @@ class UpdateMaterialRequest extends FormRequest
             'content_body_file' => [
                 'nullable', // Optional for update
                 'file',
-                $type === 'video' ? 'mimes:mp4,mov,avi,webm' : 'mimes:pdf,doc,docx,ppt,pptx',
+                $type === 'video' ? 'mimes:mp4,mov,avi,webm' : 'mimes:pdf',
                 $type === 'video' ? 'max:51200' : 'max:10240',
             ],
             'description' => ['nullable', 'string', 'max:1000'],

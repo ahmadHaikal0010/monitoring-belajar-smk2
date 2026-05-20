@@ -34,7 +34,7 @@ class StoreMaterialRequest extends FormRequest
                 'required_if:content_type,video,document',
                 'nullable',
                 'file',
-                $type === 'video' ? 'mimes:mp4,mov,avi,webm' : 'mimes:pdf,doc,docx,ppt,pptx',
+                $type === 'video' ? 'mimes:mp4,mov,avi,webm' : 'mimes:pdf',
                 $type === 'video' ? 'max:51200' : 'max:10240', // 50MB for video, 10MB for doc
             ],
             'description' => ['nullable', 'string', 'max:1000'],
