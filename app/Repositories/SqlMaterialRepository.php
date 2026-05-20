@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Repositories\Interfaces\MaterialRepositoryInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class SqlMaterialRepository implements MaterialRepositoryInterface
@@ -64,12 +65,21 @@ class SqlMaterialRepository implements MaterialRepositoryInterface
 
         return $query
             ->paginate($perPage)
-            ->withQueryString();
+            ->withQueryString()
+            ->through(function ($material) {
+                if (in_array($material->content_type, ['video', 'document']) && $material->content_body) {
+                    $material->content_body_url = Storage::disk('public')->url($material->content_body);
+                } else {
+                    $material->content_body_url = null;
+                }
+
+                return $material;
+            });
     }
 
     public function find(string $id)
     {
-        return DB::table('materials')
+        $material = DB::table('materials')
             ->join('subjects', 'materials.subject_id', '=', 'subjects.id')
             ->where('materials.id', $id)
             ->select([
@@ -84,6 +94,16 @@ class SqlMaterialRepository implements MaterialRepositoryInterface
                 'subjects.teacher_id',
             ])
             ->first();
+
+        if ($material && in_array($material->content_type, ['video', 'document']) && $material->content_body) {
+            $material->content_body_url = Storage::disk('public')->url($material->content_body);
+        } else {
+            if ($material) {
+                $material->content_body_url = null;
+            }
+        }
+
+        return $material;
     }
 
     public function create(array $data)

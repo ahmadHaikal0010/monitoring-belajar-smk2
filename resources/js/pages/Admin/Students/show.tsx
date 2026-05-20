@@ -69,7 +69,7 @@ export default function ShowStudent({ student }: Props) {
         <>
             <Head title={`Profil Siswa - ${student.user.name}`} />
 
-            <div className="mx-auto flex max-w-5xl flex-col gap-6 p-6">
+            <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6">
                 {/* Header Actions */}
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div className="flex items-center gap-4">

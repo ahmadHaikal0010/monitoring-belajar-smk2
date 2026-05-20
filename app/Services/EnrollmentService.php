@@ -35,6 +35,11 @@ class EnrollmentService
         return $this->enrollmentRepository->delete($id);
     }
 
+    public function checkEnrollment(string $studentId, string $subjectId): bool
+    {
+        return $this->enrollmentRepository->isEnrolled($studentId, $subjectId);
+    }
+
     public function enrollByCode(string $studentId, string $code)
     {
         $subject = DB::table('subjects')->where('code', $code)->first();

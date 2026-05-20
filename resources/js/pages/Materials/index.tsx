@@ -49,6 +49,7 @@ interface Subject {
     teacher_id: string;
     teacher_user_id: number;
     title: string;
+    code: string;
     description: string;
     teacher_name: string;
     teacher_email: string;
@@ -123,7 +124,7 @@ const TypeBadge = ({ type }: { type: Material['content_type'] }) => {
     };
 
     return (
-        <Badge variant="outline" className={cn("border-none font-semibold", colors[type])}>
+        <Badge variant="outline" className={cn("border-none font-semibold text-[10px]", colors[type])}>
             {labels[type]}
         </Badge>
     );
@@ -151,7 +152,7 @@ const SortIcon = ({
 
 export default function MaterialIndex({ materials, subjects, selectedSubject, filters, mode }: Props) {
     const { auth, flash } = usePage().props as any;
-    const [search, setSearch] = useState(filters.search || '');
+    const [search, setSearch] = useState(filters?.search || '');
     const [showFlash, setShowFlash] = useState(false);
     const [materialToDelete, setMaterialToDelete] = useState<Material | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -177,8 +178,13 @@ return;
             const hideTimer = setTimeout(() => setShowFlash(false), 5000);
 
             return () => {
-                clearTimeout(showTimer);
-                clearTimeout(hideTimer);
+                if (showTimer) {
+clearTimeout(showTimer);
+}
+
+                if (hideTimer) {
+clearTimeout(hideTimer);
+}
             };
         }
     }, [flash?.success, flash?.error]);
@@ -209,17 +215,17 @@ return;
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            if (search !== (filters.search || '')) {
+            if (search !== (filters?.search || '')) {
                 handleSearch(search);
             }
         }, 500);
 
         return () => clearTimeout(timer);
-    }, [search, handleSearch, filters.search]);
+    }, [search, handleSearch, filters?.search]);
 
     const handleSort = (field: string) => {
         const direction =
-            filters.sort === field && filters.direction === 'asc'
+            filters?.sort === field && filters?.direction === 'asc'
                 ? 'desc'
                 : 'asc';
         router.get(
@@ -233,8 +239,8 @@ return;
         router.get('/teacher/materials', { ...filters, subject_id: subjectId, page: 1, search: '' });
     };
 
-    const renderPagination = (data: PaginatedData<any>) => {
-        if (data.total <= data.data.length) {
+    const renderPagination = (data?: PaginatedData<any>) => {
+        if (!data || !data.data || data.total <= data.data.length) {
 return null;
 }
 
@@ -244,14 +250,14 @@ return null;
                     Menampilkan <span className="font-bold text-foreground">{data.from || 0}</span> sampai <span className="font-bold text-foreground">{data.to || 0}</span> dari <span className="font-bold text-foreground">{data.total}</span> data
                 </p>
                 <div className="flex items-center gap-1">
-                    {data.links.map((link, i) => {
+                    {data?.links?.map((link, i) => {
                         const label = link.label.toLowerCase();
-                        const isPrev = label.includes('previous') || label.includes('&laquo;');
-                        const isNext = label.includes('next') || label.includes('&raquo;');
+                        const isPrev = label.includes('previous') || label.includes('prev') || label.includes('&laquo;') || label.includes('pagination.previous');
+                        const isNext = label.includes('next') || label.includes('&raquo;') || label.includes('pagination.next');
                         const isEllipsis = link.label === '...';
 
                         if (isEllipsis) {
-return <div key={i} className="flex h-8 w-8 items-center justify-center text-xs text-muted-foreground">...</div>;
+return <div key={i} className="px-2 text-xs">...</div>;
 }
 
                         return (
@@ -299,19 +305,17 @@ return <div key={i} className="flex h-8 w-8 items-center justify-center text-xs 
                         >
                             <div className={cn(
                                 "mb-2 flex items-start gap-3 rounded-xl border p-4 shadow-sm backdrop-blur-sm",
-                                flash.success 
+                                flash?.success 
                                     ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-200"
                                     : "border-destructive/20 bg-destructive/10 text-destructive"
                             )}>
-                                {flash.success ? (
+                                {flash?.success ? (
                                     <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
                                 ) : (
                                     <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
                                 )}
-                                <div className="flex-1">
-                                    <p className="text-sm font-medium">
-                                        {flash.success || flash.error}
-                                    </p>
+                                <div className="flex-1 text-sm font-medium">
+                                    {flash?.success || flash?.error}
                                 </div>
                                 <button
                                     onClick={() => setShowFlash(false)}
@@ -365,83 +369,31 @@ return <div key={i} className="flex h-8 w-8 items-center justify-center text-xs 
                                     </div>
                                     {mode === 'subjects' ? (
                                         <>
-                                            <DropdownMenuItem
-                                                onClick={() =>
-                                                    handleSort('subjects.title')
-                                                }
-                                            >
+                                            <DropdownMenuItem onClick={() => handleSort('subjects.title')}>
                                                 <div className="flex w-full items-center justify-between">
                                                     <span>Judul Mapel</span>
-                                                    {filters.sort ===
-                                                        'subjects.title' &&
-                                                        (filters.direction ===
-                                                        'asc' ? (
-                                                            <ArrowUp className="h-3 w-3" />
-                                                        ) : (
-                                                            <ArrowDown className="h-3 w-3" />
-                                                        ))}
+                                                    {filters?.sort === 'subjects.title' && (filters?.direction === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
                                                 </div>
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem
-                                                onClick={() =>
-                                                    handleSort('users.name')
-                                                }
-                                            >
+                                            <DropdownMenuItem onClick={() => handleSort('users.name')}>
                                                 <div className="flex w-full items-center justify-between">
                                                     <span>Nama Pengajar</span>
-                                                    {filters.sort ===
-                                                        'users.name' &&
-                                                        (filters.direction ===
-                                                        'asc' ? (
-                                                            <ArrowUp className="h-3 w-3" />
-                                                        ) : (
-                                                            <ArrowDown className="h-3 w-3" />
-                                                        ))}
+                                                    {filters?.sort === 'users.name' && (filters?.direction === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
                                                 </div>
                                             </DropdownMenuItem>
                                         </>
                                     ) : (
                                         <>
-                                            <DropdownMenuItem
-                                                onClick={() => handleSort('title')}
-                                            >
+                                            <DropdownMenuItem onClick={() => handleSort('title')}>
                                                 <div className="flex w-full items-center justify-between">
                                                     <span>Judul Materi</span>
-                                                    {filters.sort === 'title' &&
-                                                        (filters.direction ===
-                                                        'asc' ? (
-                                                            <ArrowUp className="h-3 w-3" />
-                                                        ) : (
-                                                            <ArrowDown className="h-3 w-3" />
-                                                        ))}
+                                                    {filters?.sort === 'title' && (filters?.direction === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
                                                 </div>
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem
-                                                onClick={() => handleSort('type')}
-                                            >
+                                            <DropdownMenuItem onClick={() => handleSort('type')}>
                                                 <div className="flex w-full items-center justify-between">
                                                     <span>Jenis Konten</span>
-                                                    {filters.sort === 'type' &&
-                                                        (filters.direction ===
-                                                        'asc' ? (
-                                                            <ArrowUp className="h-3 w-3" />
-                                                        ) : (
-                                                            <ArrowDown className="h-3 w-3" />
-                                                        ))}
-                                                </div>
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem
-                                                onClick={() => handleSort('date')}
-                                            >
-                                                <div className="flex w-full items-center justify-between">
-                                                    <span>Tanggal Dibuat</span>
-                                                    {filters.sort === 'date' &&
-                                                        (filters.direction ===
-                                                        'asc' ? (
-                                                            <ArrowUp className="h-3 w-3" />
-                                                        ) : (
-                                                            <ArrowDown className="h-3 w-3" />
-                                                        ))}
+                                                    {filters?.sort === 'type' && (filters?.direction === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
                                                 </div>
                                             </DropdownMenuItem>
                                         </>
@@ -450,16 +402,7 @@ return <div key={i} className="flex h-8 w-8 items-center justify-center text-xs 
                                     <DropdownMenuItem
                                         onClick={() => {
                                             setSearch('');
-                                            router.get(
-                                                '/teacher/materials',
-                                                filters.subject_id
-                                                    ? {
-                                                          subject_id:
-                                                              filters.subject_id,
-                                                      }
-                                                    : {},
-                                                { replace: true },
-                                            );
+                                            router.get('/teacher/materials', filters?.subject_id ? { subject_id: filters.subject_id } : {}, { replace: true });
                                         }}
                                         className="text-destructive focus:text-destructive"
                                     >
@@ -472,9 +415,9 @@ return <div key={i} className="flex h-8 w-8 items-center justify-center text-xs 
 
                         {mode === 'materials' && selectedSubject && (
                             <>
-                                {auth.user.role === 'guru' && auth.user.id === selectedSubject.teacher_user_id ? (
+                                {auth?.user?.role === 'guru' && auth?.user?.id === selectedSubject?.teacher_user_id ? (
                                     <Button className="h-10 w-full gap-2 shadow-lg shadow-primary/20 sm:w-auto" asChild>
-                                        <Link href={`/teacher/materials/create?subject_id=${selectedSubject.id}`}>
+                                        <Link href={`/teacher/materials/create?subject_id=${selectedSubject?.id}`}>
                                             <Plus className="h-4 w-4" />
                                             <span>Tambah Materi</span>
                                         </Link>
@@ -482,7 +425,7 @@ return <div key={i} className="flex h-8 w-8 items-center justify-center text-xs 
                                 ) : (
                                     <Badge variant="outline" className="h-10 px-4 bg-muted/50 border-zinc-200 dark:border-zinc-800 text-muted-foreground gap-2">
                                         <AlertCircle className="h-4 w-4" />
-                                        <span>Tidak Berhak Menambah Materi</span>
+                                        <span>Read Only</span>
                                     </Badge>
                                 )}
                             </>
@@ -491,9 +434,8 @@ return <div key={i} className="flex h-8 w-8 items-center justify-center text-xs 
                 </div>
 
                 {mode === 'subjects' ? (
-                    /* SUBJECT PICKER MODE */
                     <div className="space-y-6">
-                        {subjects && subjects.data.length > 0 ? (
+                        {subjects && subjects?.data?.length > 0 ? (
                             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                                 {subjects.data.map((subject, index) => (
                                     <motion.div
@@ -512,19 +454,17 @@ return <div key={i} className="flex h-8 w-8 items-center justify-center text-xs 
                                                 </div>
                                                 <div className="pt-2">
                                                     <h3 className="text-lg font-bold line-clamp-1 group-hover:text-primary transition-colors">
-                                                        {subject.title}
+                                                        {subject?.title}
                                                     </h3>
                                                 </div>
                                             </CardHeader>
-                                            <CardContent className="flex-1 pb-4">
-                                                <p className="text-sm text-muted-foreground line-clamp-3">
-                                                    {subject.description || 'Tidak ada deskripsi.'}
-                                                </p>
+                                            <CardContent className="flex-1 pb-4 text-sm text-muted-foreground line-clamp-3">
+                                                {subject?.description || 'Tidak ada deskripsi.'}
                                             </CardContent>
                                             <CardFooter className="pt-4 border-t border-zinc-100 dark:border-zinc-800 bg-muted/20 text-xs text-muted-foreground flex justify-between">
                                                 <div className="flex items-center gap-2">
                                                     <User className="h-3 w-3" />
-                                                    <span className="truncate max-w-[100px]">{subject.teacher_name}</span>
+                                                    <span className="truncate max-w-[100px]">{subject?.teacher_name}</span>
                                                 </div>
                                                 <div className="flex items-center gap-1">
                                                     <FileText className="h-3 w-3" />
@@ -543,44 +483,23 @@ return <div key={i} className="flex h-8 w-8 items-center justify-center text-xs 
                         {subjects && renderPagination(subjects)}
                     </div>
                 ) : (
-                    /* MATERIALS LIST MODE */
                     <Card className="overflow-hidden border-none bg-card/50 shadow-xl backdrop-blur-sm">
                         <div className="overflow-x-auto">
                             <table className="w-full border-collapse text-left text-sm">
                                 <thead>
                                     <tr className="border-b border-zinc-200 bg-muted/50 dark:border-zinc-800">
-                                        <th 
-                                            className="p-4 font-bold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-primary transition-colors"
-                                            onClick={() => handleSort('title')}
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                Materi
-                                                <SortIcon field="title" currentSort={filters.sort} direction={filters.direction} />
-                                            </div>
+                                        <th className="p-4 font-bold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('title')}>
+                                            <div className="flex items-center gap-2">Materi <SortIcon field="title" currentSort={filters?.sort} direction={filters?.direction} /></div>
                                         </th>
-                                        <th 
-                                            className="p-4 font-bold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-primary transition-colors"
-                                            onClick={() => handleSort('type')}
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                Jenis
-                                                <SortIcon field="type" currentSort={filters.sort} direction={filters.direction} />
-                                            </div>
+                                        <th className="p-4 font-bold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('type')}>
+                                            <div className="flex items-center gap-2">Jenis <SortIcon field="type" currentSort={filters?.sort} direction={filters?.direction} /></div>
                                         </th>
-                                        <th 
-                                            className="p-4 font-bold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-primary transition-colors"
-                                            onClick={() => handleSort('date')}
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                Dibuat
-                                                <SortIcon field="date" currentSort={filters.sort} direction={filters.direction} />
-                                            </div>
-                                        </th>
+                                        <th className="p-4 font-bold text-muted-foreground uppercase tracking-wider">Dibuat</th>
                                         <th className="p-4 text-right font-bold text-muted-foreground uppercase tracking-wider">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
-                                    {materials && materials.data.length > 0 ? (
+                                    {materials && materials?.data?.length > 0 ? (
                                         materials.data.map((material, index) => (
                                             <motion.tr
                                                 key={material.id}
@@ -592,19 +511,15 @@ return <div key={i} className="flex h-8 w-8 items-center justify-center text-xs 
                                             >
                                                 <td className="p-4">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="h-9 w-9 flex items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                                            <TypeIcon type={material.content_type} />
-                                                        </div>
+                                                        <div className="h-9 w-9 flex items-center justify-center rounded-lg bg-primary/10 text-primary"><TypeIcon type={material.content_type} /></div>
                                                         <div className="flex flex-col min-w-0">
-                                                            <span className="font-semibold truncate group-hover:text-primary transition-colors">{material.title}</span>
-                                                            <span className="text-xs text-muted-foreground truncate max-w-[300px]">{material.description}</span>
+                                                            <span className="font-semibold truncate group-hover:text-primary transition-colors">{material?.title}</span>
+                                                            <span className="text-xs text-muted-foreground truncate max-w-[300px]">{material?.description}</span>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td className="p-4"><TypeBadge type={material.content_type} /></td>
-                                                <td className="p-4 text-xs text-muted-foreground">
-                                                    {new Date(material.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                                </td>
+                                                <td className="p-4 text-xs text-muted-foreground">{material?.created_at ? new Date(material.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}</td>
                                                 <td className="p-4 text-right">
                                                     <div onClick={(e) => e.stopPropagation()}>
                                                         <DropdownMenu>
@@ -612,20 +527,12 @@ return <div key={i} className="flex h-8 w-8 items-center justify-center text-xs 
                                                                 <Button variant="ghost" size="icon" className="h-8 w-8"><MoreVertical className="h-4 w-4" /></Button>
                                                             </DropdownMenuTrigger>
                                                             <DropdownMenuContent align="end" className="w-40">
-                                                                <DropdownMenuItem asChild>
-                                                                    <Link href={`/teacher/materials/${material.id}`}><Eye className="mr-2 h-4 w-4 text-primary" /> Lihat Detail</Link>
-                                                                </DropdownMenuItem>
-                                                                {auth.user.role === 'guru' && (
+                                                                <DropdownMenuItem asChild><Link href={`/teacher/materials/${material.id}`}><Eye className="mr-2 h-4 w-4 text-primary" /> Detail</Link></DropdownMenuItem>
+                                                                {auth?.user?.role === 'guru' && (
                                                                     <>
-                                                                        <DropdownMenuItem asChild>
-                                                                            <Link href={`/teacher/materials/${material.id}/edit`}><Pencil className="mr-2 h-4 w-4 text-primary" /> Edit</Link>
-                                                                        </DropdownMenuItem>
-                                                                        <DropdownMenuItem 
-                                                                            className="text-destructive focus:text-destructive"
-                                                                            onSelect={() => setMaterialToDelete(material)}
-                                                                        >
-                                                                            <Trash2 className="mr-2 h-4 w-4" /> Hapus
-                                                                        </DropdownMenuItem>                                                                    </>
+                                                                        <DropdownMenuItem asChild><Link href={`/teacher/materials/${material.id}/edit`}><Pencil className="mr-2 h-4 w-4 text-primary" /> Edit</Link></DropdownMenuItem>
+                                                                        <DropdownMenuItem className="text-destructive focus:text-destructive" onSelect={() => setMaterialToDelete(material)}><Trash2 className="mr-2 h-4 w-4" /> Hapus</DropdownMenuItem>
+                                                                    </>
                                                                 )}
                                                             </DropdownMenuContent>
                                                         </DropdownMenu>
@@ -634,62 +541,32 @@ return <div key={i} className="flex h-8 w-8 items-center justify-center text-xs 
                                             </motion.tr>
                                         ))
                                     ) : (
-                                        <tr>
-                                            <td colSpan={4} className="p-12 text-center text-muted-foreground italic">Belum ada materi untuk mata pelajaran ini.</td>
-                                        </tr>
+                                        <tr><td colSpan={4} className="p-12 text-center text-muted-foreground italic">Belum ada materi.</td></tr>
                                     )}
                                 </tbody>
                             </table>
                         </div>
                         {materials && renderPagination(materials)}
-                        </Card>
-                        )}
+                    </Card>
+                )}
 
-                        {/* Delete Confirmation Dialog */}
-                        <Dialog
-                        open={!!materialToDelete}
-                        onOpenChange={(open) => !open && setMaterialToDelete(null)}
-                        >
-                        <DialogContent className="sm:max-w-[425px]">
+                <Dialog open={!!materialToDelete} onOpenChange={(open) => !open && setMaterialToDelete(null)}>
+                    <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
-                            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
-                                <AlertCircle className="h-6 w-6 text-destructive" />
-                            </div>
+                            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10"><AlertCircle className="h-6 w-6 text-destructive" /></div>
                             <DialogTitle>Hapus Materi Pembelajaran</DialogTitle>
-                            <DialogDescription>
-                                Apakah Anda yakin ingin menghapus materi{' '}
-                                <span className="font-bold text-foreground break-all">
-                                    {materialToDelete?.title}
-                                </span>
-                                ? Tindakan ini permanen dan tidak dapat
-                                dibatalkan.
-                            </DialogDescription>
+                            <DialogDescription>Apakah Anda yakin ingin menghapus materi <span className="font-bold text-foreground">{materialToDelete?.title}</span>? Tindakan ini permanen.</DialogDescription>
                         </DialogHeader>
                         <DialogFooter className="mt-4 gap-2 sm:gap-0">
-                            <Button
-                                variant="ghost"
-                                onClick={() => setMaterialToDelete(null)}
-                                disabled={isDeleting}
-                            >
-                                Batal
-                            </Button>
-                            <Button
-                                variant="destructive"
-                                onClick={handleDelete}
-                                disabled={isDeleting}
-                                className="gap-2"
-                            >
-                                {isDeleting ? (
-                                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                                ) : (
-                                    <Trash2 className="h-4 w-4" />
-                                )}
+                            <Button variant="ghost" onClick={() => setMaterialToDelete(null)} disabled={isDeleting}>Batal</Button>
+                            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting} className="gap-2">
+                                {isDeleting ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" /> : <Trash2 className="h-4 w-4" />}
                                 Hapus Materi
                             </Button>
                         </DialogFooter>
-                        </DialogContent>
-                        </Dialog>
-                        </div>
-                        </>
-                        );
+                    </DialogContent>
+                </Dialog>
+            </div>
+        </>
+    );
 }

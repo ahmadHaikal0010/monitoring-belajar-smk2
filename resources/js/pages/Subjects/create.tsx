@@ -21,7 +21,7 @@ export default function CreateSubject() {
     const { flash } = usePage().props as any;
     const [showError, setShowError] = useState(false);
 
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         title: '',
         description: '',
     });
@@ -53,42 +53,41 @@ export default function CreateSubject() {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/teacher/subjects', {
-            onSuccess: () => reset(),
-        });
+        post('/teacher/subjects');
     };
 
     return (
         <>
             <Head title="Tambah Mata Pelajaran" />
 
-            <div className="mx-auto flex max-w-3xl flex-col gap-6 p-6">
-                {/* Global Error Message */}
+            <div className="mx-auto flex max-w-6xl w-full flex-col gap-6 p-6">
                 <AnimatePresence>
                     {showError && flash?.error && (
                         <motion.div
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
-                            className="mb-2 flex items-center justify-between rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-destructive"
+                            className="w-full"
                         >
-                            <div className="flex items-center gap-3">
-                                <AlertCircle className="h-5 w-5" />
-                                <p className="text-sm font-medium">
-                                    {flash.error}
-                                </p>
+                            <div className="flex items-center justify-between rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-destructive w-full">
+                                <div className="flex items-center gap-3">
+                                    <AlertCircle className="h-5 w-5" />
+                                    <p className="text-sm font-medium">
+                                        {flash.error}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setShowError(false)}
+                                    className="transition-opacity hover:opacity-70"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
                             </div>
-                            <button
-                                onClick={() => setShowError(false)}
-                                className="transition-opacity hover:opacity-70"
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
                         </motion.div>
                     )}
                 </AnimatePresence>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 w-full">
                     <Button
                         variant="outline"
                         size="icon"
@@ -99,21 +98,14 @@ export default function CreateSubject() {
                             <ArrowLeft className="h-4 w-4" />
                         </Link>
                     </Button>
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            Buat Mata Pelajaran
-                        </h1>
-                        <p className="text-muted-foreground">
-                            Tambahkan mata pelajaran baru untuk mulai mengelola
-                            materi pembelajaran.
-                        </p>
-                    </div>
+                    <h1 className="text-3xl font-bold tracking-tight">
+                        Tambah Mata Pelajaran
+                    </h1>
                 </div>
 
-                <form onSubmit={submit} className="grid gap-6">
-                    <Card className="border-none bg-card/50 p-6 shadow-xl backdrop-blur-sm">
+                <form onSubmit={submit} className="grid gap-6 w-full">
+                    <Card className="w-full p-6 border-none shadow-xl bg-card/50 backdrop-blur-sm">
                         <div className="grid gap-6">
-                            {/* Judul Mata Pelajaran */}
                             <div className="grid gap-2">
                                 <Label
                                     htmlFor="title"
@@ -124,7 +116,7 @@ export default function CreateSubject() {
                                 </Label>
                                 <Input
                                     id="title"
-                                    placeholder="Contoh: Pemrograman Dasar Berbasis Objek"
+                                    placeholder="Contoh: Pemrograman Dasar"
                                     className="h-11 border-zinc-200 bg-background/50 dark:border-zinc-800"
                                     value={data.title}
                                     onChange={(e) =>
@@ -134,13 +126,8 @@ export default function CreateSubject() {
                                     autoFocus
                                 />
                                 <InputError message={errors.title} />
-                                <p className="text-[11px] text-muted-foreground">
-                                    Gunakan nama yang jelas dan mudah dipahami
-                                    oleh siswa.
-                                </p>
                             </div>
 
-                            {/* Deskripsi */}
                             <div className="grid gap-2">
                                 <Label
                                     htmlFor="description"
@@ -151,7 +138,7 @@ export default function CreateSubject() {
                                 </Label>
                                 <Textarea
                                     id="description"
-                                    placeholder="Berikan ringkasan materi atau tujuan dari mata pelajaran ini..."
+                                    placeholder="Ringkasan materi..."
                                     className="min-h-[150px] resize-none border-zinc-200 bg-background/50 dark:border-zinc-800"
                                     value={data.description}
                                     onChange={(e) =>
@@ -159,14 +146,11 @@ export default function CreateSubject() {
                                     }
                                 />
                                 <InputError message={errors.description} />
-                                <p className="text-right text-[11px] text-muted-foreground">
-                                    {data.description.length}/1000 karakter
-                                </p>
                             </div>
                         </div>
                     </Card>
 
-                    <div className="flex justify-end gap-3">
+                    <div className="flex justify-end gap-3 w-full">
                         <Button variant="ghost" asChild disabled={processing}>
                             <Link href="/teacher/subjects">Batal</Link>
                         </Button>
