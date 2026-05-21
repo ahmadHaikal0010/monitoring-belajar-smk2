@@ -20,4 +20,14 @@ interface StudentProgressRepositoryInterface
      * Get progress for an enrollment.
      */
     public function getByEnrollment(string $enrollmentId);
+
+    /**
+     * Get overall stats for a student.
+     */
+    public function getOverallStats(string $studentId): array;
+
+    /**
+     * Get recent study activities for a student.
+     */
+    public function getRecentActivities(string $studentId, int $limit = 5);
 }
