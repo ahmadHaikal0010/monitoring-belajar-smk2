@@ -20,5 +20,7 @@ interface EnrollmentRepositoryInterface
 
     public function getStudentEnrollments(string $studentId);
 
+    public function getStudentEnrollmentsWithProgress(string $studentId);
+
     public function delete(string $id);
 }

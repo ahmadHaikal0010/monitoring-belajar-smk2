@@ -222,6 +222,40 @@ class SqlEnrollmentRepository implements EnrollmentRepositoryInterface
             ->get();
     }
 
+    public function getStudentEnrollmentsWithProgress(string $studentId)
+    {
+        return DB::table('enrollments')
+            ->join('subjects', 'enrollments.subject_id', '=', 'subjects.id')
+            ->join('teachers', 'subjects.teacher_id', '=', 'teachers.id')
+            ->join('users', 'teachers.user_id', '=', 'users.id')
+            ->where('enrollments.student_id', $studentId)
+            ->select([
+                'subjects.id',
+                'subjects.title',
+                'subjects.code',
+                'subjects.description',
+                'users.name as teacher_name',
+                'enrollments.id as enrollment_id',
+                'enrollments.status',
+                'enrollments.enrolled_at',
+            ])
+            // Subquery for total materials
+            ->addSelect([
+                'total_materials' => DB::table('materials')
+                    ->whereColumn('materials.subject_id', 'enrollments.subject_id')
+                    ->selectRaw('count(*)')
+            ])
+            // Subquery for completed materials
+            ->addSelect([
+                'completed_materials' => DB::table('student_progress')
+                    ->whereColumn('student_progress.enrollment_id', 'enrollments.id')
+                    ->where('is_completed', true)
+                    ->selectRaw('count(*)')
+            ])
+            ->orderBy('subjects.title', 'asc')
+            ->get();
+    }
+
     public function delete(string $id)
     {
         DB::table('enrollments')->where('id', $id)->delete();

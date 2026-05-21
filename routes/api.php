@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Authentication;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EnrollmentController;
 use App\Http\Controllers\Api\MaterialController;
 use App\Http\Controllers\Api\StudentController;
@@ -13,6 +14,13 @@ Route::post('/register', [Authentication::class, 'register']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [StudentController::class, 'profile']);
     Route::post('/update-profile', [StudentController::class, 'update']);
+
+    // Dashboard Routes
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/summary', [DashboardController::class, 'summary']);
+        Route::get('/enrolled-subjects', [DashboardController::class, 'enrolledSubjects']);
+        Route::get('/recent-activities', [DashboardController::class, 'recentActivities']);
+    });
 
     // Enrollment Routes
     Route::get('/subjects', [EnrollmentController::class, 'index']);
