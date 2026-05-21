@@ -65,7 +65,7 @@ class SqlStudentProgressRepository implements StudentProgressRepositoryInterface
                 'materials.id as material_id',
                 'materials.title as material_title',
                 'subjects.title as subject_title',
-                'student_progress.completed_at as last_accessed'
+                'student_progress.completed_at as last_accessed',
             ])
             ->orderBy('student_progress.completed_at', 'desc')
             ->limit($limit)

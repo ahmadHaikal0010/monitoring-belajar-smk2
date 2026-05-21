@@ -17,8 +17,11 @@ class DashboardApiTest extends TestCase
     use RefreshDatabase;
 
     protected $studentUser;
+
     protected $student;
+
     protected $subject;
+
     protected $materials;
 
     protected function setUp(): void
@@ -32,7 +35,7 @@ class DashboardApiTest extends TestCase
         // Create a subject
         $this->subject = Subject::factory()->create([
             'teacher_id' => $teacher->id,
-            'title' => 'Matematika'
+            'title' => 'Matematika',
         ]);
 
         // Create 5 materials
@@ -73,8 +76,8 @@ class DashboardApiTest extends TestCase
                     'total_enrolled_subjects' => 1,
                     'total_completed_materials' => 4,
                     'overall_progress_percentage' => 80,
-                    'student_name' => 'Ahmad Haikal'
-                ]
+                    'student_name' => 'Ahmad Haikal',
+                ],
             ]);
     }
 
@@ -93,10 +96,10 @@ class DashboardApiTest extends TestCase
                         'progress' => [
                             'percentage' => 80,
                             'completed' => 4,
-                            'total' => 5
-                        ]
-                    ]
-                ]
+                            'total' => 5,
+                        ],
+                    ],
+                ],
             ]);
     }
 
@@ -107,7 +110,7 @@ class DashboardApiTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJson([
-                'success' => true
+                'success' => true,
             ])
             ->assertJsonCount(4, 'data');
     }
