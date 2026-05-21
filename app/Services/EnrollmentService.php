@@ -25,9 +25,19 @@ class EnrollmentService
         return $this->enrollmentRepository->getPaginated($filters, $perPage);
     }
 
+    public function getEnrollmentListWithProgress(array $filters = [], int $perPage = 10)
+    {
+        return $this->enrollmentRepository->getPaginatedWithProgress($filters, $perPage);
+    }
+
     public function findEnrollment(string $id)
     {
         return $this->enrollmentRepository->find($id);
+    }
+
+    public function getEnrollmentWithProgress(string $id)
+    {
+        return $this->enrollmentRepository->findWithProgress($id);
     }
 
     public function deleteEnrollment(string $id)

@@ -8,9 +8,15 @@ interface EnrollmentRepositoryInterface
 
     public function find(string $id);
 
+    public function findWithProgress(string $id);
+
+    public function getPaginatedWithProgress(array $filters = [], int $perPage = 10);
+
     public function enroll(string $studentId, string $subjectId);
 
     public function isEnrolled(string $studentId, string $subjectId): bool;
+
+    public function getByStudentAndSubject(string $studentId, string $subjectId);
 
     public function getStudentEnrollments(string $studentId);
 

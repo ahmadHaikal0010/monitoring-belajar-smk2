@@ -46,6 +46,8 @@ interface Enrollment {
     subject_title: string;
     subject_code: string;
     teacher_name: string;
+    total_materials: number;
+    completed_materials: number;
 }
 
 interface Subject {
@@ -395,6 +397,9 @@ return;
                                         <th className="p-4 text-xs font-bold tracking-wider text-muted-foreground uppercase">
                                             Informasi Akademik
                                         </th>
+                                        <th className="p-4 text-xs font-bold tracking-wider text-muted-foreground uppercase">
+                                            Progres Belajar
+                                        </th>
                                         <th className="cursor-pointer p-4 text-xs font-bold tracking-wider text-muted-foreground uppercase transition-colors hover:text-primary" onClick={() => handleSort('enrollments.status')}>
                                             <div className="flex items-center">
                                                 Status <SortIcon field="enrollments.status" currentSort={filters.sort} direction={filters.direction} />
@@ -412,58 +417,83 @@ return;
                                 </thead>
                                 <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
                                     {enrollments?.data.length ? (
-                                        enrollments.data.map((enrollment, index) => (
-                                            <motion.tr
-                                                key={enrollment.id}
-                                                initial={{ opacity: 0, x: -10 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: index * 0.03 }}
-                                                className="group transition-colors hover:bg-muted/30"
-                                            >
-                                                <td className="p-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <Avatar className="h-9 w-9 border-2 border-background shadow-sm">
-                                                            <AvatarFallback className="bg-primary/10 text-[10px] font-bold text-primary">
-                                                                {enrollment.student_name.charAt(0)}
-                                                            </AvatarFallback>
-                                                        </Avatar>
-                                                        <div className="flex flex-col">
-                                                            <span className="text-sm font-semibold">{enrollment.student_name}</span>
-                                                            <span className="text-[10px] text-muted-foreground">{enrollment.student_email}</span>
+                                        enrollments.data.map((enrollment, index) => {
+                                            const progressPercentage = Math.round((enrollment.completed_materials / (enrollment.total_materials || 1)) * 100);
+
+                                            return (
+                                                <motion.tr
+                                                    key={enrollment.id}
+                                                    initial={{ opacity: 0, x: -10 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    transition={{ delay: index * 0.03 }}
+                                                    className="group transition-colors hover:bg-muted/30"
+                                                >
+                                                    <td className="p-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <Avatar className="h-9 w-9 border-2 border-background shadow-sm">
+                                                                <AvatarFallback className="bg-primary/10 text-[10px] font-bold text-primary">
+                                                                    {enrollment.student_name.charAt(0)}
+                                                                </AvatarFallback>
+                                                            </Avatar>
+                                                            <div className="flex flex-col">
+                                                                <span className="text-sm font-semibold">{enrollment.student_name}</span>
+                                                                <span className="text-[10px] text-muted-foreground">{enrollment.student_email}</span>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                </td>
-                                                <td className="p-4">
-                                                    <Badge variant="outline" className="font-mono text-[10px] font-bold">
-                                                        NISN: {enrollment.student_nisn}
-                                                    </Badge>
-                                                </td>
-                                                <td className="p-4">
-                                                    {getStatusBadge(enrollment.status)}
-                                                </td>
-                                                <td className="p-4">
-                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                        <Clock className="h-3 w-3" />
-                                                        <span>
-                                                            {new Date(enrollment.enrolled_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="p-4 text-right">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                                        onClick={() => setEnrollmentToDelete(enrollment)}
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                </td>
-                                            </motion.tr>
-                                        ))
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <Badge variant="outline" className="font-mono text-[10px] font-bold">
+                                                            NISN: {enrollment.student_nisn}
+                                                        </Badge>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <div className="flex flex-col gap-1.5 min-w-[120px]">
+                                                            <div className="flex items-center justify-between text-[10px] font-bold">
+                                                                <span>{progressPercentage}%</span>
+                                                                <span className="text-muted-foreground">{enrollment.completed_materials}/{enrollment.total_materials} Materi</span>
+                                                            </div>
+                                                            <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                                                                <motion.div 
+                                                                    initial={{ width: 0 }}
+                                                                    animate={{ width: `${progressPercentage}%` }}
+                                                                    className="h-full bg-primary transition-all"
+                                                                />
+                                                            </div>
+                                                            <Link 
+                                                                href={`/admin/enrollments/${enrollment.id}/progress`}
+                                                                className="text-[10px] text-primary hover:underline font-bold"
+                                                            >
+                                                                Lihat Detail Progres
+                                                            </Link>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        {getStatusBadge(enrollment.status)}
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                            <Clock className="h-3 w-3" />
+                                                            <span>
+                                                                {new Date(enrollment.enrolled_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4 text-right">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                                            onClick={() => setEnrollmentToDelete(enrollment)}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </td>
+                                                </motion.tr>
+                                            );
+                                        })
                                     ) : (
                                         <tr>
-                                            <td colSpan={4} className="p-12 text-center text-muted-foreground italic">
+                                            <td colSpan={6} className="p-12 text-center text-muted-foreground italic">
                                                 Belum ada siswa yang mendaftar di mata pelajaran ini.
                                             </td>
                                         </tr>
@@ -487,8 +517,8 @@ return;
                                 const isNext = label.includes('next') || label.includes('&raquo;') || label.includes('pagination.next');
                                 
                                 if (link.label === '...') {
-return <div key={i} className="px-2 text-xs">...</div>;
-}
+                                    return <div key={i} className="px-2 text-xs">...</div>;
+                                }
 
                                 return (
                                     <Button
@@ -512,6 +542,7 @@ return <div key={i} className="px-2 text-xs">...</div>;
                         </div>
                     </div>
                 )}
+
                 {/* Delete Confirmation Dialog */}
                 <Dialog
                     open={!!enrollmentToDelete}

@@ -131,4 +131,12 @@ class SqlSubjectRepository implements SubjectRepositoryInterface
             ->orderBy('title', 'asc')
             ->get();
     }
+
+    public function getMaterials(string $id)
+    {
+        return DB::table('materials')
+            ->where('subject_id', $id)
+            ->orderBy('created_at', 'asc')
+            ->get();
+    }
 }
