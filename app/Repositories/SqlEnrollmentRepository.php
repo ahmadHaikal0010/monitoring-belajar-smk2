@@ -243,14 +243,14 @@ class SqlEnrollmentRepository implements EnrollmentRepositoryInterface
             ->addSelect([
                 'total_materials' => DB::table('materials')
                     ->whereColumn('materials.subject_id', 'enrollments.subject_id')
-                    ->selectRaw('count(*)')
+                    ->selectRaw('count(*)'),
             ])
             // Subquery for completed materials
             ->addSelect([
                 'completed_materials' => DB::table('student_progress')
                     ->whereColumn('student_progress.enrollment_id', 'enrollments.id')
                     ->where('is_completed', true)
-                    ->selectRaw('count(*)')
+                    ->selectRaw('count(*)'),
             ])
             ->orderBy('subjects.title', 'asc')
             ->get();

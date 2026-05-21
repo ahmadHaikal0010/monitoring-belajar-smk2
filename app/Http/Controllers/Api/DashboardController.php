@@ -22,10 +22,10 @@ class DashboardController extends Controller
     {
         $student = $request->user()->student;
 
-        if (!$student) {
+        if (! $student) {
             return response()->json([
                 'success' => false,
-                'message' => 'User is not a student'
+                'message' => 'User is not a student',
             ], 403);
         }
 
@@ -34,7 +34,7 @@ class DashboardController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $stats
+            'data' => $stats,
         ]);
     }
 
@@ -45,10 +45,10 @@ class DashboardController extends Controller
     {
         $student = $request->user()->student;
 
-        if (!$student) {
+        if (! $student) {
             return response()->json([
                 'success' => false,
-                'message' => 'User is not a student'
+                'message' => 'User is not a student',
             ], 403);
         }
 
@@ -67,13 +67,13 @@ class DashboardController extends Controller
                     'percentage' => $percentage,
                     'completed' => $completed,
                     'total' => $total,
-                ]
+                ],
             ];
         });
 
         return response()->json([
             'success' => true,
-            'data' => $formattedSubjects
+            'data' => $formattedSubjects,
         ]);
     }
 
@@ -84,10 +84,10 @@ class DashboardController extends Controller
     {
         $student = $request->user()->student;
 
-        if (!$student) {
+        if (! $student) {
             return response()->json([
                 'success' => false,
-                'message' => 'User is not a student'
+                'message' => 'User is not a student',
             ], 403);
         }
 
@@ -95,7 +95,7 @@ class DashboardController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $activities
+            'data' => $activities,
         ]);
     }
 }

@@ -108,13 +108,13 @@ class DashboardController extends Controller
                 ->map(function ($subject) {
                     $enrollmentIds = DB::table('enrollments')->where('subject_id', $subject->id)->pluck('id');
                     $totalMaterials = DB::table('materials')->where('subject_id', $subject->id)->count();
-                    
+
                     if (count($enrollmentIds) === 0 || $totalMaterials === 0) {
                         return [
                             'name' => $subject->name,
                             'count' => 0,
                             'total' => $totalMaterials ?: 1,
-                            'percentage' => 0
+                            'percentage' => 0,
                         ];
                     }
 
@@ -122,7 +122,7 @@ class DashboardController extends Controller
                         ->whereIn('enrollment_id', $enrollmentIds)
                         ->where('is_completed', true)
                         ->count();
-                    
+
                     $totalPossibleCompletions = count($enrollmentIds) * $totalMaterials;
                     $percentage = round(($completedCount / $totalPossibleCompletions) * 100);
 
@@ -130,7 +130,7 @@ class DashboardController extends Controller
                         'name' => $subject->name,
                         'count' => $completedCount,
                         'total' => $totalPossibleCompletions,
-                        'percentage' => $percentage
+                        'percentage' => $percentage,
                     ];
                 })
                 ->sortByDesc('percentage')
