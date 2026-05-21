@@ -28,4 +28,9 @@ class Enrollment extends Model
     {
         return $this->belongsTo(Subject::class);
     }
+
+    public function progress()
+    {
+        return $this->hasMany(StudentProgress::class);
+    }
 }

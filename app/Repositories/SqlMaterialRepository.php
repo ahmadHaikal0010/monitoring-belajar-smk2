@@ -106,6 +106,13 @@ class SqlMaterialRepository implements MaterialRepositoryInterface
         return $material;
     }
 
+    public function getBySubjectId(string $subjectId)
+    {
+        return DB::table('materials')
+            ->where('subject_id', $subjectId)
+            ->get();
+    }
+
     public function create(array $data)
     {
         DB::table('materials')->insert([

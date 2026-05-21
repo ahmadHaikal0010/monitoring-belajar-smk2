@@ -48,6 +48,7 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
     // * Shared Admin/Guru Routes
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/enrollments', [EnrollmentController::class, 'index'])->name('enrollments.index');
+        Route::get('/enrollments/{id}/progress', [EnrollmentController::class, 'progress'])->name('enrollments.progress');
         Route::delete('/enrollments/{id}', [EnrollmentController::class, 'destroy'])->name('enrollments.destroy');
     });
 

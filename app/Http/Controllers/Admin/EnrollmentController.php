@@ -7,6 +7,7 @@ use App\Services\EnrollmentService;
 use App\Services\SubjectService;
 use App\Services\TeacherService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class EnrollmentController extends Controller
@@ -47,7 +48,7 @@ class EnrollmentController extends Controller
                 abort(403, 'Anda tidak memiliki hak akses untuk mata pelajaran ini.');
             }
 
-            $enrollments = $this->enrollmentService->getEnrollmentList($filters, 15);
+            $enrollments = $this->enrollmentService->getEnrollmentListWithProgress($filters, 15);
 
             return Inertia::render('Admin/Enrollments/index', [
                 'enrollments' => $enrollments,
@@ -64,6 +65,38 @@ class EnrollmentController extends Controller
             'subjects' => $subjects,
             'filters' => $filters,
             'mode' => 'subjects',
+        ]);
+    }
+
+    public function progress(string $id)
+    {
+        $enrollment = $this->enrollmentService->getEnrollmentWithProgress($id);
+
+        if (! $enrollment) {
+            abort(404, 'Data pendaftaran tidak ditemukan.');
+        }
+
+        $user = auth()->user();
+        if ($user->role === 'guru') {
+            $teacher = $this->teacherService->getTeacherByUserId($user->id);
+            if ($enrollment->teacher_id !== ($teacher->id ?? null)) {
+                abort(403, 'Anda tidak memiliki hak akses untuk melihat progres ini.');
+            }
+        }
+
+        $materials = $this->subjectService->getMaterialsBySubjectId($enrollment->subject_id);
+
+        // Get specific completion status for each material
+        $completedMaterialIds = DB::table('student_progress')
+            ->where('enrollment_id', $id)
+            ->where('is_completed', true)
+            ->pluck('material_id')
+            ->toArray();
+
+        return Inertia::render('Admin/Enrollments/progress', [
+            'enrollment' => $enrollment,
+            'materials' => $materials,
+            'completedMaterialIds' => $completedMaterialIds,
         ]);
     }
 
