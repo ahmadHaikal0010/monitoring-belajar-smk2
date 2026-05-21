@@ -21,13 +21,13 @@ class StudentProgressService
     public function markAsCompleted(string $studentId, string $materialId): array
     {
         $material = $this->materialRepository->find($materialId);
-        if (!$material) {
+        if (! $material) {
             return ['success' => false, 'message' => 'Material not found'];
         }
 
         // Check if student is enrolled in the subject of this material
         $enrollment = $this->enrollmentRepository->getByStudentAndSubject($studentId, $material->subject_id);
-        if (!$enrollment) {
+        if (! $enrollment) {
             return ['success' => false, 'message' => 'Student is not enrolled in this subject'];
         }
 
@@ -51,7 +51,7 @@ class StudentProgressService
     public function getSubjectProgress(string $studentId, string $subjectId): array
     {
         $enrollment = $this->enrollmentRepository->getByStudentAndSubject($studentId, $subjectId);
-        if (!$enrollment) {
+        if (! $enrollment) {
             return ['success' => false, 'message' => 'Student is not enrolled in this subject'];
         }
 
@@ -59,7 +59,7 @@ class StudentProgressService
         $progress = $this->progressRepository->getByEnrollment($enrollment->id);
 
         $completedMaterialIds = $progress->where('is_completed', true)->pluck('material_id')->toArray();
-        
+
         $totalMaterials = count($materials);
         $completedMaterials = count($completedMaterialIds);
         $percentage = $totalMaterials > 0 ? round(($completedMaterials / $totalMaterials) * 100) : 0;
@@ -71,7 +71,7 @@ class StudentProgressService
                 'completed_materials' => $completedMaterials,
                 'percentage' => $percentage,
                 'completed_material_ids' => $completedMaterialIds,
-            ]
+            ],
         ];
     }
 }

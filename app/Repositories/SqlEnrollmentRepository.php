@@ -93,14 +93,14 @@ class SqlEnrollmentRepository implements EnrollmentRepositoryInterface
             ->addSelect([
                 'total_materials' => DB::table('materials')
                     ->whereColumn('materials.subject_id', 'enrollments.subject_id')
-                    ->selectRaw('count(*)')
+                    ->selectRaw('count(*)'),
             ])
             // Subquery for completed materials
             ->addSelect([
                 'completed_materials' => DB::table('student_progress')
                     ->whereColumn('student_progress.enrollment_id', 'enrollments.id')
                     ->where('is_completed', true)
-                    ->selectRaw('count(*)')
+                    ->selectRaw('count(*)'),
             ]);
 
         if (! empty($filters['teacher_id'])) {
@@ -148,18 +148,18 @@ class SqlEnrollmentRepository implements EnrollmentRepositoryInterface
                 'enrollments.*',
                 'student_users.name as student_name',
                 'subjects.title as subject_title',
-                'subjects.teacher_id'
+                'subjects.teacher_id',
             ])
             ->addSelect([
                 'total_materials' => DB::table('materials')
                     ->whereColumn('materials.subject_id', 'enrollments.subject_id')
-                    ->selectRaw('count(*)')
+                    ->selectRaw('count(*)'),
             ])
             ->addSelect([
                 'completed_materials' => DB::table('student_progress')
                     ->whereColumn('student_progress.enrollment_id', 'enrollments.id')
                     ->where('is_completed', true)
-                    ->selectRaw('count(*)')
+                    ->selectRaw('count(*)'),
             ])
             ->first();
     }

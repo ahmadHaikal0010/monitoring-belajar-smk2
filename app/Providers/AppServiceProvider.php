@@ -4,8 +4,8 @@ namespace App\Providers;
 
 use App\Repositories\Interfaces\EnrollmentRepositoryInterface;
 use App\Repositories\Interfaces\MaterialRepositoryInterface;
-use App\Repositories\Interfaces\StudentRepositoryInterface;
 use App\Repositories\Interfaces\StudentProgressRepositoryInterface;
+use App\Repositories\Interfaces\StudentRepositoryInterface;
 use App\Repositories\Interfaces\SubjectRepositoryInterface;
 use App\Repositories\Interfaces\TeacherRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;

@@ -19,17 +19,17 @@ class StudentProgressController extends Controller
     public function markAsCompleted(Request $request, string $materialId): JsonResponse
     {
         $student = $request->user()->student;
-        
-        if (!$student) {
+
+        if (! $student) {
             return response()->json([
                 'success' => false,
-                'message' => 'User is not a student'
+                'message' => 'User is not a student',
             ], 403);
         }
 
         $result = $this->progressService->markAsCompleted($student->id, $materialId);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return response()->json($result, 400);
         }
 
@@ -43,16 +43,16 @@ class StudentProgressController extends Controller
     {
         $student = $request->user()->student;
 
-        if (!$student) {
+        if (! $student) {
             return response()->json([
                 'success' => false,
-                'message' => 'User is not a student'
+                'message' => 'User is not a student',
             ], 403);
         }
 
         $result = $this->progressService->getSubjectProgress($student->id, $subjectId);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return response()->json($result, 400);
         }
 

@@ -9,7 +9,6 @@ use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class StudentProgressApiTest extends TestCase
@@ -17,8 +16,11 @@ class StudentProgressApiTest extends TestCase
     use RefreshDatabase;
 
     protected $studentUser;
+
     protected $student;
+
     protected $subject;
+
     protected $materials;
 
     protected function setUp(): void
@@ -61,7 +63,7 @@ class StudentProgressApiTest extends TestCase
                 'data' => [
                     'material_id' => $material->id,
                     'is_completed' => true,
-                ]
+                ],
             ]);
 
         $this->assertDatabaseHas('student_progress', [
@@ -88,7 +90,7 @@ class StudentProgressApiTest extends TestCase
                     'completed_materials' => 1,
                     'percentage' => 33,
                     'completed_material_ids' => [$material->id],
-                ]
+                ],
             ]);
     }
 
@@ -104,7 +106,7 @@ class StudentProgressApiTest extends TestCase
         $response->assertStatus(400)
             ->assertJson([
                 'success' => false,
-                'message' => 'Student is not enrolled in this subject'
+                'message' => 'Student is not enrolled in this subject',
             ]);
     }
 }
