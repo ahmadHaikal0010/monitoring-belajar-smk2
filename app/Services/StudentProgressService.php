@@ -6,6 +6,7 @@ use App\Repositories\Interfaces\EnrollmentRepositoryInterface;
 use App\Repositories\Interfaces\MaterialRepositoryInterface;
 use App\Repositories\Interfaces\StudentProgressRepositoryInterface;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\DB;
 
 class StudentProgressService
 {
@@ -64,6 +65,31 @@ class StudentProgressService
         $completedMaterials = count($completedMaterialIds);
         $percentage = $totalMaterials > 0 ? round(($completedMaterials / $totalMaterials) * 100) : 0;
 
+        $examResults = DB::table('exams')
+            ->leftJoin('exam_sessions', function ($join) use ($studentId) {
+                $join->on('exams.id', '=', 'exam_sessions.exam_id')
+                    ->where('exam_sessions.student_id', '=', $studentId);
+            })
+            ->where('exams.subject_id', $subjectId)
+            ->where('exams.status', 'published')
+            ->select([
+                'exams.id as exam_id',
+                'exams.title as exam_title',
+                'exams.pass_score',
+                'exams.duration',
+                'exam_sessions.id as session_id',
+                'exam_sessions.status as session_status',
+                'exam_sessions.total_score',
+                'exam_sessions.submitted_at',
+            ])
+            ->orderBy('exams.created_at', 'asc')
+            ->get()
+            ->map(function ($item) {
+                $item->is_passed = $item->total_score !== null ? ((float) $item->total_score >= (float) $item->pass_score) : null;
+
+                return $item;
+            });
+
         return [
             'success' => true,
             'data' => [
@@ -71,6 +97,7 @@ class StudentProgressService
                 'completed_materials' => $completedMaterials,
                 'percentage' => $percentage,
                 'completed_material_ids' => $completedMaterialIds,
+                'exam_results' => $examResults,
             ],
         ];
     }

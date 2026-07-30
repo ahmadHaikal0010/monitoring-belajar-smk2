@@ -10,7 +10,9 @@ import {
     Clock,
     BookOpen,
     GraduationCap,
-    TrendingUp
+    TrendingUp,
+    FileQuestion,
+    XCircle,
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +25,19 @@ interface Material {
     title: string;
     content_type: 'video' | 'document' | 'url';
     description: string;
+}
+
+interface ExamResult {
+    exam_id: string;
+    exam_title: string;
+    pass_score: number;
+    duration: number;
+    session_id?: string | null;
+    session_status?: 'in_progress' | 'submitted' | null;
+    total_score?: number | null;
+    submitted_at?: string | null;
+    started_at?: string | null;
+    is_passed?: boolean | null;
 }
 
 interface Enrollment {
@@ -40,9 +55,10 @@ interface Props {
     enrollment: Enrollment;
     materials: Material[];
     completedMaterialIds: string[];
+    examResults?: ExamResult[];
 }
 
-export default function StudentProgressDetail({ enrollment, materials, completedMaterialIds }: Props) {
+export default function StudentProgressDetail({ enrollment, materials, completedMaterialIds, examResults = [] }: Props) {
     const percentage = Math.round((enrollment.completed_materials / (enrollment.total_materials || 1)) * 100);
 
     setLayoutProps({
@@ -231,6 +247,101 @@ export default function StudentProgressDetail({ enrollment, materials, completed
                             );
                         })}
                     </div>
+                </div>
+
+                {/* Exam Results Section */}
+                <div className="mt-8">
+                    <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                        <FileQuestion className="h-5 w-5 text-primary" />
+                        Hasil Ujian & Evaluasi Siswa ({examResults.length})
+                    </h3>
+
+                    {examResults.length > 0 ? (
+                        <div className="grid gap-3">
+                            {examResults.map((exam, idx) => {
+                                const isSubmitted = exam.session_status === 'submitted';
+                                const isInProgress = exam.session_status === 'in_progress';
+                                const isPassed = exam.is_passed;
+
+                                return (
+                                    <motion.div
+                                        key={exam.exam_id}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: idx * 0.05 }}
+                                    >
+                                        <Card className="border-none shadow-md bg-card/50 hover:bg-card transition-all">
+                                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4">
+                                                <div className="flex items-start gap-4">
+                                                    <div className={cn(
+                                                        "h-12 w-12 rounded-xl flex items-center justify-center shrink-0 shadow-inner",
+                                                        isSubmitted && isPassed ? "bg-emerald-500 text-white" :
+                                                        isSubmitted && !isPassed ? "bg-rose-500 text-white" :
+                                                        isInProgress ? "bg-blue-500 text-white" : "bg-primary/10 text-primary"
+                                                    )}>
+                                                        {isSubmitted && isPassed ? <CheckCircle2 className="h-6 w-6" /> :
+                                                         isSubmitted && !isPassed ? <XCircle className="h-6 w-6" /> :
+                                                         isInProgress ? <Clock className="h-6 w-6 animate-pulse" /> :
+                                                         <FileQuestion className="h-6 w-6" />}
+                                                    </div>
+
+                                                    <div>
+                                                        <div className="flex flex-wrap items-center gap-2">
+                                                            <h4 className="font-bold text-base">{exam.exam_title}</h4>
+                                                            <Badge variant="outline" className="text-[10px]">
+                                                                Durasi: {exam.duration} Menit
+                                                            </Badge>
+                                                        </div>
+
+                                                        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                                                            <span>KKM: <strong className="text-foreground">{exam.pass_score}</strong></span>
+                                                            {exam.submitted_at && (
+                                                                <span>• Selesai: {new Date(exam.submitted_at).toLocaleString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
+                                                    {isSubmitted ? (
+                                                        <div className="text-right">
+                                                            <div className="text-xl font-black">
+                                                                {exam.total_score !== null ? exam.total_score : 0}
+                                                                <span className="text-xs font-normal text-muted-foreground"> Poin</span>
+                                                            </div>
+                                                            <Badge
+                                                                variant="outline"
+                                                                className={cn(
+                                                                    "text-[10px] font-bold uppercase mt-0.5",
+                                                                    isPassed
+                                                                        ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300"
+                                                                        : "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300"
+                                                                )}
+                                                            >
+                                                                {isPassed ? 'LULUS (>= KKM)' : 'TIDAK LULUS (< KKM)'}
+                                                            </Badge>
+                                                        </div>
+                                                    ) : isInProgress ? (
+                                                        <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200">
+                                                            SEDANG DIKERJAKAN
+                                                        </Badge>
+                                                    ) : (
+                                                        <Badge variant="outline" className="text-muted-foreground">
+                                                            BELUM MENGIKUTI
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </Card>
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <Card className="border-none shadow-md bg-card/50 p-6 text-center text-muted-foreground text-sm">
+                            Belum ada ujian yang diterbitkan untuk mata pelajaran ini.
+                        </Card>
+                    )}
                 </div>
             </div>
         </>

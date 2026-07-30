@@ -35,4 +35,9 @@ class Student extends Model
         return Attribute::get(fn () => $this->photo ? asset('storage/'.$this->photo) : null
         );
     }
+
+    public function examSessions()
+    {
+        return $this->hasMany(ExamSession::class);
+    }
 }

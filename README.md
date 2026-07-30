@@ -4,54 +4,59 @@
 [![React Version](https://img.shields.io/badge/React-19.x-blue.svg)](https://react.dev)
 [![Inertia Version](https://img.shields.io/badge/Inertia.js-v3-green.svg)](https://inertiajs.com)
 
-**Simona SMK** (Sistem Informasi Monitoring Progres Belajar SMK) adalah platform manajemen pembelajaran dan monitoring akademik yang dirancang khusus untuk lingkungan Sekolah Menengah Kejuruan (SMK). Aplikasi ini bertujuan untuk memberikan transparansi progres belajar siswa kepada guru secara real-time.
+**Simona SMK** (Sistem Informasi Monitoring Progres Belajar SMK) adalah platform manajemen pembelajaran, monitoring akademik, dan pelaksanaan ujian online yang dirancang khusus untuk lingkungan Sekolah Menengah Kejuruan (SMK). Aplikasi ini memberikan transparansi progres belajar dan evaluasi siswa kepada guru secara real-time.
 
 Aplikasi ini merupakan bagian dari **Tugas Akhir** oleh **Ahmad Haikal**.
 
 ---
 
-## 🏗️ Arsitektur Proyek & Batasan Scope
+##  Arsitektur Proyek & Batasan Scope
 
 Aplikasi ini dikembangkan dengan sistem **Hybrid Architecture**:
 
-1.  **Web Dashboard (Platform Ini):**
-    *   **Target Pengguna:** Hanya **Administrator** dan **Guru**.
-    *   **Fungsi:** Manajemen data user, kurikulum (mapel), materi pembelajaran, dan monitoring progres siswa.
-    *   **Teknologi:** Laravel 13, Inertia.js v3, dan React 19.
-2.  **Mobile App (Client Siswa):**
-    *   **Target Pengguna:** **Siswa**.
-    *   **Fungsi:** Mengakses materi, mengerjakan tugas, dan melihat progres pribadi.
-    *   **Koneksi:** Terhubung melalui REST API yang disediakan oleh server ini.
+1. **Web Dashboard (Platform Ini):**
+   - **Target Pengguna:** Hanya **Administrator** dan **Guru**.
+   - **Fungsi:** Manajemen data user, kurikulum (mapel), materi pembelajaran, bank soal/ujian, dan monitoring progres & hasil ujian siswa.
+   - **Teknologi:** Laravel 13, Inertia.js v3, dan React 19.
+2. **Mobile App (Client Siswa):**
+   - **Target Pengguna:** **Siswa**.
+   - **Fungsi:** Mengakses materi, mengerjakan tugas & ujian, menyimpan jawaban real-time, dan melihat laporan hasil belajar.
+   - **Koneksi:** Terhubung melalui REST API Sanctum yang disediakan oleh server ini.
 
 > **Penting:** Website ini **TIDAK** ditujukan untuk akses siswa. Seluruh instruksi, bahasa, dan alur kerja di web ini dirancang secara profesional untuk kebutuhan manajemen sekolah.
 
 ---
 
-## 🌟 Fitur Utama
+##  Fitur Utama
 
 ### 1. Multi-Role & Authentication
-*   **Role-Based Access Control:** Tersedia peran untuk **Admin**, **Guru**, dan **Siswa**.
-*   **Secure Auth:** Didukung oleh **Laravel Fortify** dengan fitur Two-Factor Authentication (2FA).
-*   **Approval System:** Akun baru (terutama siswa) memerlukan persetujuan dari admin sebelum dapat mengakses dashboard penuh.
+* **Role-Based Access Control:** Tersedia peran untuk **Admin**, **Guru**, dan **Siswa**.
+* **Secure Auth:** Didukung oleh **Laravel Fortify** dengan fitur Two-Factor Authentication (2FA).
+* **Approval System:** Akun baru (terutama siswa) memerlukan persetujuan dari admin sebelum dapat mengakses dashboard penuh.
 
-### 2. Monitoring Akademik (Guru)
-*   **Dashboard Statistik:** Ringkasan jumlah siswa, guru, mata pelajaran, dan materi.
-*   **Tracking Progres:** Memantau persentase penyelesaian materi tiap siswa secara mendetail.
-*   **Log Aktivitas:** Melihat kapan terakhir kali siswa mengakses materi tertentu (Video, Dokumen, atau URL).
+### 2. Monitoring Akademik & Progres Siswa (Guru)
+* **Dashboard Statistik:** Ringkasan jumlah siswa, guru, mata pelajaran, materi, dan pendaftaran.
+* **Tracking Progres:** Memantau persentase penyelesaian materi tiap siswa secara mendetail.
+* **Laporan Evaluasi Ujian:** Menampilkan daftar nilai ujian, status KKM, kelulusan, dan riwayat pengerjaan siswa pada halaman progres enrollment.
 
-### 3. Manajemen Pembelajaran
-*   **Mata Pelajaran:** Pengelolaan kurikulum mata pelajaran SMK.
-*   **Materi Multimedia:** Guru dapat mengunggah materi dalam format Dokumen, Video, atau Link URL eksternal.
-*   **Status Belajar:** Sistem otomatis melacak status materi (*Not Started*, *In Progress*, *Completed*).
+### 3. Manajemen Pembelajaran & Materi
+* **Mata Pelajaran:** Pengelolaan kurikulum mata pelajaran SMK.
+* **Materi Multimedia:** Guru dapat mengunggah materi dalam format Dokumen, Video, atau Link URL eksternal.
+* **Status Belajar:** Sistem otomatis melacak status materi (*Not Started*, *In Progress*, *Completed*).
 
-### 4. Manajemen Data Diri
-*   **Profil Guru:** Validasi NIP (18 karakter) dan spesialisasi keahlian.
-*   **Profil Siswa:** Manajemen NIS dan penempatan kelas (X, XI, XII).
-*   **Upload Foto:** Sistem penyimpanan foto profil dengan integrasi storage symlink.
+### 4. Sistem Ujian & Bank Soal (Exams)
+* **Manajemen Soal (Web Dashboard):** Penyusunan bank soal Pilihan Ganda & Essay, bobot poin, upload gambar pendukung soal, dan pengait materi pembelajaran untuk rekomendasi remedial.
+* **Pengaturan Akses & KKM:** Pengacakan urutan soal & opsi jawaban, penetapan nilai KKM, serta pengaturan jadwal buka & tutup ujian (`Asia/Jakarta`).
+* **Sesi Pengerjaan Real-time (Mobile API):** Penyimpanan jawaban real-time per-soal, fitur resume ujian saat kendala jaringan, perhitungan waktu server presisi, dan rekomendasi materi terkait.
+
+### 5. Manajemen Data Diri
+* **Profil Guru:** Validasi NIP (18 karakter) dan spesialisasi keahlian.
+* **Profil Siswa:** Manajemen NIS dan penempatan kelas (X, XI, XII).
+* **Upload Foto:** Sistem penyimpanan foto profil dengan integrasi storage symlink.
 
 ---
 
-## 🛠️ Stack Teknologi
+##  Stack Teknologi
 
 | Komponen | Teknologi |
 | :--- | :--- |
@@ -65,58 +70,37 @@ Aplikasi ini dikembangkan dengan sistem **Hybrid Architecture**:
 
 ---
 
-## 🏗️ Arsitektur Aplikasi
+##  Instalasi & Persiapan
 
-Proyek ini mengikuti prinsip **Clean Code** dan **SOLID** dengan implementasi:
-*   **Repository Pattern:** Memisahkan logika query database dari logika bisnis utama.
-*   **Service Layer:** Menangani koordinasi antar entitas dan logika bisnis yang kompleks.
-*   **Single Page Application (SPA):** Memberikan pengalaman pengguna yang mulus tanpa reload halaman berkat Inertia.js.
-
----
-
-## 📂 Gambaran Database
-
-Aplikasi memiliki struktur tabel utama sebagai berikut:
-*   `users`: Data kredensial dan role.
-*   `teachers` / `students`: Detail profil spesifik tiap role.
-*   `subjects`: Daftar mata pelajaran.
-*   `materials`: Konten pembelajaran yang diunggah guru.
-*   `learning_progress`: Tracking progres per-materi untuk tiap siswa.
-*   `student_activities`: Log aktivitas detail (misal: kapan menonton video).
-
----
-
-## 🚀 Instalasi
-
-1.  **Clone repo:**
+1. **Clone repo:**
     ```bash
     git clone https://github.com/username/monitoring-belajar-smk2.git
     cd monitoring-belajar-smk2
     ```
 
-2.  **Instalasi dependensi:**
+2. **Instalasi dependensi:**
     ```bash
     composer install
     npm install
     ```
 
-3.  **Konfigurasi Environment:**
+3. **Konfigurasi Environment:**
     ```bash
     cp .env.example .env
     php artisan key:generate
     ```
 
-4.  **Migrasi & Seed:**
+4. **Migrasi & Seed:**
     ```bash
     php artisan migrate --seed
     ```
 
-5.  **Persiapan Storage:**
+5. **Persiapan Storage Symlink:**
     ```bash
     php artisan storage:link
     ```
 
-6.  **Jalankan Aplikasi:**
+6. **Jalankan Aplikasi:**
     ```bash
     # Tab terminal 1
     php artisan serve
@@ -127,6 +111,6 @@ Aplikasi memiliki struktur tabel utama sebagai berikut:
 
 ---
 
-## ✍️ Author
+##  Author
 
 **Ahmad Haikal**

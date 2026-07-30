@@ -1,0 +1,37 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('exam_sessions', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('exam_id')->constrained('exams')->onDelete('cascade');
+            $table->foreignUuid('student_id')->constrained('students')->onDelete('cascade');
+            $table->timestamp('started_at');
+            $table->timestamp('submitted_at')->nullable();
+            $table->float('total_score')->nullable();
+            $table->enum('status', ['in_progress', 'submitted', 'graded', 'timed_out'])->default('in_progress');
+            $table->timestamps();
+
+            $table->index('id');
+            $table->index('exam_id');
+            $table->index('student_id');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('exam_sessions');
+    }
+};

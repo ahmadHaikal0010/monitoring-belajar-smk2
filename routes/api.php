@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Authentication;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EnrollmentController;
+use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\MaterialController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\StudentProgressController;
@@ -33,6 +34,15 @@ Route::middleware('auth:sanctum')->group(function () {
     // Progress Routes
     Route::post('/materials/{material}/complete', [StudentProgressController::class, 'markAsCompleted']);
     Route::get('/subjects/{subject}/progress', [StudentProgressController::class, 'getSubjectProgress']);
+
+    // Exam Routes (Mobile Client Siswa)
+    Route::get('/subjects/{subject}/exams', [ExamController::class, 'index']);
+    Route::post('/exams/{exam}/start', [ExamController::class, 'start']);
+    Route::get('/exams/sessions/{session}', [ExamController::class, 'showSession']);
+    Route::post('/exams/sessions/{session}/answer', [ExamController::class, 'submitAnswer']);
+    Route::post('/exams/sessions/{session}/answers', [ExamController::class, 'submitMultipleAnswers']);
+    Route::post('/exams/sessions/{session}/submit', [ExamController::class, 'submitSession']);
+    Route::get('/exams/sessions/{session}/result', [ExamController::class, 'result']);
 
     Route::post('/logout', [Authentication::class, 'logout']);
 
