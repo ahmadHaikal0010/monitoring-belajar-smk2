@@ -3,37 +3,40 @@
 namespace Tests\Feature\Auth;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Fortify\Features;
 use Tests\TestCase;
 
 class RegistrationTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->skipUnlessFortifyHas(Features::registration());
-    }
-
-    public function test_registration_screen_can_be_rendered()
+    public function test_web_registration_screen_redirects_to_login()
     {
         $response = $this->get(route('register'));
 
-        $response->assertOk();
+        $response->assertRedirect(route('login'));
     }
 
-    public function test_new_users_can_register()
+    public function test_mobile_api_registration_can_be_performed()
     {
-        $response = $this->post(route('register.store'), [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+        $response = $this->postJson('/api/register', [
+            'name' => 'Siswa Baru Mobile',
+            'email' => 'siswabaru@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'nisn' => '1234567890',
+            'address' => 'Jl. Lubuk Basung No. 10',
         ]);
 
-        $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+        ]);
+
+        $this->assertDatabaseHas('users', [
+            'name' => 'Siswa Baru Mobile',
+            'email' => 'siswabaru@example.com',
+            'role' => 'siswa',
+            'is_approved' => false,
+        ]);
     }
 }

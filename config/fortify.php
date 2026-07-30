@@ -144,7 +144,7 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Features::registration(), // Web registration disabled. Registration is strictly handled via Mobile API (/api/register)
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::twoFactorAuthentication([

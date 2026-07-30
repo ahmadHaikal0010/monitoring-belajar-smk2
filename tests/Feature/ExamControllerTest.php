@@ -30,6 +30,15 @@ class ExamControllerTest extends TestCase
         );
     }
 
+    public function test_admin_ditolak_mengakses_halaman_ujian()
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'is_approved' => true]);
+
+        $response = $this->actingAs($admin)->get(route('teacher.exams.index'));
+
+        $response->assertStatus(403);
+    }
+
     public function test_guru_dapat_membuat_ujian_baru()
     {
         $user = User::factory()->create(['role' => 'guru', 'is_approved' => true]);
