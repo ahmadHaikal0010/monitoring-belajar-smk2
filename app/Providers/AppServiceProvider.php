@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Repositories\Interfaces\AssignmentRepositoryInterface;
 use App\Repositories\Interfaces\EnrollmentRepositoryInterface;
 use App\Repositories\Interfaces\ExamRepositoryInterface;
 use App\Repositories\Interfaces\MaterialRepositoryInterface;
@@ -10,6 +11,7 @@ use App\Repositories\Interfaces\StudentRepositoryInterface;
 use App\Repositories\Interfaces\SubjectRepositoryInterface;
 use App\Repositories\Interfaces\TeacherRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
+use App\Repositories\SqlAssignmentRepository;
 use App\Repositories\SqlEnrollmentRepository;
 use App\Repositories\SqlExamRepository;
 use App\Repositories\SqlMaterialRepository;
@@ -69,6 +71,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             ExamRepositoryInterface::class,
             SqlExamRepository::class
+        );
+
+        $this->app->bind(
+            AssignmentRepositoryInterface::class,
+            SqlAssignmentRepository::class
         );
     }
 

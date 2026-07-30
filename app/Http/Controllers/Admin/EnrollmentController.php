@@ -120,11 +120,34 @@ class EnrollmentController extends Controller
                 return $item;
             });
 
+        // Get assignment results for this student in this subject
+        $assignmentResults = DB::table('assignments')
+            ->leftJoin('assignment_submissions', function ($join) use ($enrollment) {
+                $join->on('assignments.id', '=', 'assignment_submissions.assignment_id')
+                    ->where('assignment_submissions.student_id', '=', $enrollment->student_id);
+            })
+            ->where('assignments.subject_id', $enrollment->subject_id)
+            ->where('assignments.status', 'published')
+            ->select([
+                'assignments.id as assignment_id',
+                'assignments.title as assignment_title',
+                'assignments.max_score',
+                'assignments.due_date',
+                'assignment_submissions.id as submission_id',
+                'assignment_submissions.status as submission_status',
+                'assignment_submissions.score',
+                'assignment_submissions.feedback',
+                'assignment_submissions.submitted_at',
+            ])
+            ->orderBy('assignments.created_at', 'asc')
+            ->get();
+
         return Inertia::render('Admin/Enrollments/progress', [
             'enrollment' => $enrollment,
             'materials' => $materials,
             'completedMaterialIds' => $completedMaterialIds,
             'examResults' => $examResults,
+            'assignmentResults' => $assignmentResults,
         ]);
     }
 

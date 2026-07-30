@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Policies\ExamPolicy;
-use Database\Factories\ExamFactory;
+use App\Policies\AssignmentPolicy;
+use Database\Factories\AssignmentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -17,18 +17,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'teacher_id',
     'title',
     'description',
-    'duration',
-    'pass_score',
-    'randomize_questions',
-    'randomize_options',
+    'due_date',
+    'max_score',
+    'allowed_file_types',
     'status',
-    'start_time',
-    'end_time',
 ])]
-#[UsePolicy(ExamPolicy::class)]
-class Exam extends Model
+#[UsePolicy(AssignmentPolicy::class)]
+class Assignment extends Model
 {
-    /** @use HasFactory<ExamFactory> */
+    /** @use HasFactory<AssignmentFactory> */
     use HasFactory, HasUuids;
 
     /**
@@ -39,12 +36,9 @@ class Exam extends Model
     protected function casts(): array
     {
         return [
-            'duration' => 'integer',
-            'pass_score' => 'integer',
-            'randomize_questions' => 'boolean',
-            'randomize_options' => 'boolean',
-            'start_time' => 'datetime',
-            'end_time' => 'datetime',
+            'due_date' => 'datetime',
+            'max_score' => 'integer',
+            'allowed_file_types' => 'array',
         ];
     }
 
@@ -58,13 +52,8 @@ class Exam extends Model
         return $this->belongsTo(Teacher::class);
     }
 
-    public function questions(): HasMany
+    public function submissions(): HasMany
     {
-        return $this->hasMany(Question::class)->orderBy('order');
-    }
-
-    public function sessions(): HasMany
-    {
-        return $this->hasMany(ExamSession::class);
+        return $this->hasMany(AssignmentSubmission::class);
     }
 }
