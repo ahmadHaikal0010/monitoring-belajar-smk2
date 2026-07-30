@@ -7,6 +7,7 @@ use App\Http\Requests\Subject\UpdateSubjectRequest;
 use App\Models\Subject;
 use App\Services\SubjectService;
 use App\Services\TeacherService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
@@ -49,7 +50,18 @@ class SubjectController extends Controller
     {
         Gate::authorize('create', Subject::class);
 
-        return Inertia::render('Subjects/create');
+        $teachers = [];
+        if (auth()->user()->role === 'admin') {
+            $teachers = DB::table('teachers')
+                ->join('users', 'teachers.user_id', '=', 'users.id')
+                ->select(['teachers.id', 'users.name'])
+                ->orderBy('users.name')
+                ->get();
+        }
+
+        return Inertia::render('Subjects/create', [
+            'teachers' => $teachers,
+        ]);
     }
 
     /**
@@ -59,13 +71,19 @@ class SubjectController extends Controller
     {
         $data = $request->validated();
 
-        $teacher = $this->teacherService->getTeacherByUserId(auth()->id());
+        if (auth()->user()->role === 'admin') {
+            if (empty($data['teacher_id'])) {
+                return redirect()->back()->with('error', 'Silakan pilih guru pengampu untuk mata pelajaran ini.');
+            }
+        } else {
+            $teacher = $this->teacherService->getTeacherByUserId(auth()->id());
 
-        if (! $teacher) {
-            return redirect()->back()->with('error', 'Profil pengajar Anda tidak ditemukan. Pastikan Anda sudah melengkapi profil guru.');
+            if (! $teacher) {
+                return redirect()->back()->with('error', 'Profil pengajar Anda tidak ditemukan. Pastikan Anda sudah melengkapi profil guru.');
+            }
+
+            $data['teacher_id'] = $teacher->id;
         }
-
-        $data['teacher_id'] = $teacher->id;
 
         $this->subjectService->createSubject($data);
 
@@ -94,8 +112,18 @@ class SubjectController extends Controller
 
         $subjectData = $this->subjectService->getSubjectById($subject->id);
 
+        $teachers = [];
+        if (auth()->user()->role === 'admin') {
+            $teachers = DB::table('teachers')
+                ->join('users', 'teachers.user_id', '=', 'users.id')
+                ->select(['teachers.id', 'users.name'])
+                ->orderBy('users.name')
+                ->get();
+        }
+
         return Inertia::render('Subjects/edit', [
             'subject' => $subjectData,
+            'teachers' => $teachers,
         ]);
     }
 
@@ -106,8 +134,11 @@ class SubjectController extends Controller
     {
         $data = $request->validated();
 
-        // Ensure teacher_id is preserved
-        $data['teacher_id'] = $subject->teacher_id;
+        if (auth()->user()->role === 'admin' && ! empty($data['teacher_id'])) {
+            // Keep admin selected teacher_id
+        } else {
+            $data['teacher_id'] = $subject->teacher_id;
+        }
 
         $this->subjectService->updateSubject($subject->id, $data);
 

@@ -11,19 +11,26 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import InputError from '@/components/input-error';
+import type { TeacherItem } from '@/components/SearchableTeacherSelect';
+import { SearchableTeacherSelect } from '@/components/SearchableTeacherSelect';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
-export default function CreateSubject() {
+interface CreateSubjectProps {
+    teachers?: TeacherItem[];
+}
+
+export default function CreateSubject({ teachers = [] }: CreateSubjectProps) {
     const { flash } = usePage().props as any;
     const [showError, setShowError] = useState(false);
 
     const { data, setData, post, processing, errors } = useForm({
         title: '',
         description: '',
+        teacher_id: '',
     });
 
     useEffect(() => {
@@ -127,6 +134,15 @@ export default function CreateSubject() {
                                 />
                                 <InputError message={errors.title} />
                             </div>
+
+                            {teachers.length > 0 && (
+                                <SearchableTeacherSelect
+                                    teachers={teachers}
+                                    value={data.teacher_id}
+                                    onChange={(val) => setData('teacher_id', val)}
+                                    error={errors.teacher_id}
+                                />
+                            )}
 
                             <div className="grid gap-2">
                                 <Label

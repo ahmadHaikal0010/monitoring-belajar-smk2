@@ -26,6 +26,7 @@ class StoreSubjectRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
+            'teacher_id' => ['nullable', 'string', 'exists:teachers,id'],
         ];
     }
 
@@ -42,6 +43,7 @@ class StoreSubjectRequest extends FormRequest
             'title.max' => 'Judul mata pelajaran tidak boleh lebih dari 255 karakter.',
             'description.string' => 'Deskripsi harus berupa teks.',
             'description.max' => 'Deskripsi tidak boleh lebih dari 1000 karakter.',
+            'teacher_id.exists' => 'Guru pengampu yang dipilih tidak valid.',
         ];
     }
 

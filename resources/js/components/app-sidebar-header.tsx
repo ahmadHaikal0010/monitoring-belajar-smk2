@@ -1,5 +1,5 @@
 import { usePage, Link } from '@inertiajs/react';
-import { Bell, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -33,13 +33,6 @@ export function AppSidebarHeader({
 
             {/* Right Side Icons */}
             <div className="flex items-center gap-2">
-                <button className="relative rounded-xl p-2 text-muted-foreground transition-colors hover:bg-muted">
-                    <Bell className="h-5 w-5" />
-                    <span className="absolute top-2 right-2 h-2 w-2 rounded-full border-2 border-background bg-red-500"></span>
-                </button>
-
-                <div className="mx-2 hidden h-8 w-[1px] bg-border sm:block"></div>
-
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <button className="flex items-center gap-2 rounded-xl p-1 pr-3 transition-colors outline-none hover:bg-muted">

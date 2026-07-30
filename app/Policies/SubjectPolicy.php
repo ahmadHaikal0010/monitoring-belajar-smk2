@@ -28,7 +28,7 @@ class SubjectPolicy
      */
     public function create(User $user): bool
     {
-        return $user->role === 'guru';
+        return in_array($user->role, ['guru', 'admin']);
     }
 
     /**
@@ -36,6 +36,10 @@ class SubjectPolicy
      */
     public function update(User $user, Subject $subject): bool
     {
+        if ($user->role === 'admin') {
+            return true;
+        }
+
         return $user->role === 'guru' &&
             $user->teacher?->id === $subject->teacher_id;
     }
@@ -45,6 +49,10 @@ class SubjectPolicy
      */
     public function delete(User $user, Subject $subject): bool
     {
+        if ($user->role === 'admin') {
+            return true;
+        }
+
         return $user->role === 'guru' &&
             $user->teacher?->id === $subject->teacher_id;
     }
