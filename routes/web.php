@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\EnrollmentController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Admin\TeacherController as AdminTeacherController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\MaterialController;
@@ -46,6 +47,10 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
             Route::post('exams/{exam}/questions', [ExamController::class, 'storeQuestion'])->name('exams.questions.store');
             Route::post('exams/{exam}/questions/{question}', [ExamController::class, 'updateQuestion'])->name('exams.questions.update');
             Route::delete('exams/{exam}/questions/{question}', [ExamController::class, 'destroyQuestion'])->name('exams.questions.destroy');
+
+            Route::resource('assignments', AssignmentController::class);
+            Route::get('assignments/{assignment}/submissions/{submission}', [AssignmentController::class, 'showSubmission'])->name('assignments.submissions.show');
+            Route::post('assignments/{assignment}/submissions/{submission}/grade', [AssignmentController::class, 'gradeSubmission'])->name('assignments.submissions.grade');
         });
 
     });

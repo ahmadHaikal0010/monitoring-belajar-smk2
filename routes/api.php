@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AssignmentApiController;
 use App\Http\Controllers\Api\Authentication;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EnrollmentController;
@@ -43,6 +44,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/exams/sessions/{session}/answers', [ExamController::class, 'submitMultipleAnswers']);
     Route::post('/exams/sessions/{session}/submit', [ExamController::class, 'submitSession']);
     Route::get('/exams/sessions/{session}/result', [ExamController::class, 'result']);
+
+    // Assignment Routes (Mobile Client Siswa)
+    Route::get('/subjects/{subject}/assignments', [AssignmentApiController::class, 'getSubjectAssignments']);
+    Route::get('/assignments/{assignment}', [AssignmentApiController::class, 'getAssignmentDetail']);
+    Route::post('/assignments/{assignment}/submit', [AssignmentApiController::class, 'submitAssignment']);
 
     Route::post('/logout', [Authentication::class, 'logout']);
 

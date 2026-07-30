@@ -49,7 +49,12 @@ Aplikasi ini dikembangkan dengan sistem **Hybrid Architecture**:
 * **Pengaturan Akses & KKM:** Pengacakan urutan soal & opsi jawaban, penetapan nilai KKM, serta pengaturan jadwal buka & tutup ujian (`Asia/Jakarta`).
 * **Sesi Pengerjaan Real-time (Mobile API):** Penyimpanan jawaban real-time per-soal, fitur resume ujian saat kendala jaringan, perhitungan waktu server presisi, dan rekomendasi materi terkait.
 
-### 5. Manajemen Data Diri
+### 5. Fitur Tugas Siswa & Penilaian Manual (Assignments)
+* **Manajemen Tugas (Web Dashboard):** Guru dapat membuat tugas baru, menentukan deskripsi instruksi, tenggat waktu pengumpulan, nilai maksimal, dan tipe berkas yang diterima (Bulk foto/gambar & dokumen PDF).
+* **Penilaian Manual Guru:** Guru dapat memeriksa hasil pekerjaan siswa (melihat galeri bulk foto & file PDF), membaca catatan siswa, serta memasukkan nilai angka secara **manual** beserta masukan/feedback.
+* **Integrasi Progres Pendaftaran:** Hasil tugas siswa langsung terintegrasi secara otomatis pada halaman progres belajar siswa dengan tampilan Tab Navigation yang teratur.
+
+### 6. Manajemen Data Diri
 * **Profil Guru:** Validasi NIP (18 karakter) dan spesialisasi keahlian.
 * **Profil Siswa:** Manajemen NIS dan penempatan kelas (X, XI, XII).
 * **Upload Foto:** Sistem penyimpanan foto profil dengan integrasi storage symlink.

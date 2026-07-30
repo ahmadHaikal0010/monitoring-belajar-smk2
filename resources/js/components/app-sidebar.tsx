@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, LayoutGrid, Users, Shield, FileText, UserCheck, GraduationCap, FileQuestion } from 'lucide-react';
+import { BookOpen, LayoutGrid, Users, Shield, FileText, UserCheck, GraduationCap, FileQuestion, ClipboardList } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -52,11 +52,17 @@ export function AppSidebar() {
         icon: FileText,
     });
 
-    if (auth?.user?.role === 'admin' || auth?.user?.role === 'guru') {
+    if (auth?.user?.role === 'guru') {
         mainNavItems.push({
             title: 'Manajemen Ujian',
             href: '/teacher/exams',
             icon: FileQuestion,
+        });
+
+        mainNavItems.push({
+            title: 'Manajemen Tugas',
+            href: '/teacher/assignments',
+            icon: ClipboardList,
         });
     }
 

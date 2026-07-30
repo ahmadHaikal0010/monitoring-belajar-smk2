@@ -21,20 +21,26 @@ class ExamController extends Controller
         protected TeacherService $teacherService
     ) {}
 
+    private function authorizeGuru(): void
+    {
+        if (auth()->user()->role !== 'guru') {
+            abort(403, 'Manajemen Ujian hanya dapat diakses oleh Guru.');
+        }
+    }
+
     public function index()
     {
+        $this->authorizeGuru();
+
         $filters = request()->only(['search', 'sort', 'direction', 'subject_id', 'status']);
         $user = auth()->user();
-
-        if ($user->role === 'guru') {
-            $teacher = $this->teacherService->getTeacherByUserId($user->id);
-            $filters['teacher_id'] = $teacher->id ?? null;
-        }
+        $teacher = $this->teacherService->getTeacherByUserId($user->id);
+        $filters['teacher_id'] = $teacher->id ?? null;
 
         if (! empty($filters['subject_id'])) {
             $selectedSubject = $this->subjectService->getSubjectById($filters['subject_id']);
 
-            if ($user->role === 'guru' && ($selectedSubject->teacher_id ?? null) !== ($filters['teacher_id'] ?? null)) {
+            if (($selectedSubject->teacher_id ?? null) !== ($filters['teacher_id'] ?? null)) {
                 return redirect()->route('teacher.exams.index')
                     ->with('error', 'Anda tidak memiliki hak akses untuk mata pelajaran tersebut.');
             }
@@ -60,6 +66,8 @@ class ExamController extends Controller
 
     public function create()
     {
+        $this->authorizeGuru();
+
         $subjectId = request('subject_id');
 
         if (! $subjectId) {
@@ -70,7 +78,7 @@ class ExamController extends Controller
         $subject = $this->subjectService->getSubjectById($subjectId);
         $teacher = $this->teacherService->getTeacherByUserId(auth()->id());
 
-        if (auth()->user()->role === 'guru' && $subject->teacher_id !== $teacher->id) {
+        if ($subject->teacher_id !== $teacher->id) {
             return Inertia::render('unauthorized', [
                 'message' => 'Anda tidak memiliki wewenang untuk menambahkan ujian pada mata pelajaran ini.',
             ]);
@@ -83,18 +91,16 @@ class ExamController extends Controller
 
     public function store(StoreExamRequest $request)
     {
+        $this->authorizeGuru();
+
         $data = $request->validated();
         $subject = $this->subjectService->getSubjectById($data['subject_id']);
 
-        if (auth()->user()->role === 'guru') {
-            $teacher = $this->teacherService->getTeacherByUserId(auth()->id());
-            if ($subject->teacher_id !== $teacher->id) {
-                abort(403, 'Tindakan tidak diizinkan.');
-            }
-            $data['teacher_id'] = $teacher->id;
-        } else {
-            $data['teacher_id'] = $subject->teacher_id;
+        $teacher = $this->teacherService->getTeacherByUserId(auth()->id());
+        if ($subject->teacher_id !== $teacher->id) {
+            abort(403, 'Tindakan tidak diizinkan.');
         }
+        $data['teacher_id'] = $teacher->id;
 
         try {
             $this->examService->createExam($data);
@@ -111,6 +117,8 @@ class ExamController extends Controller
 
     public function show(string $id)
     {
+        $this->authorizeGuru();
+
         $exam = $this->examService->findExamWithDetails($id);
 
         if (! $exam) {
@@ -132,6 +140,8 @@ class ExamController extends Controller
 
     public function edit(string $id)
     {
+        $this->authorizeGuru();
+
         $exam = $this->examService->findExam($id);
 
         if (! $exam) {
@@ -149,6 +159,8 @@ class ExamController extends Controller
 
     public function update(UpdateExamRequest $request, string $id)
     {
+        $this->authorizeGuru();
+
         $exam = $this->examService->findExam($id);
         if (! $exam) {
             return redirect()->route('teacher.exams.index')->with('error', 'Ujian tidak ditemukan.');
@@ -171,6 +183,8 @@ class ExamController extends Controller
 
     public function destroy(string $id)
     {
+        $this->authorizeGuru();
+
         $exam = $this->examService->findExam($id);
         $subjectId = $exam->subject_id ?? null;
 
@@ -189,6 +203,8 @@ class ExamController extends Controller
 
     public function storeQuestion(StoreQuestionRequest $request, string $examId)
     {
+        $this->authorizeGuru();
+
         $data = $request->validated();
         $imageFile = $request->file('image');
 
@@ -219,6 +235,8 @@ class ExamController extends Controller
 
     public function updateQuestion(StoreQuestionRequest $request, string $examId, string $questionId)
     {
+        $this->authorizeGuru();
+
         $data = $request->validated();
         $imageFile = $request->file('image');
         $optionsData = $data['options'] ?? [];
@@ -249,6 +267,8 @@ class ExamController extends Controller
 
     public function destroyQuestion(string $examId, string $questionId)
     {
+        $this->authorizeGuru();
+
         try {
             $this->examService->deleteQuestion($questionId);
 
