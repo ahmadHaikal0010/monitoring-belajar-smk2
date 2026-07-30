@@ -93,10 +93,38 @@ class EnrollmentController extends Controller
             ->pluck('material_id')
             ->toArray();
 
+        // Get exam results for this student in this subject
+        $examResults = DB::table('exams')
+            ->leftJoin('exam_sessions', function ($join) use ($enrollment) {
+                $join->on('exams.id', '=', 'exam_sessions.exam_id')
+                    ->where('exam_sessions.student_id', '=', $enrollment->student_id);
+            })
+            ->where('exams.subject_id', $enrollment->subject_id)
+            ->where('exams.status', 'published')
+            ->select([
+                'exams.id as exam_id',
+                'exams.title as exam_title',
+                'exams.pass_score',
+                'exams.duration',
+                'exam_sessions.id as session_id',
+                'exam_sessions.status as session_status',
+                'exam_sessions.total_score',
+                'exam_sessions.submitted_at',
+                'exam_sessions.started_at',
+            ])
+            ->orderBy('exams.created_at', 'asc')
+            ->get()
+            ->map(function ($item) {
+                $item->is_passed = $item->total_score !== null ? ((float) $item->total_score >= (float) $item->pass_score) : null;
+
+                return $item;
+            });
+
         return Inertia::render('Admin/Enrollments/progress', [
             'enrollment' => $enrollment,
             'materials' => $materials,
             'completedMaterialIds' => $completedMaterialIds,
+            'examResults' => $examResults,
         ]);
     }
 
