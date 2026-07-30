@@ -295,7 +295,7 @@ clearTimeout(hideTimer);
                             </DropdownMenu>
                         </div>
 
-                        {auth?.user?.role === 'guru' ? (
+                        {auth?.user?.role === 'guru' || auth?.user?.role === 'admin' ? (
                             <Button
                                 className="h-10 w-full gap-2 shadow-lg shadow-primary/20 sm:w-auto"
                                 asChild
@@ -365,10 +365,10 @@ clearTimeout(hideTimer);
                                                                         </span>
                                                                     </Link>
                                                                 </DropdownMenuItem>
-                                                                {(auth?.user?.role ===
-                                                                    'guru' &&
-                                                                    auth?.user?.id ===
-                                                                        subject?.teacher_user_id) && (
+                                                                {(auth?.user?.role === 'admin' ||
+                                                                    (auth?.user?.role === 'guru' &&
+                                                                        auth?.user?.id ===
+                                                                            subject?.teacher_user_id)) && (
                                                                     <>
                                                                         <DropdownMenuItem
                                                                             asChild

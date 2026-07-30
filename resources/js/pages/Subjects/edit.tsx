@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import InputError from '@/components/input-error';
+import type { TeacherItem } from '@/components/SearchableTeacherSelect';
+import { SearchableTeacherSelect } from '@/components/SearchableTeacherSelect';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -20,6 +22,7 @@ import { Textarea } from '@/components/ui/textarea';
 
 interface Subject {
     id: string;
+    teacher_id?: string;
     title: string;
     code: string;
     description: string;
@@ -27,9 +30,10 @@ interface Subject {
 
 interface Props {
     subject: Subject;
+    teachers?: TeacherItem[];
 }
 
-export default function EditSubject({ subject }: Props) {
+export default function EditSubject({ subject, teachers = [] }: Props) {
     const { flash } = usePage().props as any;
     const [showFlash, setShowFlash] = useState(false);
 
@@ -37,6 +41,7 @@ export default function EditSubject({ subject }: Props) {
         title: subject?.title || '',
         code: subject?.code || '',
         description: subject?.description || '',
+        teacher_id: subject?.teacher_id || '',
     });
 
     useEffect(() => {
@@ -107,6 +112,15 @@ export default function EditSubject({ subject }: Props) {
                                 />
                                 <InputError message={errors.title} />
                             </div>
+
+                            {teachers.length > 0 && (
+                                <SearchableTeacherSelect
+                                    teachers={teachers}
+                                    value={data.teacher_id}
+                                    onChange={(val) => setData('teacher_id', val)}
+                                    error={errors.teacher_id}
+                                />
+                            )}
                             <div className="grid gap-2">
                                 <Label htmlFor="code" className="flex items-center gap-2 font-semibold">
                                     <Fingerprint className="h-4 w-4 text-primary" /> 

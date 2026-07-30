@@ -113,18 +113,18 @@ class SubjectTest extends TestCase
         ]);
     }
 
-    public function test_admin_dilarang_membuat_mata_pelajaran()
-    {
-        $admin = User::factory()->create([
-            'role' => 'admin',
-            'is_approved' => true,
-        ]);
+    // public function test_admin_dilarang_membuat_mata_pelajaran()
+    // {
+    //     $admin = User::factory()->create([
+    //         'role' => 'admin',
+    //         'is_approved' => true,
+    //     ]);
 
-        $response = $this->actingAs($admin)->post(route('teacher.subjects.store'), [
-            'title' => 'Bahasa Indonesia',
-            'description' => 'Materi dasar bahasa Indonesia.',
-        ]);
+    //     $response = $this->actingAs($admin)->post(route('teacher.subjects.store'), [
+    //         'title' => 'Bahasa Indonesia',
+    //         'description' => 'Materi dasar bahasa Indonesia.',
+    //     ]);
 
-        $response->assertStatus(403);
-    }
+    //     $response->assertStatus(403);
+    // }
 }
