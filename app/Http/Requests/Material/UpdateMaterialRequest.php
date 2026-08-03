@@ -30,8 +30,7 @@ class UpdateMaterialRequest extends FormRequest
 
         return [
             'title' => ['required', 'string', 'max:255'],
-            'content_type' => ['required', 'string', 'in:video,document,url'],
-            'content_body_text' => ['required_if:content_type,url', 'nullable', 'string', 'max:2000'],
+            'content_type' => ['required', 'string', 'in:video,document'],
             'content_body_file' => [
                 'nullable', // Optional for update
                 'file',

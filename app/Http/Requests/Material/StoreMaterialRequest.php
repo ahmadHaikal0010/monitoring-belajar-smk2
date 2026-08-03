@@ -28,11 +28,9 @@ class StoreMaterialRequest extends FormRequest
         return [
             'subject_id' => ['required', 'exists:subjects,id'],
             'title' => ['required', 'string', 'max:255'],
-            'content_type' => ['required', 'string', 'in:video,document,url'],
-            'content_body_text' => ['required_if:content_type,url', 'nullable', 'string', 'max:2000'],
+            'content_type' => ['required', 'string', 'in:video,document'],
             'content_body_file' => [
-                'required_if:content_type,video,document',
-                'nullable',
+                'required',
                 'file',
                 $type === 'video' ? 'mimes:mp4,mov,avi,webm' : 'mimes:pdf',
                 $type === 'video' ? 'max:51200' : 'max:10240', // 50MB for video, 10MB for doc

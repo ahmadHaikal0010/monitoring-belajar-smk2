@@ -286,7 +286,8 @@ export default function AssignmentIndex({ assignments, subjects, filters }: Prop
                         {assignments.data.map((assignment) => (
                             <Card
                                 key={assignment.id}
-                                className="group flex flex-col justify-between overflow-hidden border-none bg-card/50 shadow-lg backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-xl"
+                                className="group flex flex-col justify-between overflow-hidden border-none bg-card/50 shadow-lg backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-xl cursor-pointer"
+                                onClick={() => router.visit(`/teacher/assignments/${assignment.id}`)}
                             >
                                 <CardHeader className="pb-3">
                                     <div className="flex items-start justify-between gap-3">
@@ -300,7 +301,7 @@ export default function AssignmentIndex({ assignments, subjects, filters }: Prop
                                                 </Badge>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                                             {getStatusBadge(assignment.status)}
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
@@ -337,11 +338,9 @@ export default function AssignmentIndex({ assignments, subjects, filters }: Prop
                                         </div>
                                     </div>
                                     <div className="pt-2">
-                                        <Link href={`/teacher/assignments/${assignment.id}`} className="hover:underline">
-                                            <h3 className="line-clamp-2 text-lg font-bold tracking-tight">
-                                                {assignment.title}
-                                            </h3>
-                                        </Link>
+                                        <h3 className="line-clamp-2 text-lg font-bold tracking-tight group-hover:text-primary transition-colors">
+                                            {assignment.title}
+                                        </h3>
                                     </div>
                                 </CardHeader>
 
