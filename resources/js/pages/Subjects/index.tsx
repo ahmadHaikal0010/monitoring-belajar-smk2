@@ -18,8 +18,10 @@ import {
     BookCheck,
     CheckCircle2,
     AlertCircle,
+    Download,
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
+import { ExportReportModal } from '@/components/ExportReportModal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -92,6 +94,7 @@ export default function SubjectList({ subjects, filters }: Props) {
         null,
     );
     const [isDeleting, setIsDeleting] = useState(false);
+    const [exportSubjectTarget, setExportSubjectTarget] = useState<{ id: string; title: string } | null>(null);
 
     const handleDelete = () => {
         if (!subjectToDelete) {
@@ -365,6 +368,17 @@ clearTimeout(hideTimer);
                                                                         </span>
                                                                     </Link>
                                                                 </DropdownMenuItem>
+                                                                <DropdownMenuItem
+                                                                    onSelect={() =>
+                                                                        setExportSubjectTarget({
+                                                                            id: subject.id,
+                                                                            title: subject.title,
+                                                                        })
+                                                                    }
+                                                                >
+                                                                    <Download className="mr-2 h-4 w-4 text-emerald-600" />
+                                                                    <span>Export Laporan</span>
+                                                                </DropdownMenuItem>
                                                                 {(auth?.user?.role === 'admin' ||
                                                                     (auth?.user?.role === 'guru' &&
                                                                         auth?.user?.id ===
@@ -601,6 +615,14 @@ clearTimeout(hideTimer);
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+                {exportSubjectTarget && (
+                    <ExportReportModal
+                        isOpen={Boolean(exportSubjectTarget)}
+                        onClose={() => setExportSubjectTarget(null)}
+                        subjectId={exportSubjectTarget.id}
+                        subjectTitle={exportSubjectTarget.title}
+                    />
+                )}
             </div>
         </>
     );

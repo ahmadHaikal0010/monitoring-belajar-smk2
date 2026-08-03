@@ -14,8 +14,10 @@ import {
     ArrowLeft,
     Trash2,
     AlertTriangle,
+    Download,
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
+import { ExportReportModal } from '@/components/ExportReportModal';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -123,6 +125,7 @@ export default function EnrollmentList({
     const [showSuccess, setShowSuccess] = useState(false);
     const [enrollmentToDelete, setEnrollmentToDelete] = useState<Enrollment | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
     useEffect(() => {
         if (flash?.success) {
@@ -325,6 +328,16 @@ return;
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
+                            )}
+
+                            {mode === 'enrollments' && selectedSubject && (
+                                <Button
+                                    onClick={() => setIsExportModalOpen(true)}
+                                    className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-md h-10 shrink-0"
+                                >
+                                    <Download className="h-4 w-4" />
+                                    <span>Export Rekap Nilai</span>
+                                </Button>
                             )}
                         </div>
                     </div>
@@ -590,6 +603,14 @@ return;
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+                {selectedSubject && (
+                    <ExportReportModal
+                        isOpen={isExportModalOpen}
+                        onClose={() => setIsExportModalOpen(false)}
+                        subjectId={selectedSubject.id}
+                        subjectTitle={selectedSubject.title}
+                    />
+                )}
             </div>
         </>
     );

@@ -8,6 +8,7 @@ use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\ReportExportController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Middleware\AdminAccess;
@@ -64,6 +65,7 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
         Route::get('/enrollments', [EnrollmentController::class, 'index'])->name('enrollments.index');
         Route::get('/enrollments/{id}/progress', [EnrollmentController::class, 'progress'])->name('enrollments.progress');
         Route::delete('/enrollments/{id}', [EnrollmentController::class, 'destroy'])->name('enrollments.destroy');
+        Route::get('/subjects/{subject}/export', [ReportExportController::class, 'export'])->name('subjects.export');
     });
 
     // * Admin ONLY Routes
