@@ -439,7 +439,8 @@ return;
                                                     initial={{ opacity: 0, x: -10 }}
                                                     animate={{ opacity: 1, x: 0 }}
                                                     transition={{ delay: index * 0.03 }}
-                                                    className="group transition-colors hover:bg-muted/30"
+                                                    className="group transition-colors hover:bg-muted/50 cursor-pointer"
+                                                    onClick={() => router.visit(`/admin/enrollments/${enrollment.id}/progress`)}
                                                 >
                                                     <td className="p-4">
                                                         <div className="flex items-center gap-3">
@@ -449,7 +450,7 @@ return;
                                                                 </AvatarFallback>
                                                             </Avatar>
                                                             <div className="flex flex-col">
-                                                                <span className="text-sm font-semibold">{enrollment.student_name}</span>
+                                                                <span className="text-sm font-semibold group-hover:text-primary transition-colors">{enrollment.student_name}</span>
                                                                 <span className="text-[10px] text-muted-foreground">{enrollment.student_email}</span>
                                                             </div>
                                                         </div>
@@ -472,12 +473,9 @@ return;
                                                                     className="h-full bg-primary transition-all"
                                                                 />
                                                             </div>
-                                                            <Link 
-                                                                href={`/admin/enrollments/${enrollment.id}/progress`}
-                                                                className="text-[10px] text-primary hover:underline font-bold"
-                                                            >
-                                                                Lihat Detail Progres
-                                                            </Link>
+                                                            <span className="text-[10px] text-primary group-hover:underline font-bold">
+                                                                Lihat Detail Progres &rarr;
+                                                            </span>
                                                         </div>
                                                     </td>
                                                     <td className="p-4">
@@ -496,7 +494,10 @@ return;
                                                             variant="ghost"
                                                             size="icon"
                                                             className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                                            onClick={() => setEnrollmentToDelete(enrollment)}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setEnrollmentToDelete(enrollment);
+                                                            }}
                                                         >
                                                             <Trash2 className="h-4 w-4" />
                                                         </Button>

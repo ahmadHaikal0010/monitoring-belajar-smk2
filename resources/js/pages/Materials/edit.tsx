@@ -5,7 +5,6 @@ import {
     Save, 
     FileText,
     Video,
-    Link as LinkIcon,
     Loader2,
     Upload,
     Settings2,
@@ -80,11 +79,11 @@ export default function EditMaterial({ material }: Props) {
         <>
             <Head title={`Edit: ${material?.title}`} />
 
-            <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6">
+            <div className="mx-auto flex max-w-6xl w-full flex-col gap-6 p-6">
                 <AnimatePresence>
                     {showFlash && (flash?.success || flash?.error) && (
-                        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                            <div className={cn("mb-2 p-4 rounded-xl border flex justify-between", flash.success ? "bg-emerald-50 text-emerald-800 border-emerald-200" : "bg-destructive/10 text-destructive border-destructive/20")}>
+                        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full">
+                            <div className={cn("mb-2 p-4 rounded-xl border flex justify-between w-full", flash.success ? "bg-emerald-50 text-emerald-800 border-emerald-200" : "bg-destructive/10 text-destructive border-destructive/20")}>
                                 <div className="flex gap-3 items-center">
                                     {flash.success ? <CheckCircle2 className="h-5 w-5 text-emerald-600" /> : <AlertCircle className="h-5 w-5" />}
                                     <span className="text-sm font-medium">{flash.success || flash.error}</span>
@@ -95,27 +94,47 @@ export default function EditMaterial({ material }: Props) {
                     )}
                 </AnimatePresence>
 
-                <div className="flex items-center gap-4">
-                    <Button variant="outline" size="icon" asChild><Link href={`/teacher/materials?subject_id=${material?.subject_id}`}><ArrowLeft className="h-4 w-4" /></Link></Button>
-                    <h1 className="text-3xl font-bold tracking-tight">Edit Materi</h1>
+                <div className="flex items-center gap-4 w-full">
+                    <Button variant="outline" size="icon" asChild className="shrink-0">
+                        <Link href={`/teacher/materials?subject_id=${material?.subject_id}`}><ArrowLeft className="h-4 w-4" /></Link>
+                    </Button>
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">Edit Materi</h1>
+                        <p className="text-muted-foreground text-sm">Mapel: <span className="font-bold text-primary">{material?.subject_title}</span></p>
+                    </div>
                 </div>
 
-                <form onSubmit={submit} className="grid gap-6">
-                    <Card className="p-6 border-none shadow-xl bg-card/50 backdrop-blur-sm">
+                <form onSubmit={submit} className="grid gap-6 w-full">
+                    <Card className="w-full p-6 border-none shadow-xl bg-card/50 backdrop-blur-sm">
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="title" className="flex items-center gap-2 font-semibold"><FileText className="h-4 w-4 text-primary" /> Judul Materi</Label>
-                                <Input id="title" value={data.title} onChange={e => setData('title', e.target.value)} required />
+                                <Label htmlFor="title" className="flex items-center gap-2 text-sm font-semibold">
+                                    <FileText className="h-4 w-4 text-primary" /> Judul Materi
+                                </Label>
+                                <Input 
+                                    id="title" 
+                                    className="h-11 border-zinc-200 bg-background/50 dark:border-zinc-800" 
+                                    value={data.title} 
+                                    onChange={e => setData('title', e.target.value)} 
+                                    required 
+                                />
                                 <InputError message={errors.title} />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label className="flex items-center gap-2 font-semibold"><Settings2 className="h-4 w-4 text-primary" /> Jenis Konten</Label>
-                                <div className="grid grid-cols-3 gap-3">
-                                    {['video', 'document', 'url'].map(type => (
-                                        <button key={type} type="button" onClick={() => setData('content_type', type as any)} className={cn("flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all", data.content_type === type ? "border-primary bg-primary/5 text-primary" : "border-zinc-100 bg-zinc-50/50 text-muted-foreground hover:border-zinc-200")}>
-                                            {type === 'video' ? <Video className="h-6 w-6" /> : type === 'document' ? <FileText className="h-6 w-6" /> : <LinkIcon className="h-6 w-6" />}
-                                            <span className="text-xs font-bold uppercase tracking-wider">{type}</span>
+                                <Label className="flex items-center gap-2 text-sm font-semibold">
+                                    <Settings2 className="h-4 w-4 text-primary" /> Jenis Konten
+                                </Label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {['video', 'document'].map(type => (
+                                        <button 
+                                            key={type} 
+                                            type="button" 
+                                            onClick={() => setData('content_type', type as any)} 
+                                            className={cn("flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all cursor-pointer", data.content_type === type ? "border-primary bg-primary/5 text-primary" : "border-zinc-100 bg-zinc-50/50 text-muted-foreground hover:border-zinc-200 dark:border-zinc-800")}
+                                        >
+                                            {type === 'video' ? <Video className="h-6 w-6" /> : <FileText className="h-6 w-6" />}
+                                            <span className="text-xs font-bold uppercase tracking-wider">{type === 'video' ? 'File Video' : 'File PDF'}</span>
                                         </button>
                                     ))}
                                 </div>
@@ -124,39 +143,39 @@ export default function EditMaterial({ material }: Props) {
                             <div className="grid gap-2">
                                 {(data.content_type === 'video' || data.content_type === 'document') && (
                                     <div className="space-y-2">
-                                        <div className="p-3 rounded-lg bg-blue-50 border border-blue-100 text-[11px] text-blue-800">
+                                        <div className="p-3 rounded-lg bg-blue-50 border border-blue-100 text-[11px] text-blue-800 dark:bg-blue-950/40 dark:border-blue-900 dark:text-blue-300">
                                             <strong>File saat ini:</strong> {material?.content_body}<br/>
                                             Ganti file hanya jika diperlukan.
                                         </div>
-                                        <Label className="font-semibold">{data.content_type === 'video' ? 'Ganti Video' : 'Ganti PDF'}</Label>
+                                        <Label className="text-sm font-semibold">{data.content_type === 'video' ? 'Ganti Video' : 'Ganti PDF'}</Label>
                                         <div className="relative group/file">
-                                            <Input type="file" accept={data.content_type === 'video' ? "video/*" : ".pdf"} className="h-11 cursor-pointer pt-2" onChange={e => setData('content_body_file', e.target.files?.[0] || null)} />
-                                            <Upload className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input type="file" accept={data.content_type === 'video' ? "video/*" : ".pdf"} className="h-11 cursor-pointer pt-2 border-zinc-200 bg-background/50 dark:border-zinc-800" onChange={e => setData('content_body_file', e.target.files?.[0] || null)} />
+                                            <Upload className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                                         </div>
                                         <InputError message={errors.content_body_file} />
-                                    </div>
-                                )}
-
-                                {data.content_type === 'url' && (
-                                    <div className="space-y-2">
-                                        <Label className="flex items-center gap-2 font-semibold"><LinkIcon className="h-4 w-4 text-primary" /> Tautan / URL</Label>
-                                        <Input value={data.content_body_text} onChange={e => setData('content_body_text', e.target.value)} />
-                                        <InputError message={errors.content_body_text} />
                                     </div>
                                 )}
                             </div>
 
                             <div className="grid gap-2">
-                                <Label className="font-semibold">Ringkasan</Label>
-                                <Textarea value={data.description} onChange={e => setData('description', e.target.value)} className="min-h-[100px]" />
+                                <Label className="text-sm font-semibold">Ringkasan Materi</Label>
+                                <Textarea 
+                                    value={data.description} 
+                                    onChange={e => setData('description', e.target.value)} 
+                                    className="min-h-[150px] resize-none border-zinc-200 bg-background/50 dark:border-zinc-800" 
+                                />
                                 <InputError message={errors.description} />
                             </div>
                         </div>
                     </Card>
 
-                    <div className="flex justify-end gap-3">
-                        <Button variant="ghost" asChild disabled={processing}><Link href={`/teacher/materials?subject_id=${material?.subject_id}`}>Batal</Link></Button>
-                        <Button className="px-8 shadow-lg" disabled={processing}>{processing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4 mr-2" />} Simpan</Button>
+                    <div className="flex justify-end gap-3 w-full">
+                        <Button variant="ghost" asChild disabled={processing}>
+                            <Link href={`/teacher/materials?subject_id=${material?.subject_id}`}>Batal</Link>
+                        </Button>
+                        <Button className="gap-2 px-8 shadow-lg shadow-primary/20" disabled={processing}>
+                            {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Simpan Perubahan
+                        </Button>
                     </div>
                 </form>
             </div>
