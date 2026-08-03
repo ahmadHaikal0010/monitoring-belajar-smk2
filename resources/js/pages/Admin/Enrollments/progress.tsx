@@ -16,8 +16,10 @@ import {
     ClipboardList,
     Award,
     MessageSquare,
+    Download,
 } from 'lucide-react';
 import { useState } from 'react';
+import { ExportReportModal } from '@/components/ExportReportModal';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -83,6 +85,7 @@ export default function StudentProgressDetail({
     assignmentResults = [],
 }: Props) {
     const [activeTab, setActiveTab] = useState<'materials' | 'exams' | 'assignments'>('materials');
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
     const percentage = Math.round((enrollment.completed_materials / (enrollment.total_materials || 1)) * 100);
 
     setLayoutProps({
@@ -128,6 +131,14 @@ export default function StudentProgressDetail({
                             </p>
                         </div>
                     </div>
+
+                    <Button
+                        onClick={() => setIsExportModalOpen(true)}
+                        className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shrink-0"
+                    >
+                        <Download className="h-4 w-4" />
+                        <span>Export Laporan Mapel</span>
+                    </Button>
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-3">
@@ -625,6 +636,13 @@ export default function StudentProgressDetail({
                         </AnimatePresence>
                     </div>
                 </div>
+
+                <ExportReportModal
+                    isOpen={isExportModalOpen}
+                    onClose={() => setIsExportModalOpen(false)}
+                    subjectId={enrollment.subject_id}
+                    subjectTitle={enrollment.subject_title}
+                />
             </div>
         </>
     );
