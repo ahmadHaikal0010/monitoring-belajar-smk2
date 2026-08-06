@@ -25,7 +25,7 @@ export default function ExamCreate({ subject }: Props) {
         pass_score: 75,
         randomize_questions: false,
         randomize_options: false,
-        status: 'published',
+        status: 'draft',
         start_time: '',
         end_time: '',
     });
@@ -132,8 +132,8 @@ export default function ExamCreate({ subject }: Props) {
                                         onChange={(e) => setData('status', e.target.value as any)}
                                         className="w-full h-10 rounded-md border border-input bg-background/50 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                     >
+                                        <option value="draft">Draft (Belum diterbitkan - Default)</option>
                                         <option value="published">Diterbitkan (Published)</option>
-                                        <option value="draft">Draft (Belum dapat diakses)</option>
                                     </select>
                                 </div>
                             </div>
