@@ -155,20 +155,32 @@ class SqlExamRepository implements ExamRepositoryInterface
 
     public function update(string $id, array $data)
     {
+        $updateFields = [];
+        $allowedKeys = [
+            'subject_id',
+            'teacher_id',
+            'title',
+            'description',
+            'duration',
+            'pass_score',
+            'randomize_questions',
+            'randomize_options',
+            'status',
+            'start_time',
+            'end_time',
+        ];
+
+        foreach ($allowedKeys as $key) {
+            if (array_key_exists($key, $data)) {
+                $updateFields[$key] = $data[$key];
+            }
+        }
+
+        $updateFields['updated_at'] = now();
+
         DB::table('exams')
             ->where('id', $id)
-            ->update([
-                'title' => $data['title'],
-                'description' => $data['description'] ?? null,
-                'duration' => $data['duration'],
-                'pass_score' => $data['pass_score'] ?? 75,
-                'randomize_questions' => $data['randomize_questions'] ?? false,
-                'randomize_options' => $data['randomize_options'] ?? false,
-                'status' => $data['status'] ?? 'draft',
-                'start_time' => $data['start_time'] ?? null,
-                'end_time' => $data['end_time'] ?? null,
-                'updated_at' => now(),
-            ]);
+            ->update($updateFields);
     }
 
     public function delete(string $id)

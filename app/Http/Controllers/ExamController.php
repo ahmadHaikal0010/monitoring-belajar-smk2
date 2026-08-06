@@ -168,6 +168,24 @@ class ExamController extends Controller
 
         $data = $request->validated();
 
+        if (isset($data['status']) && $data['status'] === 'published') {
+            $questionsCount = DB::table('questions')->where('exam_id', $id)->count();
+            if ($questionsCount === 0) {
+                return redirect()->route('teacher.exams.show', $id)
+                    ->with('error', 'Gagal menerbitkan ujian! Ujian belum memiliki soal.');
+            }
+
+            $totalScore = (float) DB::table('questions')->where('exam_id', $id)->sum('score');
+            if (abs($totalScore - 100.0) > 0.001) {
+                $diff = round(abs(100.0 - $totalScore), 2);
+                $msg = $totalScore < 100.0
+                    ? "Gagal menerbitkan ujian! Total poin soal saat ini {$totalScore}, masih kurang {$diff} poin lagi (harus tepat 100 poin)."
+                    : "Gagal menerbitkan ujian! Total poin soal saat ini {$totalScore}, kelebihan {$diff} poin (harus tepat 100 poin).";
+
+                return redirect()->route('teacher.exams.show', $id)->with('error', $msg);
+            }
+        }
+
         try {
             $this->examService->updateExam($id, $data);
 
@@ -178,6 +196,76 @@ class ExamController extends Controller
 
             return redirect()->route('teacher.exams.show', $id)
                 ->with('error', 'Terjadi kesalahan saat memperbarui ujian.');
+        }
+    }
+
+    public function publish(string $id)
+    {
+        $this->authorizeGuru();
+
+        $exam = $this->examService->findExam($id);
+        if (! $exam) {
+            return redirect()->route('teacher.exams.index')->with('error', 'Ujian tidak ditemukan.');
+        }
+
+        $teacher = $this->teacherService->getTeacherByUserId(auth()->id());
+        if ($exam->teacher_id !== $teacher->id) {
+            abort(403, 'Tindakan tidak diizinkan.');
+        }
+
+        $questionsCount = DB::table('questions')->where('exam_id', $id)->count();
+        if ($questionsCount === 0) {
+            return redirect()->route('teacher.exams.show', $id)
+                ->with('error', 'Gagal menerbitkan ujian! Ujian belum memiliki soal.');
+        }
+
+        $totalScore = (float) DB::table('questions')->where('exam_id', $id)->sum('score');
+        if (abs($totalScore - 100.0) > 0.001) {
+            $diff = round(abs(100.0 - $totalScore), 2);
+            $msg = $totalScore < 100.0
+                ? "Gagal menerbitkan ujian! Total poin soal saat ini {$totalScore}, masih kurang {$diff} poin lagi (harus tepat 100 poin)."
+                : "Gagal menerbitkan ujian! Total poin soal saat ini {$totalScore}, kelebihan {$diff} poin (harus tepat 100 poin).";
+
+            return redirect()->route('teacher.exams.show', $id)->with('error', $msg);
+        }
+
+        try {
+            $this->examService->updateExam($id, ['status' => 'published']);
+
+            return redirect()->route('teacher.exams.show', $id)
+                ->with('success', 'Ujian berhasil diterbitkan dan siap dikerjakan oleh siswa.');
+        } catch (Exception $e) {
+            Log::error('Error publishing exam: '.$e->getMessage());
+
+            return redirect()->route('teacher.exams.show', $id)
+                ->with('error', 'Terjadi kesalahan saat menerbitkan ujian.');
+        }
+    }
+
+    public function unpublish(string $id)
+    {
+        $this->authorizeGuru();
+
+        $exam = $this->examService->findExam($id);
+        if (! $exam) {
+            return redirect()->route('teacher.exams.index')->with('error', 'Ujian tidak ditemukan.');
+        }
+
+        $teacher = $this->teacherService->getTeacherByUserId(auth()->id());
+        if ($exam->teacher_id !== $teacher->id) {
+            abort(403, 'Tindakan tidak diizinkan.');
+        }
+
+        try {
+            $this->examService->updateExam($id, ['status' => 'draft']);
+
+            return redirect()->route('teacher.exams.show', $id)
+                ->with('success', 'Status ujian diubah kembali menjadi Draft.');
+        } catch (Exception $e) {
+            Log::error('Error unpublishing exam: '.$e->getMessage());
+
+            return redirect()->route('teacher.exams.show', $id)
+                ->with('error', 'Terjadi kesalahan saat membatalkan publikasi ujian.');
         }
     }
 

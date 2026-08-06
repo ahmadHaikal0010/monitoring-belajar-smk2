@@ -49,6 +49,8 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
             Route::resource('subjects', SubjectController::class);
             Route::resource('materials', MaterialController::class);
             Route::resource('exams', ExamController::class);
+            Route::patch('exams/{exam}/publish', [ExamController::class, 'publish'])->name('exams.publish');
+            Route::patch('exams/{exam}/unpublish', [ExamController::class, 'unpublish'])->name('exams.unpublish');
             Route::post('exams/{exam}/questions', [ExamController::class, 'storeQuestion'])->name('exams.questions.store');
             Route::post('exams/{exam}/questions/{question}', [ExamController::class, 'updateQuestion'])->name('exams.questions.update');
             Route::delete('exams/{exam}/questions/{question}', [ExamController::class, 'destroyQuestion'])->name('exams.questions.destroy');

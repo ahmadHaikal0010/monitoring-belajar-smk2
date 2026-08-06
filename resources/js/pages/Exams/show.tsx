@@ -14,6 +14,8 @@ import {
     HelpCircle,
     Check,
     AlertCircle,
+    AlertTriangle,
+    Send,
     Calendar,
     BookOpen,
 } from 'lucide-react';
@@ -97,6 +99,12 @@ export default function ExamShow({ exam, materials = [] }: Props) {
     const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
     const [questionToDelete, setQuestionToDelete] = useState<Question | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [showPublishWarningModal, setShowPublishWarningModal] = useState(false);
+
+    const totalScore = (exam.questions || []).reduce((sum, q) => sum + (Number(q.score) || 0), 0);
+    const roundedTotalScore = Math.round(totalScore * 100) / 100;
+    const isScoreValid = Math.abs(roundedTotalScore - 100) < 0.01;
+    const scoreDiff = Math.round(Math.abs(100 - roundedTotalScore) * 100) / 100;
 
     const { data, setData, post, processing, errors, reset } = useForm({
         question_text: '',
@@ -238,12 +246,26 @@ return null;
 
     const handleDeleteQuestion = () => {
         if (!questionToDelete) {
-return;
-}
+            return;
+        }
 
         router.delete(`/teacher/exams/${exam.id}/questions/${questionToDelete.id}`, {
             onSuccess: () => setQuestionToDelete(null),
         });
+    };
+
+    const handlePublishClick = () => {
+        if (exam.questions?.length === 0 || !isScoreValid) {
+            setShowPublishWarningModal(true);
+
+            return;
+        }
+
+        router.patch(`/teacher/exams/${exam.id}/publish`);
+    };
+
+    const handleUnpublishClick = () => {
+        router.patch(`/teacher/exams/${exam.id}/unpublish`);
     };
 
     return (
@@ -261,7 +283,7 @@ return;
                                 <h1 className="text-2xl font-bold tracking-tight">{exam.title}</h1>
                                 <Badge variant="outline" className={cn(
                                     "border-none font-semibold text-xs",
-                                    exam.status === 'published' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                                    exam.status === 'published' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300'
                                 )}>
                                     {exam.status === 'published' ? 'Diterbitkan' : 'Draft'}
                                 </Badge>
@@ -272,7 +294,31 @@ return;
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
+                        {exam.status === 'draft' ? (
+                            <Button
+                                className={cn(
+                                    "gap-2 shadow-lg transition-all",
+                                    isScoreValid && (exam.questions?.length || 0) > 0
+                                        ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20"
+                                        : "bg-amber-600 hover:bg-amber-700 text-white shadow-amber-600/20 opacity-90"
+                                )}
+                                onClick={handlePublishClick}
+                            >
+                                <Send className="h-4 w-4" />
+                                <span>Terbitkan Ujian</span>
+                            </Button>
+                        ) : (
+                            <Button
+                                variant="outline"
+                                className="gap-2 text-amber-600 border-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/20"
+                                onClick={handleUnpublishClick}
+                            >
+                                <XCircle className="h-4 w-4" />
+                                <span>Batalkan Publikasi (Draft)</span>
+                            </Button>
+                        )}
+
                         <Button variant="outline" className="gap-2" onClick={() => router.get(`/teacher/exams/${exam.id}/edit`)}>
                             <Pencil className="h-4 w-4" />
                             <span>Edit Pengaturan Ujian</span>
@@ -283,6 +329,58 @@ return;
                         </Button>
                     </div>
                 </div>
+
+                {/* Real-time Total Poin Indicator Banner */}
+                {roundedTotalScore < 100 && (
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200 gap-3 shadow-sm">
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 shrink-0">
+                                <AlertTriangle className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <p className="font-bold text-sm">Total Poin Baru {roundedTotalScore} / 100</p>
+                                <p className="text-xs opacity-90">Masih kurang <strong className="font-bold">{scoreDiff} poin</strong> lagi agar ujian dapat diterbitkan.</p>
+                            </div>
+                        </div>
+                        <Badge variant="outline" className="bg-amber-500/20 border-amber-500/40 text-amber-800 dark:text-amber-300 font-bold shrink-0">
+                            Kurang {scoreDiff} Poin
+                        </Badge>
+                    </div>
+                )}
+
+                {roundedTotalScore > 100 && (
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border border-destructive/30 bg-destructive/10 text-destructive gap-3 shadow-sm">
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-destructive/20 text-destructive shrink-0">
+                                <XCircle className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <p className="font-bold text-sm">Total Poin {roundedTotalScore} / 100</p>
+                                <p className="text-xs opacity-90">Kelebihan <strong className="font-bold">{scoreDiff} poin</strong>! Silakan kurangi bobot poin pada soal.</p>
+                            </div>
+                        </div>
+                        <Badge variant="outline" className="bg-destructive/20 border-destructive/40 text-destructive font-bold shrink-0">
+                            Kelebihan {scoreDiff} Poin
+                        </Badge>
+                    </div>
+                )}
+
+                {roundedTotalScore === 100 && (
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-900 dark:text-emerald-200 gap-3 shadow-sm">
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0">
+                                <CheckCircle2 className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <p className="font-bold text-sm">Total Poin Pas 100 / 100!</p>
+                                <p className="text-xs opacity-90">Total poin soal sempurna. Ujian siap disimpan / diterbitkan untuk siswa.</p>
+                            </div>
+                        </div>
+                        <Badge variant="outline" className="bg-emerald-500/20 border-emerald-500/40 text-emerald-800 dark:text-emerald-300 font-bold shrink-0">
+                            100 / 100 Pas!
+                        </Badge>
+                    </div>
+                )}
 
                 {/* Summary Cards */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -597,6 +695,20 @@ return;
                                         value={data.score}
                                         onChange={(e) => setData('score', parseFloat(e.target.value) || 0)}
                                     />
+                                    {(() => {
+                                        const currentWithoutQuestion = editingQuestion ? (roundedTotalScore - Number(editingQuestion.score || 0)) : roundedTotalScore;
+                                        const projected = Math.round((currentWithoutQuestion + (Number(data.score) || 0)) * 100) / 100;
+
+                                        return (
+                                            <p className={cn(
+                                                "text-[11px] font-semibold mt-1",
+                                                projected === 100 ? "text-emerald-600 dark:text-emerald-400" :
+                                                projected > 100 ? "text-destructive" : "text-amber-600 dark:text-amber-400"
+                                            )}>
+                                                Estimasi Total Ujian: {projected} / 100
+                                            </p>
+                                        );
+                                    })()}
                                 </div>
                             </div>
 
@@ -734,6 +846,39 @@ return;
                             <Button variant="destructive" onClick={handleDeleteQuestion} className="gap-2">
                                 <Trash2 className="h-4 w-4" />
                                 Hapus Soal
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Dialog Modal: Publish Warning / Action Blocker */}
+                <Dialog open={showPublishWarningModal} onOpenChange={setShowPublishWarningModal}>
+                    <DialogContent className="sm:max-w-[450px]">
+                        <DialogHeader>
+                            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                                <AlertTriangle className="h-6 w-6" />
+                            </div>
+                            <DialogTitle className="text-lg">Belum Dapat Menerbitkan Ujian</DialogTitle>
+                            <DialogDescription className="pt-2 text-sm text-foreground space-y-2">
+                                {exam.questions?.length === 0 ? (
+                                    <span>Ujian ini belum memiliki soal. Silakan buat soal terlebih dahulu sebelum menerbitkan ujian.</span>
+                                ) : (
+                                    <>
+                                        <span>Total poin seluruh soal saat ini adalah <strong className="font-bold text-primary">{roundedTotalScore} / 100</strong>.</span>
+                                        <br />
+                                        <span className="text-xs text-muted-foreground block mt-1">
+                                            {roundedTotalScore < 100 
+                                                ? `Persyaratan Publikasi: Total poin dari seluruh soal wajib bernilai tepat 100 poin. Saat ini masih kurang ${scoreDiff} poin lagi.`
+                                                : `Persyaratan Publikasi: Total poin dari seluruh soal wajib bernilai tepat 100 poin. Saat ini kelebihan ${scoreDiff} poin.`
+                                            }
+                                        </span>
+                                    </>
+                                )}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter className="mt-4">
+                            <Button onClick={() => setShowPublishWarningModal(false)} className="w-full sm:w-auto">
+                                Mengerti & Perbaiki Soal
                             </Button>
                         </DialogFooter>
                     </DialogContent>
