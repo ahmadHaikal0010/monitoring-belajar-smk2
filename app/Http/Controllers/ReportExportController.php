@@ -6,7 +6,6 @@ use App\Services\ReportExportService;
 use App\Services\SubjectService;
 use App\Services\TeacherService;
 use Illuminate\Http\Request;
-
 use Illuminate\Support\Facades\DB;
 
 class ReportExportController extends Controller
