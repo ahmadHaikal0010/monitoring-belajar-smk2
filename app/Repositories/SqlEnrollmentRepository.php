@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Repositories\Interfaces\EnrollmentRepositoryInterface;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Symfony\Component\Uid\Uuid;
 
 class SqlEnrollmentRepository implements EnrollmentRepositoryInterface
 {
@@ -176,7 +176,7 @@ class SqlEnrollmentRepository implements EnrollmentRepositoryInterface
     public function enroll(string $studentId, string $subjectId)
     {
         DB::table('enrollments')->insert([
-            'id' => (string) Str::uuid(),
+            'id' => (string) Uuid::v7(),
             'student_id' => $studentId,
             'subject_id' => $subjectId,
             'status' => 'enrolled',

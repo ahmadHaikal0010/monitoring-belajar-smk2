@@ -5,14 +5,14 @@ namespace App\Repositories;
 use App\Repositories\Interfaces\TeacherRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use Symfony\Component\Uid\Uuid;
 
 class SqlTeacherRepository implements TeacherRepositoryInterface
 {
     public function create(array $data)
     {
         DB::table('teachers')->insert([
-            'id' => (string) Str::uuid(),
+            'id' => (string) Uuid::v7(),
             'user_id' => $data['user_id'],
             'nip' => $data['nip'],
             'photo' => $data['photo'] ?? null,

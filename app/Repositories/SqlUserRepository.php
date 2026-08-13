@@ -5,7 +5,7 @@ namespace App\Repositories;
 use App\Models\User;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Symfony\Component\Uid\Uuid;
 
 class SqlUserRepository implements UserRepositoryInterface
 {
@@ -153,7 +153,7 @@ class SqlUserRepository implements UserRepositoryInterface
             ]);
 
             DB::table('students')->insert([
-                'id' => Str::uuid(),
+                'id' => (string) Uuid::v7(),
                 'user_id' => $userId,
                 'nisn' => $data['nisn'],
                 'address' => $data['address'],
