@@ -5,7 +5,7 @@ namespace App\Repositories;
 use App\Repositories\Interfaces\MaterialRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use Symfony\Component\Uid\Uuid;
 
 class SqlMaterialRepository implements MaterialRepositoryInterface
 {
@@ -116,7 +116,7 @@ class SqlMaterialRepository implements MaterialRepositoryInterface
     public function create(array $data)
     {
         DB::table('materials')->insert([
-            'id' => (string) Str::uuid(),
+            'id' => (string) Uuid::v7(),
             'subject_id' => $data['subject_id'],
             'title' => $data['title'],
             'content_type' => $data['content_type'],

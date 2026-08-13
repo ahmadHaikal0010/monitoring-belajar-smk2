@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Repositories\Interfaces\SubjectRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Symfony\Component\Uid\Uuid;
 
 class SqlSubjectRepository implements SubjectRepositoryInterface
 {
@@ -13,7 +14,7 @@ class SqlSubjectRepository implements SubjectRepositoryInterface
         $code = $this->generateUniqueCode();
 
         DB::table('subjects')->insert([
-            'id' => (string) Str::uuid(),
+            'id' => (string) Uuid::v7(),
             'teacher_id' => $data['teacher_id'],
             'title' => $data['title'],
             'code' => $data['code'] ?? $code,

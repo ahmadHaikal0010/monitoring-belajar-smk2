@@ -6,7 +6,7 @@ use App\Repositories\Interfaces\ExamRepositoryInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use Symfony\Component\Uid\Uuid;
 
 class SqlExamRepository implements ExamRepositoryInterface
 {
@@ -131,7 +131,7 @@ class SqlExamRepository implements ExamRepositoryInterface
 
     public function create(array $data)
     {
-        $id = (string) Str::uuid();
+        $id = (string) Uuid::v7();
 
         DB::table('exams')->insert([
             'id' => $id,
@@ -197,7 +197,7 @@ class SqlExamRepository implements ExamRepositoryInterface
 
     public function addQuestion(string $examId, array $questionData, array $optionsData = [])
     {
-        $questionId = (string) Str::uuid();
+        $questionId = (string) Uuid::v7();
 
         $maxOrder = DB::table('questions')->where('exam_id', $examId)->max('order') ?? 0;
 
@@ -217,7 +217,7 @@ class SqlExamRepository implements ExamRepositoryInterface
         if ($questionData['question_type'] === 'multiple_choice' && ! empty($optionsData)) {
             foreach ($optionsData as $idx => $opt) {
                 DB::table('options')->insert([
-                    'id' => (string) Str::uuid(),
+                    'id' => (string) Uuid::v7(),
                     'question_id' => $questionId,
                     'option_text' => $opt['option_text'],
                     'is_correct' => $opt['is_correct'] ?? false,
@@ -264,7 +264,7 @@ class SqlExamRepository implements ExamRepositoryInterface
 
             foreach ($optionsData as $idx => $opt) {
                 DB::table('options')->insert([
-                    'id' => (string) Str::uuid(),
+                    'id' => (string) Uuid::v7(),
                     'question_id' => $questionId,
                     'option_text' => $opt['option_text'],
                     'is_correct' => $opt['is_correct'] ?? false,
@@ -362,7 +362,7 @@ class SqlExamRepository implements ExamRepositoryInterface
 
     public function createExamSession(string $examId, string $studentId)
     {
-        $id = (string) Str::uuid();
+        $id = (string) Uuid::v7();
 
         DB::table('exam_sessions')->insert([
             'id' => $id,
@@ -527,7 +527,7 @@ class SqlExamRepository implements ExamRepositoryInterface
                 ]);
         } else {
             DB::table('student_answers')->insert([
-                'id' => (string) Str::uuid(),
+                'id' => (string) Uuid::v7(),
                 'exam_session_id' => $sessionId,
                 'question_id' => $questionId,
                 'selected_option_id' => $selectedOptionId,

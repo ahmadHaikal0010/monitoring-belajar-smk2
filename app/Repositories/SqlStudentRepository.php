@@ -5,7 +5,7 @@ namespace App\Repositories;
 use App\Repositories\Interfaces\StudentRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use Symfony\Component\Uid\Uuid;
 
 class SqlStudentRepository implements StudentRepositoryInterface
 {
@@ -100,7 +100,7 @@ class SqlStudentRepository implements StudentRepositoryInterface
     public function create(array $data)
     {
         DB::table('students')->insert([
-            'id' => (string) Str::uuid(),
+            'id' => (string) Uuid::v7(),
             'user_id' => $data['user_id'],
             'nisn' => $data['nisn'],
             'address' => $data['address'],
