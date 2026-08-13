@@ -32,8 +32,17 @@ class Student extends Model
      */
     protected function photoUrl(): Attribute
     {
-        return Attribute::get(fn () => $this->photo ? asset('storage/'.$this->photo) : null
-        );
+        return Attribute::get(function () {
+            if (! $this->photo) {
+                return null;
+            }
+
+            if (str_starts_with($this->photo, 'http://') || str_starts_with($this->photo, 'https://')) {
+                return $this->photo;
+            }
+
+            return url('storage/'.ltrim($this->photo, '/'));
+        });
     }
 
     public function examSessions()

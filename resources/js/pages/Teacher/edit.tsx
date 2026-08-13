@@ -43,6 +43,7 @@ export default function EditTeacher({ teacher }: EditTeacherProps) {
     const [showFlash, setShowFlash] = useState(false);
 
     const { data, setData, post, processing, errors, hasErrors } = useForm({
+        _method: 'PUT',
         nip: teacher?.nip || '',
         specialization: teacher?.specialization || '',
         bio: teacher?.bio || '',

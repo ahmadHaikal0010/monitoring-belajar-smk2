@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use App\Repositories\Interfaces\TeacherRepositoryInterface;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Uid\Uuid;
 
 class SqlTeacherRepository implements TeacherRepositoryInterface
@@ -84,7 +83,7 @@ class SqlTeacherRepository implements TeacherRepositoryInterface
             ->withQueryString() // Agar parameter ?search=... tidak hilang saat pindah halaman
             ->through(function ($teacher) {
                 // Menambahkan URL foto secara on-the-fly
-                $teacher->photo_url = $teacher->photo ? Storage::disk('public')->url($teacher->photo) : null;
+                $teacher->photo_url = $this->formatPhotoUrl($teacher->photo);
 
                 return $teacher;
             });
@@ -103,7 +102,7 @@ class SqlTeacherRepository implements TeacherRepositoryInterface
                 ->first();
 
             $teacher->user = $user;
-            $teacher->photo_url = $teacher->photo ? Storage::disk('public')->url($teacher->photo) : null;
+            $teacher->photo_url = $this->formatPhotoUrl($teacher->photo);
         }
 
         return $teacher;
@@ -141,10 +140,23 @@ class SqlTeacherRepository implements TeacherRepositoryInterface
                 ->select(['id', 'name', 'email'])
                 ->first();
 
-            $teacher->photo_url = $teacher->photo ? Storage::disk('public')->url($teacher->photo) : null;
+            $teacher->photo_url = $this->formatPhotoUrl($teacher->photo);
         }
 
         return $teacher;
+    }
+
+    private function formatPhotoUrl(?string $path): ?string
+    {
+        if (! $path) {
+            return null;
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        return url('storage/'.ltrim($path, '/'));
     }
 
     public function delete(string $id)

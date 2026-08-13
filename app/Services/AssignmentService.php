@@ -5,13 +5,15 @@ namespace App\Services;
 use App\Models\Assignment;
 use App\Models\AssignmentSubmission;
 use App\Repositories\Interfaces\AssignmentRepositoryInterface;
+use App\Services\Interfaces\ImageConverterInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 
 class AssignmentService
 {
     public function __construct(
-        protected AssignmentRepositoryInterface $assignmentRepository
+        protected AssignmentRepositoryInterface $assignmentRepository,
+        protected ImageConverterInterface $imageConverter
     ) {}
 
     public function getAssignmentList(array $filters = [], int $perPage = 12): LengthAwarePaginator
@@ -74,8 +76,15 @@ class AssignmentService
             }
 
             $mime = $file->getMimeType();
-            $fileType = str_starts_with($mime, 'image/') ? 'image' : 'pdf';
-            $path = $file->store('assignments/submissions', 'public');
+            $isImage = str_starts_with($mime, 'image/');
+            $fileType = $isImage ? 'image' : 'pdf';
+
+            if ($isImage) {
+                $path = $this->imageConverter->convertAndStore($file, 'assignments/submissions', 'public', 80);
+                $mime = 'image/webp';
+            } else {
+                $path = $file->store('assignments/submissions', 'public');
+            }
 
             $savedFiles[] = [
                 'file_path' => $path,
