@@ -68,6 +68,7 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
         Route::get('/enrollments/{id}/progress', [EnrollmentController::class, 'progress'])->name('enrollments.progress');
         Route::delete('/enrollments/{id}', [EnrollmentController::class, 'destroy'])->name('enrollments.destroy');
         Route::get('/subjects/{subject}/export', [ReportExportController::class, 'export'])->name('subjects.export');
+        Route::get('/subjects/{subject}/export-options', [ReportExportController::class, 'getExportOptions'])->name('subjects.export-options');
     });
 
     // * Admin ONLY Routes
