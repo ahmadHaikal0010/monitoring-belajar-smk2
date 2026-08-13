@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use App\Repositories\Interfaces\StudentRepositoryInterface;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Uid\Uuid;
 
 class SqlStudentRepository implements StudentRepositoryInterface
@@ -47,7 +46,7 @@ class SqlStudentRepository implements StudentRepositoryInterface
         return $query->paginate($perPage)
             ->withQueryString()
             ->through(function ($student) {
-                $student->photo_url = $student->photo ? Storage::disk('public')->url($student->photo) : null;
+                $student->photo_url = $this->formatPhotoUrl($student->photo);
 
                 return $student;
             });
@@ -86,10 +85,23 @@ class SqlStudentRepository implements StudentRepositoryInterface
                 ->select(['id', 'name', 'email'])
                 ->first();
 
-            $student->photo_url = $student->photo ? Storage::disk('public')->url($student->photo) : null;
+            $student->photo_url = $this->formatPhotoUrl($student->photo);
         }
 
         return $student;
+    }
+
+    private function formatPhotoUrl(?string $path): ?string
+    {
+        if (! $path) {
+            return null;
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        return url('storage/'.ltrim($path, '/'));
     }
 
     public function findByUserId(int $userId)

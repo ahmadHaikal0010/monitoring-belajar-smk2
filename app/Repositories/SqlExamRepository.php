@@ -288,7 +288,7 @@ class SqlExamRepository implements ExamRepositoryInterface
             return $path;
         }
 
-        return '/storage/'.ltrim($path, '/');
+        return url('storage/'.ltrim($path, '/'));
     }
 
     public function deleteQuestion(string $questionId)

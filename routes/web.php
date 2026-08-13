@@ -44,7 +44,7 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
         Route::middleware(CheckTeacherProfile::class)->group(function () {
             Route::get('/profile', [TeacherController::class, 'profile'])->name('profile');
             Route::get('/edit', [TeacherController::class, 'edit'])->name('edit');
-            Route::put('/update/{teacher}', [TeacherController::class, 'update'])->name('update');
+            Route::match(['put', 'post'], '/update/{teacher}', [TeacherController::class, 'update'])->name('update');
 
             Route::resource('subjects', SubjectController::class);
             Route::resource('materials', MaterialController::class);

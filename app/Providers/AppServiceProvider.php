@@ -20,6 +20,8 @@ use App\Repositories\SqlStudentRepository;
 use App\Repositories\SqlSubjectRepository;
 use App\Repositories\SqlTeacherRepository;
 use App\Repositories\SqlUserRepository;
+use App\Services\Interfaces\ImageConverterInterface;
+use App\Services\WebpImageConverterService;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -76,6 +78,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             AssignmentRepositoryInterface::class,
             SqlAssignmentRepository::class
+        );
+
+        $this->app->bind(
+            ImageConverterInterface::class,
+            WebpImageConverterService::class
         );
     }
 

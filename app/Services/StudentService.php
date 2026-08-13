@@ -4,23 +4,18 @@ namespace App\Services;
 
 use App\Repositories\Interfaces\StudentRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
+use App\Services\Interfaces\ImageConverterInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class StudentService
 {
-    protected StudentRepositoryInterface $studentRepository;
-
-    protected UserRepositoryInterface $userRepository;
-
     public function __construct(
-        StudentRepositoryInterface $studentRepository,
-        UserRepositoryInterface $userRepository
-    ) {
-        $this->studentRepository = $studentRepository;
-        $this->userRepository = $userRepository;
-    }
+        protected StudentRepositoryInterface $studentRepository,
+        protected UserRepositoryInterface $userRepository,
+        protected ImageConverterInterface $imageConverter
+    ) {}
 
     public function getStudentByUserId(int $userId)
     {
@@ -118,8 +113,6 @@ class StudentService
 
     private function storePhoto(UploadedFile $file)
     {
-        $filename = uniqid().'.'.$file->getClientOriginalExtension();
-
-        return $file->storeAs('student-photos', $filename, 'public');
+        return $this->imageConverter->convertAndStore($file, 'student-photos', 'public', 80);
     }
 }

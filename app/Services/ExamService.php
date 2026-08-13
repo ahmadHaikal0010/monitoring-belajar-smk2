@@ -3,13 +3,15 @@
 namespace App\Services;
 
 use App\Repositories\Interfaces\ExamRepositoryInterface;
+use App\Services\Interfaces\ImageConverterInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 
 class ExamService
 {
     public function __construct(
-        protected ExamRepositoryInterface $examRepository
+        protected ExamRepositoryInterface $examRepository,
+        protected ImageConverterInterface $imageConverter
     ) {}
 
     public function getPaginatedExams(array $filters = [], int $perPage = 10)
@@ -50,7 +52,7 @@ class ExamService
     public function addQuestionToExam(string $examId, array $questionData, ?UploadedFile $imageFile = null, array $optionsData = [])
     {
         if ($imageFile) {
-            $path = $imageFile->store('exams/questions', 'public');
+            $path = $this->imageConverter->convertAndStore($imageFile, 'exams/questions', 'public', 80);
             $questionData['image_path'] = $path;
         }
 
@@ -60,7 +62,7 @@ class ExamService
     public function updateQuestion(string $questionId, array $questionData, ?UploadedFile $imageFile = null, array $optionsData = [])
     {
         if ($imageFile) {
-            $path = $imageFile->store('exams/questions', 'public');
+            $path = $this->imageConverter->convertAndStore($imageFile, 'exams/questions', 'public', 80);
             $questionData['image_path'] = $path;
         }
 

@@ -4,23 +4,18 @@ namespace App\Services;
 
 use App\Repositories\Interfaces\TeacherRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
+use App\Services\Interfaces\ImageConverterInterface;
 use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 class TeacherService
 {
-    protected TeacherRepositoryInterface $teacherRepository;
-
-    protected UserRepositoryInterface $userRepository;
-
     public function __construct(
-        TeacherRepositoryInterface $teacherRepository,
-        UserRepositoryInterface $userRepository
-    ) {
-        $this->teacherRepository = $teacherRepository;
-        $this->userRepository = $userRepository;
-    }
+        protected TeacherRepositoryInterface $teacherRepository,
+        protected UserRepositoryInterface $userRepository,
+        protected ImageConverterInterface $imageConverter
+    ) {}
 
     public function createTeacher(array $data)
     {
@@ -65,9 +60,7 @@ class TeacherService
 
     private function storePhoto(UploadedFile $file)
     {
-        $filename = uniqid().'.'.$file->getClientOriginalExtension();
-
-        return $file->storeAs('teacher-photos', $filename, 'public');
+        return $this->imageConverter->convertAndStore($file, 'teacher-photos', 'public', 80);
     }
 
     public function getTeacherByUserId(int $userId)
