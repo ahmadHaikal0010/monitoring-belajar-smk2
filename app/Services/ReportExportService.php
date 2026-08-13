@@ -65,21 +65,30 @@ class ReportExportService
         $materials = collect();
         $studentProgressMap = [];
         if ($includeMaterials) {
-            $materials = DB::table('materials')
+            $materialsQuery = DB::table('materials')
                 ->where('subject_id', $subjectId)
                 ->select(['id', 'title', 'content_type'])
-                ->orderBy('created_at', 'asc')
-                ->get();
+                ->orderBy('created_at', 'asc');
 
-            $progressRows = DB::table('student_progress')
-                ->join('enrollments', 'student_progress.enrollment_id', '=', 'enrollments.id')
-                ->where('enrollments.subject_id', $subjectId)
-                ->where('student_progress.is_completed', true)
-                ->select(['enrollments.student_id', 'student_progress.material_id'])
-                ->get();
+            if (! empty($options['material_ids']) && is_array($options['material_ids'])) {
+                $materialsQuery->whereIn('id', $options['material_ids']);
+            }
 
-            foreach ($progressRows as $row) {
-                $studentProgressMap[$row->student_id][$row->material_id] = true;
+            $materials = $materialsQuery->get();
+            $selectedMaterialIds = $materials->pluck('id')->toArray();
+
+            if (! empty($selectedMaterialIds)) {
+                $progressRows = DB::table('student_progress')
+                    ->join('enrollments', 'student_progress.enrollment_id', '=', 'enrollments.id')
+                    ->where('enrollments.subject_id', $subjectId)
+                    ->where('student_progress.is_completed', true)
+                    ->whereIn('student_progress.material_id', $selectedMaterialIds)
+                    ->select(['enrollments.student_id', 'student_progress.material_id'])
+                    ->get();
+
+                foreach ($progressRows as $row) {
+                    $studentProgressMap[$row->student_id][$row->material_id] = true;
+                }
             }
         }
 
@@ -87,33 +96,41 @@ class ReportExportService
         $exams = collect();
         $studentExamsMap = [];
         if ($includeExams) {
-            $exams = DB::table('exams')
+            $examsQuery = DB::table('exams')
                 ->where('subject_id', $subjectId)
                 ->where('status', 'published')
                 ->select(['id', 'title', 'pass_score', 'duration'])
-                ->orderBy('created_at', 'asc')
-                ->get();
+                ->orderBy('created_at', 'asc');
 
-            $examSessions = DB::table('exam_sessions')
-                ->join('exams', 'exam_sessions.exam_id', '=', 'exams.id')
-                ->where('exams.subject_id', $subjectId)
-                ->where('exams.status', 'published')
-                ->select([
-                    'exam_sessions.student_id',
-                    'exam_sessions.exam_id',
-                    'exam_sessions.status as session_status',
-                    'exam_sessions.total_score',
-                    'exams.pass_score',
-                ])
-                ->get();
+            if (! empty($options['exam_ids']) && is_array($options['exam_ids'])) {
+                $examsQuery->whereIn('id', $options['exam_ids']);
+            }
 
-            foreach ($examSessions as $session) {
-                $studentExamsMap[$session->student_id][$session->exam_id] = [
-                    'status' => $session->session_status,
-                    'score' => $session->total_score,
-                    'pass_score' => $session->pass_score,
-                    'is_passed' => $session->total_score !== null ? ((float) $session->total_score >= (float) $session->pass_score) : false,
-                ];
+            $exams = $examsQuery->get();
+            $selectedExamIds = $exams->pluck('id')->toArray();
+
+            if (! empty($selectedExamIds)) {
+                $examSessions = DB::table('exam_sessions')
+                    ->join('exams', 'exam_sessions.exam_id', '=', 'exams.id')
+                    ->where('exams.subject_id', $subjectId)
+                    ->whereIn('exam_sessions.exam_id', $selectedExamIds)
+                    ->select([
+                        'exam_sessions.student_id',
+                        'exam_sessions.exam_id',
+                        'exam_sessions.status as session_status',
+                        'exam_sessions.total_score',
+                        'exams.pass_score',
+                    ])
+                    ->get();
+
+                foreach ($examSessions as $session) {
+                    $studentExamsMap[$session->student_id][$session->exam_id] = [
+                        'status' => $session->session_status,
+                        'score' => $session->total_score,
+                        'pass_score' => $session->pass_score,
+                        'is_passed' => $session->total_score !== null ? ((float) $session->total_score >= (float) $session->pass_score) : false,
+                    ];
+                }
             }
         }
 
@@ -121,32 +138,40 @@ class ReportExportService
         $assignments = collect();
         $studentAssignmentsMap = [];
         if ($includeAssignments) {
-            $assignments = DB::table('assignments')
+            $assignmentsQuery = DB::table('assignments')
                 ->where('subject_id', $subjectId)
                 ->where('status', 'published')
                 ->select(['id', 'title', 'max_score', 'due_date'])
-                ->orderBy('created_at', 'asc')
-                ->get();
+                ->orderBy('created_at', 'asc');
 
-            $submissions = DB::table('assignment_submissions')
-                ->join('assignments', 'assignment_submissions.assignment_id', '=', 'assignments.id')
-                ->where('assignments.subject_id', $subjectId)
-                ->where('assignments.status', 'published')
-                ->select([
-                    'assignment_submissions.student_id',
-                    'assignment_submissions.assignment_id',
-                    'assignment_submissions.status as submission_status',
-                    'assignment_submissions.score',
-                    'assignments.max_score',
-                ])
-                ->get();
+            if (! empty($options['assignment_ids']) && is_array($options['assignment_ids'])) {
+                $assignmentsQuery->whereIn('id', $options['assignment_ids']);
+            }
 
-            foreach ($submissions as $sub) {
-                $studentAssignmentsMap[$sub->student_id][$sub->assignment_id] = [
-                    'status' => $sub->submission_status,
-                    'score' => $sub->score,
-                    'max_score' => $sub->max_score,
-                ];
+            $assignments = $assignmentsQuery->get();
+            $selectedAssignmentIds = $assignments->pluck('id')->toArray();
+
+            if (! empty($selectedAssignmentIds)) {
+                $submissions = DB::table('assignment_submissions')
+                    ->join('assignments', 'assignment_submissions.assignment_id', '=', 'assignments.id')
+                    ->where('assignments.subject_id', $subjectId)
+                    ->whereIn('assignment_submissions.assignment_id', $selectedAssignmentIds)
+                    ->select([
+                        'assignment_submissions.student_id',
+                        'assignment_submissions.assignment_id',
+                        'assignment_submissions.status as submission_status',
+                        'assignment_submissions.score',
+                        'assignments.max_score',
+                    ])
+                    ->get();
+
+                foreach ($submissions as $sub) {
+                    $studentAssignmentsMap[$sub->student_id][$sub->assignment_id] = [
+                        'status' => $sub->submission_status,
+                        'score' => $sub->score,
+                        'max_score' => $sub->max_score,
+                    ];
+                }
             }
         }
 
