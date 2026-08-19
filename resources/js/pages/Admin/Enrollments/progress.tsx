@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { ExportReportModal } from '@/components/ExportReportModal';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
@@ -64,6 +64,7 @@ interface Enrollment {
     subject_id: string;
     status: string;
     student_name: string;
+    student_photo_url?: string;
     subject_title: string;
     total_materials: number;
     completed_materials: number;
@@ -90,7 +91,7 @@ export default function StudentProgressDetail({
 
     setLayoutProps({
         breadcrumbs: [
-            { title: 'Data Pendaftaran', href: '/admin/enrollments' },
+            { title: 'Progress Siswa', href: '/admin/enrollments' },
             {
                 title: enrollment.subject_title,
                 href: `/admin/enrollments?subject_id=${enrollment.subject_id}`,
@@ -147,6 +148,7 @@ export default function StudentProgressDetail({
                         <CardHeader className="text-center pb-2">
                             <div className="mx-auto mb-4 relative">
                                 <Avatar className="h-24 w-24 border-4 border-background shadow-lg mx-auto">
+                                    <AvatarImage src={enrollment.student_photo_url || ''} alt={enrollment.student_name} />
                                     <AvatarFallback className="bg-primary/10 text-2xl font-bold text-primary uppercase">
                                         {enrollment.student_name.charAt(0)}
                                     </AvatarFallback>

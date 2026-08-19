@@ -343,7 +343,7 @@ clearTimeout(hideTimer);
                                         >
                                             <CardHeader className="pb-3">
                                                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                                                    <FileQuestion className="h-5 w-5" />
+                                                    <Award className="h-5 w-5" />
                                                 </div>
                                                 <div className="pt-2">
                                                     <h3 className="text-lg font-bold line-clamp-1 group-hover:text-primary transition-colors">

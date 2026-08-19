@@ -13,6 +13,7 @@ import {
     X,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -21,6 +22,7 @@ import { cn } from '@/lib/utils';
 interface Student {
     id: string;
     nisn: string;
+    photo_url?: string;
     user?: {
         name: string;
         email: string;
@@ -197,7 +199,13 @@ export default function ShowAssignment({ assignment, submissions = [] }: Props) 
                                     <p className="text-xs text-muted-foreground">Tenggat Waktu</p>
                                     <p className="font-medium text-xs">
                                         {assignment.due_date
-                                            ? new Date(assignment.due_date).toLocaleString('id-ID')
+                                            ? new Date(assignment.due_date).toLocaleString('id-ID', {
+                                                  day: 'numeric',
+                                                  month: 'long',
+                                                  year: 'numeric',
+                                                  hour: '2-digit',
+                                                  minute: '2-digit',
+                                              })
                                             : 'Tidak ditentukan'}
                                     </p>
                                 </div>
@@ -240,9 +248,12 @@ export default function ShowAssignment({ assignment, submissions = [] }: Props) 
                                 >
                                     <CardContent className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">
-                                                <User className="h-5 w-5" />
-                                            </div>
+                                            <Avatar className="h-10 w-10 shrink-0 border border-border">
+                                                <AvatarImage src={sub.student?.photo_url || ''} alt={sub.student?.user?.name} />
+                                                <AvatarFallback className="bg-primary/10 font-bold text-primary">
+                                                    {sub.student?.user?.name?.charAt(0) || 'S'}
+                                                </AvatarFallback>
+                                            </Avatar>
                                             <div>
                                                 <h4 className="font-semibold text-base">
                                                     {sub.student?.user?.name || 'Siswa'}

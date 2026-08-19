@@ -336,7 +336,7 @@ class SqlExamRepository implements ExamRepositoryInterface
                 'end_time',
                 'created_at',
             ])
-            ->orderBy('created_at', 'desc')
+            ->orderBy('created_at', 'asc')
             ->get()
             ->map(function ($exam) use ($now, $tzOffset, $tzName) {
                 $exam->question_count = DB::table('questions')->where('exam_id', $exam->id)->count();

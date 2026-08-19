@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import InputError from '@/components/input-error';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,6 +35,7 @@ interface SubmissionFile {
 interface Student {
     id: string;
     nisn: string;
+    photo_url?: string;
     user?: {
         name: string;
         email: string;
@@ -126,9 +128,12 @@ export default function SubmissionGrading({ assignment, submission }: Props) {
                         <Card className="border-none bg-card/50 shadow-md backdrop-blur-sm">
                             <CardHeader className="pb-3">
                                 <div className="flex items-center gap-3">
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-lg">
-                                        <User className="h-6 w-6" />
-                                    </div>
+                                    <Avatar className="h-12 w-12 shrink-0 border border-border">
+                                        <AvatarImage src={submission.student?.photo_url || ''} alt={submission.student?.user?.name} />
+                                        <AvatarFallback className="bg-primary/10 font-bold text-primary text-lg">
+                                            {submission.student?.user?.name?.charAt(0) || 'S'}
+                                        </AvatarFallback>
+                                    </Avatar>
                                     <div>
                                         <CardTitle className="text-lg">
                                             {submission.student?.user?.name}
@@ -145,7 +150,13 @@ export default function SubmissionGrading({ assignment, submission }: Props) {
                                     <span>
                                         Dikumpulkan pada:{' '}
                                         <strong className="text-foreground">
-                                            {new Date(submission.submitted_at).toLocaleString('id-ID')}
+                                            {new Date(submission.submitted_at).toLocaleString('id-ID', {
+                                                day: 'numeric',
+                                                month: 'long',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                            })}
                                         </strong>
                                     </span>
                                 </div>

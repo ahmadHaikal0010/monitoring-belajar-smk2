@@ -85,6 +85,7 @@ class SqlEnrollmentRepository implements EnrollmentRepositoryInterface
                 'student_users.name as student_name',
                 'student_users.email as student_email',
                 'students.nisn as student_nisn',
+                'students.photo as student_photo',
                 'subjects.title as subject_title',
                 'subjects.code as subject_code',
                 'teacher_users.name as teacher_name',
@@ -134,12 +135,20 @@ class SqlEnrollmentRepository implements EnrollmentRepositoryInterface
             $query->orderBy('enrollments.enrolled_at', 'desc');
         }
 
-        return $query->paginate($perPage)->withQueryString();
+        return $query->paginate($perPage)
+            ->withQueryString()
+            ->through(function ($item) {
+                $item->student_photo_url = $item->student_photo
+                    ? url('storage/'.ltrim($item->student_photo, '/'))
+                    : null;
+
+                return $item;
+            });
     }
 
     public function findWithProgress(string $id)
     {
-        return DB::table('enrollments')
+        $enrollment = DB::table('enrollments')
             ->join('students', 'enrollments.student_id', '=', 'students.id')
             ->join('users as student_users', 'students.user_id', '=', 'student_users.id')
             ->join('subjects', 'enrollments.subject_id', '=', 'subjects.id')
@@ -149,6 +158,7 @@ class SqlEnrollmentRepository implements EnrollmentRepositoryInterface
                 'student_users.name as student_name',
                 'subjects.title as subject_title',
                 'subjects.teacher_id',
+                'students.photo as student_photo',
             ])
             ->addSelect([
                 'total_materials' => DB::table('materials')
@@ -162,6 +172,14 @@ class SqlEnrollmentRepository implements EnrollmentRepositoryInterface
                     ->selectRaw('count(*)'),
             ])
             ->first();
+
+        if ($enrollment) {
+            $enrollment->student_photo_url = $enrollment->student_photo
+                ? url('storage/'.ltrim($enrollment->student_photo, '/'))
+                : null;
+        }
+
+        return $enrollment;
     }
 
     public function find(string $id)

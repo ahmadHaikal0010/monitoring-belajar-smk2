@@ -1,5 +1,16 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, LayoutGrid, Users, Shield, FileText, UserCheck, GraduationCap, FileQuestion, ClipboardList } from 'lucide-react';
+import {
+    LayoutGrid,
+    Library,
+    TrendingUp,
+    BookOpen,
+    Award,
+    CheckSquare,
+    Users,
+    GraduationCap,
+    Shield,
+    UserCheck,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -36,33 +47,33 @@ export function AppSidebar() {
         mainNavItems.push({
             title: 'Mata Pelajaran',
             href: '/teacher/subjects',
-            icon: BookOpen,
+            icon: Library,
         });
 
         mainNavItems.push({
-            title: 'Data Pendaftaran',
+            title: 'Progress Siswa',
             href: '/admin/enrollments',
-            icon: Users,
+            icon: TrendingUp,
         });
     }
 
     mainNavItems.push({
         title: 'Materi Pembelajaran',
         href: '/teacher/materials',
-        icon: FileText,
+        icon: BookOpen,
     });
 
     if (auth?.user?.role === 'guru') {
         mainNavItems.push({
             title: 'Manajemen Ujian',
             href: '/teacher/exams',
-            icon: FileQuestion,
+            icon: Award,
         });
 
         mainNavItems.push({
             title: 'Manajemen Tugas',
             href: '/teacher/assignments',
-            icon: ClipboardList,
+            icon: CheckSquare,
         });
     }
 
