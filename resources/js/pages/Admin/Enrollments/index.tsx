@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Search,
     Filter,
-    BookOpen,
+    TrendingUp,
     User,
     ArrowUpDown,
     ArrowUp,
@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { ExportReportModal } from '@/components/ExportReportModal';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
@@ -45,6 +45,7 @@ interface Enrollment {
     student_name: string;
     student_email: string;
     student_nisn: string;
+    student_photo_url?: string;
     subject_title: string;
     subject_code: string;
     teacher_name: string;
@@ -113,12 +114,12 @@ const SortIcon = ({
     );
 };
 
-export default function EnrollmentList({ 
-    enrollments, 
-    subjects, 
-    selectedSubject, 
-    filters, 
-    mode 
+export default function EnrollmentList({
+    enrollments,
+    subjects,
+    selectedSubject,
+    filters,
+    mode
 }: Props) {
     const { flash } = usePage().props as any;
     const [search, setSearch] = useState(filters.search || '');
@@ -156,7 +157,7 @@ return;
     setLayoutProps({
         breadcrumbs: [
             {
-                title: 'Data Pendaftaran',
+                title: 'Progress Siswa',
                 href: '/admin/enrollments',
             },
             ...(selectedSubject ? [{
@@ -234,7 +235,7 @@ return;
 
     return (
         <>
-            <Head title={mode === 'subjects' ? "Pilih Mata Pelajaran" : `Pendaftaran: ${selectedSubject?.title}`} />
+            <Head title={mode === 'subjects' ? "Progress Siswa" : `Progress Siswa: ${selectedSubject?.title}`} />
 
             <div className="flex flex-col gap-6 p-6">
                 <AnimatePresence>
@@ -269,16 +270,16 @@ return;
                         )}
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight">
-                                {mode === 'subjects' ? "Pendaftaran Siswa" : selectedSubject?.title}
+                                {mode === 'subjects' ? "Progress Siswa" : selectedSubject?.title}
                             </h1>
                             <p className="text-muted-foreground">
-                                {mode === 'subjects' 
-                                    ? "Pilih mata pelajaran untuk melihat daftar siswa yang terdaftar." 
-                                    : `Daftar siswa yang terdaftar pada kelas ${selectedSubject?.title}.`}
+                                {mode === 'subjects'
+                                    ? "Pilih mata pelajaran untuk melihat daftar progres belajar siswa."
+                                    : `Daftar siswa & progres pembelajaran pada kelas ${selectedSubject?.title}.`}
                             </p>
                         </div>
                     </div>
-                    
+
                     <div className="flex flex-col items-center gap-3 sm:flex-row">
                         <div className="flex w-full items-center gap-3 sm:w-auto">
                             <div className="relative w-full md:w-64">
@@ -290,7 +291,7 @@ return;
                                     onChange={(e) => setSearch(e.target.value)}
                                 />
                             </div>
-                            
+
                             {mode === 'enrollments' && (
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -354,7 +355,7 @@ return;
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.05 }}
                                 >
-                                    <Card 
+                                    <Card
                                         className="group cursor-pointer border-none bg-card/50 shadow-lg backdrop-blur-sm transition-all hover:translate-y-[-4px] hover:shadow-xl active:scale-[0.98]"
                                         onClick={() => router.get('/admin/enrollments', { subject_id: subject.id })}
                                     >
@@ -362,7 +363,7 @@ return;
                                             <div className="flex items-start justify-between gap-4">
                                                 <div className="flex flex-col gap-2">
                                                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                                                        <BookOpen className="h-5 w-5" />
+                                                        <TrendingUp className="h-5 w-5" />
                                                     </div>
                                                     <Badge variant="outline" className="w-fit font-mono text-[10px] font-bold">
                                                         #{subject.code}
@@ -445,6 +446,7 @@ return;
                                                     <td className="p-4">
                                                         <div className="flex items-center gap-3">
                                                             <Avatar className="h-9 w-9 border-2 border-background shadow-sm">
+                                                                <AvatarImage src={enrollment.student_photo_url || ''} alt={enrollment.student_name} />
                                                                 <AvatarFallback className="bg-primary/10 text-[10px] font-bold text-primary">
                                                                     {enrollment.student_name.charAt(0)}
                                                                 </AvatarFallback>
@@ -467,7 +469,7 @@ return;
                                                                 <span className="text-muted-foreground">{enrollment.completed_materials}/{enrollment.total_materials} Materi</span>
                                                             </div>
                                                             <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
-                                                                <motion.div 
+                                                                <motion.div
                                                                     initial={{ width: 0 }}
                                                                     animate={{ width: `${progressPercentage}%` }}
                                                                     className="h-full bg-primary transition-all"
@@ -529,7 +531,7 @@ return;
                                 const label = link.label.toLowerCase();
                                 const isPrev = label.includes('previous') || label.includes('prev') || label.includes('&laquo;') || label.includes('pagination.previous');
                                 const isNext = label.includes('next') || label.includes('&raquo;') || label.includes('pagination.next');
-                                
+
                                 if (link.label === '...') {
                                     return <div key={i} className="px-2 text-xs">...</div>;
                                 }

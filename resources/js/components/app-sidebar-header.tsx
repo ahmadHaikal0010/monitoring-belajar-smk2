@@ -51,8 +51,12 @@ export function AppSidebarHeader({
                                 <span className="text-sm font-semibold">
                                     {auth.user.name}
                                 </span>
-                                <span className="text-[10px] text-muted-foreground">
-                                    Administrator
+                                <span className="text-[10px] text-muted-foreground font-medium">
+                                    {auth.user.role === 'admin'
+                                        ? 'Administrator'
+                                        : auth.user.role === 'guru'
+                                          ? 'Guru'
+                                            : auth.user.role}
                                 </span>
                             </div>
                         </button>

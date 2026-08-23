@@ -4,6 +4,7 @@ import {
     Search,
     Filter,
     BookOpen,
+    Library,
     User,
     Calendar,
     ChevronLeft,
@@ -332,7 +333,7 @@ clearTimeout(hideTimer);
                                             <div className="flex items-start justify-between gap-4">
                                                 <div className="flex flex-col gap-2">
                                                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                                                        <BookOpen className="h-5 w-5" />
+                                                        <Library className="h-5 w-5" />
                                                     </div>
                                                     <Badge variant="outline" className="w-fit font-mono text-[10px] font-bold tracking-wider">
                                                         #{subject?.code}

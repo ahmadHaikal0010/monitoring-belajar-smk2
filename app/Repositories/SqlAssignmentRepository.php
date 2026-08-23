@@ -151,7 +151,7 @@ class SqlAssignmentRepository implements AssignmentRepositoryInterface
     {
         $assignments = Assignment::where('subject_id', $subjectId)
             ->where('status', 'published')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('created_at', 'asc')
             ->get();
 
         return $assignments->map(function ($assignment) use ($studentId) {

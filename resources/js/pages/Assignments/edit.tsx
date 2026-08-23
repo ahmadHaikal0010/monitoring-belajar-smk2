@@ -40,9 +40,23 @@ interface Props {
 }
 
 export default function EditAssignment({ assignment, subjects = [] }: Props) {
-    const formattedDueDate = assignment.due_date
-        ? new Date(assignment.due_date).toISOString().slice(0, 16)
-        : '';
+    const formatDatetimeLocal = (dateString: string | null) => {
+        if (!dateString) {
+return '';
+}
+
+        const date = new Date(dateString);
+
+        if (isNaN(date.getTime())) {
+return '';
+}
+
+        const pad = (n: number) => n.toString().padStart(2, '0');
+
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    };
+
+    const formattedDueDate = formatDatetimeLocal(assignment.due_date);
 
     const { data, setData, put, processing, errors } = useForm({
         subject_id: assignment.subject_id || '',

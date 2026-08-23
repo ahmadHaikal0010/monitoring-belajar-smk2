@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Search,
     ClipboardList,
+    CheckSquare,
     Plus,
     X,
     MoreVertical,
@@ -293,7 +294,7 @@ export default function AssignmentIndex({ assignments, subjects, filters }: Prop
                                     <div className="flex items-start justify-between gap-3">
                                         <div className="flex items-center gap-2">
                                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                                                <ClipboardList className="h-5 w-5" />
+                                                <CheckSquare className="h-5 w-5" />
                                             </div>
                                             <div>
                                                 <Badge variant="outline" className="text-[10px] font-mono">
@@ -363,7 +364,7 @@ export default function AssignmentIndex({ assignments, subjects, filters }: Prop
                                                     Tenggat:{' '}
                                                     {new Date(assignment.due_date).toLocaleString('id-ID', {
                                                         day: 'numeric',
-                                                        month: 'short',
+                                                        month: 'long',
                                                         year: 'numeric',
                                                         hour: '2-digit',
                                                         minute: '2-digit',

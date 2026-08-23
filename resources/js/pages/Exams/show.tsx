@@ -323,10 +323,12 @@ return null;
                             <Pencil className="h-4 w-4" />
                             <span>Edit Pengaturan Ujian</span>
                         </Button>
-                        <Button className="gap-2 shadow-lg shadow-primary/20" onClick={handleOpenCreateModal}>
-                            <Plus className="h-4 w-4" />
-                            <span>Tambah Soal</span>
-                        </Button>
+                        {exam.status !== 'published' && (
+                            <Button className="gap-2 shadow-lg shadow-primary/20" onClick={handleOpenCreateModal}>
+                                <Plus className="h-4 w-4" />
+                                <span>Tambah Soal</span>
+                            </Button>
+                        )}
                     </div>
                 </div>
 
@@ -569,12 +571,16 @@ return null;
                                 <HelpCircle className="h-10 w-10 mx-auto text-muted-foreground mb-3 opacity-50" />
                                 <h3 className="font-bold text-lg">Belum Ada Soal</h3>
                                 <p className="text-muted-foreground text-sm mt-1 max-w-sm mx-auto">
-                                    Klik tombol "Tambah Soal" di atas untuk mulai membuat soal Pilihan Ganda atau Essay untuk ujian ini.
+                                    {exam.status === 'published'
+                                        ? 'Ujian telah diterbitkan dan tidak menerima penambahan soal baru.'
+                                        : 'Klik tombol "Tambah Soal" di atas untuk mulai membuat soal Pilihan Ganda atau Essay untuk ujian ini.'}
                                 </p>
-                                <Button className="mt-4 gap-2" onClick={handleOpenCreateModal}>
-                                    <Plus className="h-4 w-4" />
-                                    <span>Tambah Soal Pertama</span>
-                                </Button>
+                                {exam.status !== 'published' && (
+                                    <Button className="mt-4 gap-2" onClick={handleOpenCreateModal}>
+                                        <Plus className="h-4 w-4" />
+                                        <span>Tambah Soal Pertama</span>
+                                    </Button>
+                                )}
                             </Card>
                         )}
                     </div>
@@ -671,27 +677,13 @@ return null;
                         </DialogHeader>
 
                         <form onSubmit={handleSaveQuestion} className="space-y-4 py-2">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="question_type">Tipe Soal</Label>
-                                    <select
-                                        id="question_type"
-                                        value={data.question_type}
-                                        onChange={(e) => setData('question_type', e.target.value as any)}
-                                        className="w-full h-10 rounded-md border border-input bg-background/50 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                    >
-                                        <option value="multiple_choice">Pilihan Ganda</option>
-                                        <option value="essay">Essay / Uraian</option>
-                                    </select>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="score">Bobot Poin</Label>
-                                    <Input
-                                        id="score"
-                                        type="number"
-                                        step="any"
-                                        min={0.1}
+                            <div className="space-y-2">
+                                <Label htmlFor="score">Bobot Poin</Label>
+                                <Input
+                                    id="score"
+                                    type="number"
+                                    step="any"
+                                    min={0.1}
                                         value={data.score}
                                         onChange={(e) => setData('score', parseFloat(e.target.value) || 0)}
                                     />
@@ -710,7 +702,6 @@ return null;
                                         );
                                     })()}
                                 </div>
-                            </div>
 
                             {/* Material Selector */}
                             <div className="space-y-2">

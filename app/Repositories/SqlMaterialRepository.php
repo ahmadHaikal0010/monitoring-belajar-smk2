@@ -110,6 +110,7 @@ class SqlMaterialRepository implements MaterialRepositoryInterface
     {
         return DB::table('materials')
             ->where('subject_id', $subjectId)
+            ->orderBy('created_at', 'asc')
             ->get();
     }
 
