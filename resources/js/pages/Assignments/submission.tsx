@@ -2,7 +2,6 @@ import { Head, Link, useForm, setLayoutProps } from '@inertiajs/react';
 import {
     ArrowLeft,
     Save,
-    User,
     Clock,
     FileText,
     Award,

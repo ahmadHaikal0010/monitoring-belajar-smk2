@@ -6,7 +6,6 @@ import {
     Award,
     CheckCircle2,
     AlertCircle,
-    User,
     FileCheck2,
     FileQuestion,
     Pencil,

@@ -41,9 +41,16 @@ interface Props {
 
 export default function EditAssignment({ assignment, subjects = [] }: Props) {
     const formatDatetimeLocal = (dateString: string | null) => {
-        if (!dateString) return '';
+        if (!dateString) {
+return '';
+}
+
         const date = new Date(dateString);
-        if (isNaN(date.getTime())) return '';
+
+        if (isNaN(date.getTime())) {
+return '';
+}
+
         const pad = (n: number) => n.toString().padStart(2, '0');
 
         return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;

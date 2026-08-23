@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Search,
     Filter,
-    BookOpen,
     TrendingUp,
     User,
     ArrowUpDown,
@@ -115,12 +114,12 @@ const SortIcon = ({
     );
 };
 
-export default function EnrollmentList({ 
-    enrollments, 
-    subjects, 
-    selectedSubject, 
-    filters, 
-    mode 
+export default function EnrollmentList({
+    enrollments,
+    subjects,
+    selectedSubject,
+    filters,
+    mode
 }: Props) {
     const { flash } = usePage().props as any;
     const [search, setSearch] = useState(filters.search || '');
@@ -274,13 +273,13 @@ return;
                                 {mode === 'subjects' ? "Progress Siswa" : selectedSubject?.title}
                             </h1>
                             <p className="text-muted-foreground">
-                                {mode === 'subjects' 
-                                    ? "Pilih mata pelajaran untuk melihat daftar progres belajar siswa." 
+                                {mode === 'subjects'
+                                    ? "Pilih mata pelajaran untuk melihat daftar progres belajar siswa."
                                     : `Daftar siswa & progres pembelajaran pada kelas ${selectedSubject?.title}.`}
                             </p>
                         </div>
                     </div>
-                    
+
                     <div className="flex flex-col items-center gap-3 sm:flex-row">
                         <div className="flex w-full items-center gap-3 sm:w-auto">
                             <div className="relative w-full md:w-64">
@@ -292,7 +291,7 @@ return;
                                     onChange={(e) => setSearch(e.target.value)}
                                 />
                             </div>
-                            
+
                             {mode === 'enrollments' && (
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -356,7 +355,7 @@ return;
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.05 }}
                                 >
-                                    <Card 
+                                    <Card
                                         className="group cursor-pointer border-none bg-card/50 shadow-lg backdrop-blur-sm transition-all hover:translate-y-[-4px] hover:shadow-xl active:scale-[0.98]"
                                         onClick={() => router.get('/admin/enrollments', { subject_id: subject.id })}
                                     >
@@ -470,7 +469,7 @@ return;
                                                                 <span className="text-muted-foreground">{enrollment.completed_materials}/{enrollment.total_materials} Materi</span>
                                                             </div>
                                                             <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
-                                                                <motion.div 
+                                                                <motion.div
                                                                     initial={{ width: 0 }}
                                                                     animate={{ width: `${progressPercentage}%` }}
                                                                     className="h-full bg-primary transition-all"
@@ -532,7 +531,7 @@ return;
                                 const label = link.label.toLowerCase();
                                 const isPrev = label.includes('previous') || label.includes('prev') || label.includes('&laquo;') || label.includes('pagination.previous');
                                 const isNext = label.includes('next') || label.includes('&raquo;') || label.includes('pagination.next');
-                                
+
                                 if (link.label === '...') {
                                     return <div key={i} className="px-2 text-xs">...</div>;
                                 }
