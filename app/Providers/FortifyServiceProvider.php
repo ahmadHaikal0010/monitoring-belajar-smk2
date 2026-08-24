@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -40,6 +42,24 @@ class FortifyServiceProvider extends ServiceProvider
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::createUsersUsing(CreateNewUser::class);
+
+        Fortify::authenticateUsing(function (Request $request) {
+            $identity = $request->input('nomor_induk') ?? $request->input('email') ?? $request->input('username');
+            $password = $request->input('password');
+
+            if (! $identity || ! $password) {
+                return null;
+            }
+
+            $userRepository = app(UserRepositoryInterface::class);
+            $user = $userRepository->authenticate($identity);
+
+            if ($user && Hash::check($password, $user->kata_sandi)) {
+                return $user;
+            }
+
+            return null;
+        });
     }
 
     /**

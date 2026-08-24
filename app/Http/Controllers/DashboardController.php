@@ -31,6 +31,8 @@ class DashboardController extends Controller
             $data = $this->getAdminDashboardData();
         } elseif ($user->role === 'guru') {
             $data = $this->getTeacherDashboardData($user);
+        } elseif ($user->role === 'siswa') {
+            $data = $this->getStudentDashboardData($user);
         }
 
         return Inertia::render('dashboard', $data);
@@ -148,5 +150,92 @@ class DashboardController extends Controller
     public function unauthorized()
     {
         return Inertia::render('unauthorized');
+    }
+
+    protected function getStudentDashboardData($user): array
+    {
+        $student = DB::table('siswa')->where('id_pengguna', $user->id)->first();
+        $studentId = $student?->id;
+
+        if (! $studentId) {
+            return [
+                'stats' => [
+                    'enrolled_subjects' => 0,
+                    'completed_materials' => 0,
+                    'available_exams' => 0,
+                    'pending_assignments' => 0,
+                ],
+                'enrolled_subjects_list' => [],
+            ];
+        }
+
+        $enrollments = DB::table('pendaftaran')
+            ->join('mata_pelajaran', 'pendaftaran.id_mata_pelajaran', '=', 'mata_pelajaran.id')
+            ->leftJoin('guru', 'mata_pelajaran.id_guru', '=', 'guru.id')
+            ->leftJoin('pengguna', 'guru.id_pengguna', '=', 'pengguna.id')
+            ->where('pendaftaran.id_siswa', $studentId)
+            ->select([
+                'pendaftaran.id as enrollment_id',
+                'mata_pelajaran.id as subject_id',
+                'mata_pelajaran.judul as subject_title',
+                'mata_pelajaran.kode as subject_code',
+                'pengguna.nama as teacher_name',
+                'pendaftaran.terdaftar_pada as enrolled_at',
+            ])
+            ->get();
+
+        $enrolledSubjectIds = $enrollments->pluck('subject_id')->toArray();
+        $enrollmentIds = $enrollments->pluck('enrollment_id')->toArray();
+
+        $completedMaterialsCount = DB::table('progres_siswa')
+            ->whereIn('id_pendaftaran', $enrollmentIds)
+            ->where('selesai', true)
+            ->count();
+
+        $availableExamsCount = DB::table('ujian')
+            ->whereIn('id_mata_pelajaran', $enrolledSubjectIds)
+            ->where('status', 'published')
+            ->count();
+
+        $submittedAssignmentIds = DB::table('pengumpulan_tugas')
+            ->where('id_siswa', $studentId)
+            ->pluck('id_tugas')
+            ->toArray();
+
+        $pendingAssignmentsCount = DB::table('tugas')
+            ->whereIn('id_mata_pelajaran', $enrolledSubjectIds)
+            ->where('status', 'published')
+            ->whereNotIn('id', $submittedAssignmentIds)
+            ->count();
+
+        $enrolledSubjectsList = $enrollments->map(function ($item) {
+            $totalMaterials = DB::table('materi')->where('id_mata_pelajaran', $item->subject_id)->count();
+            $completedMaterials = DB::table('progres_siswa')
+                ->where('id_pendaftaran', $item->enrollment_id)
+                ->where('selesai', true)
+                ->count();
+
+            $percentage = $totalMaterials > 0 ? (int) round(($completedMaterials / $totalMaterials) * 100) : 0;
+
+            return [
+                'id' => $item->subject_id,
+                'title' => $item->subject_title,
+                'code' => $item->subject_code,
+                'teacher_name' => $item->teacher_name ?? 'Pengajar',
+                'total_materials' => $totalMaterials,
+                'completed_materials' => $completedMaterials,
+                'percentage' => $percentage,
+            ];
+        })->toArray();
+
+        return [
+            'stats' => [
+                'enrolled_subjects' => count($enrollments),
+                'completed_materials' => $completedMaterialsCount,
+                'available_exams' => $availableExamsCount,
+                'pending_assignments' => $pendingAssignmentsCount,
+            ],
+            'enrolled_subjects_list' => $enrolledSubjectsList,
+        ];
     }
 }

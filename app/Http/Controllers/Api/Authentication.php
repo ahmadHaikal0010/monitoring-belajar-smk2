@@ -20,8 +20,9 @@ class Authentication extends Controller
     public function login(LoginRequest $request)
     {
         $data = $request->validated();
+        $identity = $data['nisn'] ?? $data['identity'] ?? $data['email'] ?? '';
 
-        $user = $this->userService->authenticate($data['email'], $data['password']);
+        $user = $this->userService->authenticate($identity, $data['password']);
 
         return response()->json([
             'success' => true,

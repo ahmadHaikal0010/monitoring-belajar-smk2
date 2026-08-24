@@ -7,6 +7,10 @@ import {
     FileText,
     Clock,
     UserPlus,
+    CheckCircle2,
+    ClipboardList,
+    Award,
+    Sparkles,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,11 +19,15 @@ import { cn } from '@/lib/utils';
 import { dashboard } from '@/routes';
 
 interface DashboardStats {
-    total_students: number;
+    total_students?: number;
     total_teachers?: number;
-    total_subjects: number;
-    total_materials: number;
+    total_subjects?: number;
+    total_materials?: number;
     total_enrollments?: number;
+    enrolled_subjects?: number;
+    completed_materials?: number;
+    available_exams?: number;
+    pending_assignments?: number;
 }
 
 interface PendingUser {
@@ -44,43 +52,88 @@ interface SubjectProgress {
     percentage?: number;
 }
 
+interface EnrolledSubjectItem {
+    id: string;
+    title: string;
+    code: string;
+    teacher_name: string;
+    total_materials: number;
+    completed_materials: number;
+    percentage: number;
+}
+
 interface Props {
     stats: DashboardStats;
     pending_users?: PendingUser[];
     recent_enrollments?: RecentEnrollment[];
-    subject_progress: SubjectProgress[];
+    subject_progress?: SubjectProgress[];
+    enrolled_subjects_list?: EnrolledSubjectItem[];
 }
 
-export default function Dashboard({ stats, pending_users, recent_enrollments, subject_progress }: Props) {
+export default function Dashboard({
+    stats,
+    pending_users,
+    recent_enrollments,
+    subject_progress = [],
+    enrolled_subjects_list = [],
+}: Props) {
     const { auth } = usePage().props as any;
     const isGuru = auth.user.role === 'guru';
+    const isSiswa = auth.user.role === 'siswa';
 
-    const statCards = [
-        {
-            title: 'Total Siswa',
-            value: stats.total_students.toString(),
-            icon: Users,
-            description: isGuru ? 'Terdaftar di kelas Anda' : 'Siswa aktif terverifikasi',
-        },
-        {
-            title: isGuru ? 'Mapel Anda' : 'Total Guru',
-            value: (isGuru ? stats.total_subjects : stats.total_teachers)?.toString() || '0',
-            icon: isGuru ? BookOpen : UserCheck,
-            description: isGuru ? 'Mata pelajaran yang diampu' : 'Tenaga pendidik aktif',
-        },
-        {
-            title: isGuru ? 'Pendaftaran' : 'Total Mapel',
-            value: (isGuru ? stats.total_enrollments : stats.total_subjects)?.toString() || '0',
-            icon: isGuru ? UserPlus : BookOpen,
-            description: isGuru ? 'Total pendaftaran di semua kelas' : 'Mata pelajaran tersedia',
-        },
-        {
-            title: 'Total Materi',
-            value: stats.total_materials.toString(),
-            icon: FileText,
-            description: 'Materi tayang di semua mapel',
-        },
-    ];
+    const statCards = isSiswa
+        ? [
+              {
+                  title: 'Mapel Diikuti',
+                  value: (stats.enrolled_subjects || 0).toString(),
+                  icon: BookOpen,
+                  description: 'Mata pelajaran yang Anda ikuti',
+              },
+              {
+                  title: 'Materi Selesai',
+                  value: (stats.completed_materials || 0).toString(),
+                  icon: CheckCircle2,
+                  description: 'Total modul materi terselesaikan',
+              },
+              {
+                  title: 'Ujian Tersedia',
+                  value: (stats.available_exams || 0).toString(),
+                  icon: Award,
+                  description: 'Ujian aktif di mata pelajaran Anda',
+              },
+              {
+                  title: 'Tugas Pending',
+                  value: (stats.pending_assignments || 0).toString(),
+                  icon: ClipboardList,
+                  description: 'Tugas yang perlu dikumpulkan',
+              },
+          ]
+        : [
+              {
+                  title: 'Total Siswa',
+                  value: (stats.total_students || 0).toString(),
+                  icon: Users,
+                  description: isGuru ? 'Terdaftar di kelas Anda' : 'Siswa aktif terverifikasi',
+              },
+              {
+                  title: isGuru ? 'Mapel Anda' : 'Total Guru',
+                  value: (isGuru ? stats.total_subjects : stats.total_teachers)?.toString() || '0',
+                  icon: isGuru ? BookOpen : UserCheck,
+                  description: isGuru ? 'Mata pelajaran yang diampu' : 'Tenaga pendidik aktif',
+              },
+              {
+                  title: isGuru ? 'Pendaftaran' : 'Total Mapel',
+                  value: (isGuru ? stats.total_enrollments : stats.total_subjects)?.toString() || '0',
+                  icon: isGuru ? UserPlus : BookOpen,
+                  description: isGuru ? 'Total pendaftaran di semua kelas' : 'Mata pelajaran tersedia',
+              },
+              {
+                  title: 'Total Materi',
+                  value: (stats.total_materials || 0).toString(),
+                  icon: FileText,
+                  description: 'Materi tayang di semua mapel',
+              },
+          ];
 
     return (
         <>
@@ -88,11 +141,14 @@ export default function Dashboard({ stats, pending_users, recent_enrollments, su
 
             <div className="flex flex-col gap-8 p-6">
                 <div className="flex flex-col gap-1">
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
                         Selamat Datang, {auth.user.name.split(' ')[0]}!
+                        {isSiswa}
                     </h1>
-                    <p className="text-muted-foreground">
-                        Berikut adalah ringkasan data pembelajaran hari ini.
+                    <p className="text-muted-foreground text-sm">
+                        {isSiswa
+                            ? 'Pantau progres belajar, materi, tugas, dan ujian Anda di SMK Negeri 2 Lubuk Basung.'
+                            : 'Berikut adalah ringkasan data pembelajaran hari ini.'}
                     </p>
                 </div>
 
@@ -123,164 +179,230 @@ export default function Dashboard({ stats, pending_users, recent_enrollments, su
                     ))}
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-7">
-                    {/* Left Section: Pending Users or Recent Activity */}
-                    <Card className="overflow-hidden border-none bg-card/50 shadow-md backdrop-blur-sm md:col-span-4">
-                        <CardHeader className="flex flex-row items-center justify-between bg-muted/20 px-6 py-4">
-                            <div>
-                                <CardTitle className="text-lg font-bold">
-                                    {isGuru ? 'Pendaftaran Terbaru' : 'Permintaan Akun Baru'}
-                                </CardTitle>
-                                <p className="text-xs text-muted-foreground">
-                                    {isGuru ? 'Siswa yang baru saja masuk ke kelas Anda' : 'Pengguna yang menunggu persetujuan Admin'}
-                                </p>
-                            </div>
-                            <Button variant="outline" size="sm" className="h-8 text-xs font-bold" asChild>
-                                <Link href={isGuru ? "/admin/enrollments" : "/admin/approval"}>
-                                    Lihat Semua
-                                </Link>
-                            </Button>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                            <div className="overflow-x-auto">
-                                <table className="w-full border-collapse text-left">
-                                    <thead>
-                                        <tr className="border-b bg-muted/50 dark:border-zinc-800">
-                                            <th className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                                                Identitas
-                                            </th>
-                                            <th className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">
-                                                {isGuru ? 'Mata Pelajaran' : 'Role'}
-                                            </th>
-                                            <th className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground text-right">
-                                                Waktu
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                                        {isGuru ? (
-                                            recent_enrollments?.map((enrollment, i) => (
-                                                <tr key={i} className="transition-colors hover:bg-muted/30">
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex flex-col">
-                                                            <span className="text-sm font-bold">{enrollment.student_name}</span>
-                                                            <span className="text-[10px] text-muted-foreground">{enrollment.student_email}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 text-center">
-                                                        <Badge variant="outline" className="font-bold text-[10px] uppercase">{enrollment.subject_title}</Badge>
-                                                    </td>
-                                                    <td className="px-6 py-4 text-right">
-                                                        <div className="flex items-center justify-end gap-1.5 text-[11px] font-medium text-muted-foreground">
-                                                            <Clock className="h-3.5 w-3.5" />
-                                                            {new Date(enrollment.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        ) : (
-                                            pending_users?.map((user, i) => (
-                                                <tr key={i} className="transition-colors hover:bg-muted/30">
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex flex-col">
-                                                            <span className="text-sm font-bold">{user.name}</span>
-                                                            <span className="text-[10px] text-muted-foreground">{user.email}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 text-center">
-                                                        <Badge className={cn(
-                                                            "font-bold text-[10px] uppercase",
-                                                            user.role === 'guru' ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-blue-500/10 text-blue-600 border-blue-500/20"
-                                                        )} variant="outline">
-                                                            {user.role}
+                {/* Siswa Dashboard Content */}
+                {isSiswa ? (
+                    <div className="grid gap-6 md:grid-cols-7">
+                        <Card className="overflow-hidden border-none bg-card/50 shadow-md backdrop-blur-sm md:col-span-7">
+                            <CardHeader className="flex flex-row items-center justify-between bg-muted/20 px-6 py-4">
+                                <div>
+                                    <CardTitle className="text-lg font-bold">
+                                        Mata Pelajaran Yang Anda Ikuti
+                                    </CardTitle>
+                                    <p className="text-xs text-muted-foreground">
+                                        Daftar mata pelajaran aktif beserta progres kelengkapan materi Anda
+                                    </p>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                {enrolled_subjects_list.length > 0 ? (
+                                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                        {enrolled_subjects_list.map((subject) => (
+                                            <div
+                                                key={subject.id}
+                                                className="group flex flex-col justify-between rounded-2xl border border-border/50 bg-background/60 p-5 shadow-sm backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-md"
+                                            >
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center justify-between">
+                                                        <Badge variant="outline" className="text-[10px] font-mono">
+                                                            {subject.code}
                                                         </Badge>
-                                                    </td>
-                                                    <td className="px-6 py-4 text-right">
-                                                        <div className="flex items-center justify-end gap-1.5 text-[11px] font-medium text-muted-foreground">
-                                                            <Clock className="h-3.5 w-3.5" />
-                                                            {new Date(user.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                        {((isGuru ? recent_enrollments?.length : pending_users?.length) === 0) && (
-                                            <tr>
-                                                <td colSpan={3} className="py-12 text-center text-sm italic text-muted-foreground">
-                                                    Belum ada aktivitas terbaru.
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </CardContent>
-                    </Card>
+                                                        <span className="text-xs font-bold text-primary">
+                                                            {subject.percentage}% Selesai
+                                                        </span>
+                                                    </div>
+                                                    <h3 className="text-base font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
+                                                        {subject.title}
+                                                    </h3>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        Pengajar: {subject.teacher_name}
+                                                    </p>
+                                                </div>
 
-                    {/* Right Section: Progress */}
-                    <Card className="border-none bg-card/50 shadow-md backdrop-blur-sm md:col-span-3">
-                        <CardHeader className="flex flex-row items-center justify-between pb-4">
-                            <div>
-                                <CardTitle className="text-lg font-bold">
-                                    {isGuru ? 'Pencapaian Siswa' : 'Mapel Terpopuler'}
-                                </CardTitle>
-                                <p className="text-xs text-muted-foreground">
-                                    {isGuru ? 'Rata-rata progres siswa per kelas' : 'Mata pelajaran dengan pendaftaran terbanyak'}
-                                </p>
-                            </div>
-                            <div className="rounded-xl bg-primary/10 p-2.5 text-primary shadow-sm">
-                                <BookOpen className="h-4 w-4" />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-6">
-                                {subject_progress.map((mapel, i) => {
-                                    const percentage = mapel.percentage ?? Math.round((mapel.count / (mapel.total || 1)) * 100);
-
-                                    return (
-                                        <div key={i} className="group space-y-2.5">
-                                            <div className="flex items-center justify-between text-sm">
-                                                <span className="font-bold tracking-tight group-hover:text-primary transition-colors">
-                                                    {mapel.name}
-                                                </span>
-                                                <span className="font-black text-primary tabular-nums">
-                                                    {isGuru ? `${percentage}%` : `${mapel.count} Siswa`}
-                                                </span>
+                                                <div className="mt-4 space-y-2">
+                                                    <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
+                                                        <motion.div
+                                                            initial={{ width: 0 }}
+                                                            animate={{ width: `${subject.percentage}%` }}
+                                                            transition={{ duration: 1, ease: 'easeOut' }}
+                                                            className="h-full rounded-full bg-primary"
+                                                        />
+                                                    </div>
+                                                    <div className="flex justify-between text-[10px] text-muted-foreground">
+                                                        <span>Materi Dibaca</span>
+                                                        <span className="font-bold">{subject.completed_materials} / {subject.total_materials} Modul</span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary shadow-inner">
-                                                <motion.div
-                                                    initial={{ width: 0 }}
-                                                    animate={{
-                                                        width: `${percentage}%`,
-                                                    }}
-                                                    transition={{
-                                                        duration: 1.2,
-                                                        ease: "easeOut",
-                                                        delay: 0.3 + i * 0.1,
-                                                    }}
-                                                    className="h-full rounded-full bg-primary shadow-sm"
-                                                />
-                                            </div>
-                                            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-70">
-                                                <span>
-                                                    {isGuru ? 'Progres Rata-rata' : 'Popularitas'}
-                                                </span>
-                                                <span>
-                                                    {isGuru ? `${mapel.count}/${mapel.total} Target` : `DARI ${mapel.total} TOTAL SISWA`}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                                {subject_progress.length === 0 && (
+                                        ))}
+                                    </div>
+                                ) : (
                                     <div className="py-12 text-center text-sm italic text-muted-foreground">
-                                        Belum ada data progres tersedia.
+                                        Anda belum mendaftar di mata pelajaran apapun. Silakan akses aplikasi mobile untuk memilih mata pelajaran.
                                     </div>
                                 )}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                ) : (
+                    <div className="grid gap-6 md:grid-cols-7">
+                        {/* Left Section: Pending Users or Recent Activity */}
+                        <Card className="overflow-hidden border-none bg-card/50 shadow-md backdrop-blur-sm md:col-span-4">
+                            <CardHeader className="flex flex-row items-center justify-between bg-muted/20 px-6 py-4">
+                                <div>
+                                    <CardTitle className="text-lg font-bold">
+                                        {isGuru ? 'Pendaftaran Terbaru' : 'Permintaan Akun Baru'}
+                                    </CardTitle>
+                                    <p className="text-xs text-muted-foreground">
+                                        {isGuru ? 'Siswa yang baru saja masuk ke kelas Anda' : 'Pengguna yang menunggu persetujuan Admin'}
+                                    </p>
+                                </div>
+                                <Button variant="outline" size="sm" className="h-8 text-xs font-bold" asChild>
+                                    <Link href={isGuru ? "/admin/enrollments" : "/admin/approval"}>
+                                        Lihat Semua
+                                    </Link>
+                                </Button>
+                            </CardHeader>
+                            <CardContent className="p-0">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full border-collapse text-left">
+                                        <thead>
+                                            <tr className="border-b bg-muted/50 dark:border-zinc-800">
+                                                <th className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                                                    Identitas
+                                                </th>
+                                                <th className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">
+                                                    {isGuru ? 'Mata Pelajaran' : 'Role'}
+                                                </th>
+                                                <th className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground text-right">
+                                                    Waktu
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                                            {isGuru ? (
+                                                recent_enrollments?.map((enrollment, i) => (
+                                                    <tr key={i} className="transition-colors hover:bg-muted/30">
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex flex-col">
+                                                                <span className="text-sm font-bold">{enrollment.student_name}</span>
+                                                                <span className="text-[10px] text-muted-foreground">{enrollment.student_email}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-center">
+                                                            <Badge variant="outline" className="font-bold text-[10px] uppercase">{enrollment.subject_title}</Badge>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-right">
+                                                            <div className="flex items-center justify-end gap-1.5 text-[11px] font-medium text-muted-foreground">
+                                                                <Clock className="h-3.5 w-3.5" />
+                                                                {new Date(enrollment.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                pending_users?.map((user, i) => (
+                                                    <tr key={i} className="transition-colors hover:bg-muted/30">
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex flex-col">
+                                                                <span className="text-sm font-bold">{user.name}</span>
+                                                                <span className="text-[10px] text-muted-foreground">{user.email}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-center">
+                                                            <Badge className={cn(
+                                                                "font-bold text-[10px] uppercase",
+                                                                user.role === 'guru' ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-blue-500/10 text-blue-600 border-blue-500/20"
+                                                            )} variant="outline">
+                                                                {user.role}
+                                                            </Badge>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-right">
+                                                            <div className="flex items-center justify-end gap-1.5 text-[11px] font-medium text-muted-foreground">
+                                                                <Clock className="h-3.5 w-3.5" />
+                                                                {new Date(user.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                            {((isGuru ? recent_enrollments?.length : pending_users?.length) === 0) && (
+                                                <tr>
+                                                    <td colSpan={3} className="py-12 text-center text-sm italic text-muted-foreground">
+                                                        Belum ada aktivitas terbaru.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Right Section: Progress */}
+                        <Card className="border-none bg-card/50 shadow-md backdrop-blur-sm md:col-span-3">
+                            <CardHeader className="flex flex-row items-center justify-between pb-4">
+                                <div>
+                                    <CardTitle className="text-lg font-bold">
+                                        {isGuru ? 'Pencapaian Siswa' : 'Mapel Terpopuler'}
+                                    </CardTitle>
+                                    <p className="text-xs text-muted-foreground">
+                                        {isGuru ? 'Rata-rata progres siswa per kelas' : 'Mata pelajaran dengan pendaftaran terbanyak'}
+                                    </p>
+                                </div>
+                                <div className="rounded-xl bg-primary/10 p-2.5 text-primary shadow-sm">
+                                    <BookOpen className="h-4 w-4" />
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-6">
+                                    {subject_progress.map((mapel, i) => {
+                                        const percentage = mapel.percentage ?? Math.round((mapel.count / (mapel.total || 1)) * 100);
+
+                                        return (
+                                            <div key={i} className="group space-y-2.5">
+                                                <div className="flex items-center justify-between text-sm">
+                                                    <span className="font-bold tracking-tight group-hover:text-primary transition-colors">
+                                                        {mapel.name}
+                                                    </span>
+                                                    <span className="font-black text-primary tabular-nums">
+                                                        {isGuru ? `${percentage}%` : `${mapel.count} Siswa`}
+                                                    </span>
+                                                </div>
+                                                <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary shadow-inner">
+                                                    <motion.div
+                                                        initial={{ width: 0 }}
+                                                        animate={{
+                                                            width: `${percentage}%`,
+                                                        }}
+                                                        transition={{
+                                                            duration: 1.2,
+                                                            ease: "easeOut",
+                                                            delay: 0.3 + i * 0.1,
+                                                        }}
+                                                        className="h-full rounded-full bg-primary shadow-sm"
+                                                    />
+                                                </div>
+                                                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-70">
+                                                    <span>
+                                                        {isGuru ? 'Progres Rata-rata' : 'Popularitas'}
+                                                    </span>
+                                                    <span>
+                                                        {isGuru ? `${mapel.count}/${mapel.total} Target` : `DARI ${mapel.total} TOTAL SISWA`}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                    {subject_progress.length === 0 && (
+                                        <div className="py-12 text-center text-sm italic text-muted-foreground">
+                                            Belum ada data progres tersedia.
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
             </div>
         </>
     );

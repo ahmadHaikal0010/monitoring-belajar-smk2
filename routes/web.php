@@ -20,10 +20,6 @@ Route::get('/', function () {
     return redirect()->route('login');
 })->name('home');
 
-Route::get('/register', function () {
-    return redirect()->route('login');
-})->name('register');
-
 Route::get('/pending', [DashboardController::class, 'pending'])
     ->name('pending');
 

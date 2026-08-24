@@ -14,7 +14,9 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|email',
+            'nisn' => 'nullable|string',
+            'email' => 'nullable|string',
+            'identity' => 'nullable|string',
             'password' => 'required|string',
             'device_name' => 'required|string',
         ];
@@ -23,8 +25,6 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required' => 'Alamat email wajib diisi.',
-            'email.email' => 'Format alamat email tidak valid.',
             'password.required' => 'Kata sandi wajib diisi.',
             'device_name.required' => 'Informasi perangkat (device name) diperlukan.',
         ];
