@@ -22,10 +22,6 @@ class CheckAccount
             return $next($request);
         }
 
-        if ($user && $user->role === 'siswa') {
-            return redirect()->route('unauthorized');
-        }
-
         if ($user && ! $user->is_approved) {
             return redirect()->route('pending');
         }

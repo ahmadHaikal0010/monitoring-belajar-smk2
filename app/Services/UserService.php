@@ -44,12 +44,12 @@ class UserService
         $this->userRepository->approve($id);
     }
 
-    public function authenticate(string $email, string $password)
+    public function authenticate(string $identity, string $password)
     {
-        $user = $this->userRepository->authenticate($email);
+        $user = $this->userRepository->authenticate($identity);
 
-        if (! $user || ! Hash::check($password, $user->password)) {
-            abort(401, 'Alamat email atau kata sandi yang Anda masukkan tidak sesuai.');
+        if (! $user || ! Hash::check($password, $user->kata_sandi)) {
+            abort(401, 'NISN / Nomor Induk atau kata sandi yang Anda masukkan tidak sesuai.');
         }
 
         if (! $user->is_approved) {

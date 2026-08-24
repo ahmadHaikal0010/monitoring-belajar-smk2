@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Student;
+use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
@@ -24,12 +26,80 @@ class AuthenticationTest extends TestCase
         $user = User::factory()->create();
 
         $response = $this->post(route('login.store'), [
-            'email' => $user->email,
+            'nomor_induk' => $user->email,
             'password' => 'password',
         ]);
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('dashboard', absolute: false));
+    }
+
+    public function test_students_can_authenticate_using_nisn_on_web()
+    {
+        $user = User::factory()->create([
+            'peran' => 'siswa',
+            'disetujui' => true,
+        ]);
+
+        Student::create([
+            'id_pengguna' => $user->id,
+            'nisn' => '0012345678',
+            'alamat' => 'Jl. Merdeka No. 1',
+        ]);
+
+        $response = $this->post(route('login.store'), [
+            'nomor_induk' => '0012345678',
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticatedAs($user);
+        $response->assertRedirect(route('dashboard', absolute: false));
+    }
+
+    public function test_teachers_can_authenticate_using_nip_on_web()
+    {
+        $user = User::factory()->create([
+            'peran' => 'guru',
+            'disetujui' => true,
+        ]);
+
+        Teacher::create([
+            'id_pengguna' => $user->id,
+            'nip' => '199001012020011001',
+        ]);
+
+        $response = $this->post(route('login.store'), [
+            'nomor_induk' => '199001012020011001',
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticatedAs($user);
+        $response->assertRedirect(route('dashboard', absolute: false));
+    }
+
+    public function test_students_can_authenticate_using_nisn_on_mobile_api()
+    {
+        $user = User::factory()->create([
+            'peran' => 'siswa',
+            'disetujui' => true,
+        ]);
+
+        Student::create([
+            'id_pengguna' => $user->id,
+            'nisn' => '0099887766',
+            'alamat' => 'Jl. Anggrek No. 2',
+        ]);
+
+        $response = $this->postJson('/api/login', [
+            'nisn' => '0099887766',
+            'password' => 'password',
+            'device_name' => 'Android Phone',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+        ]);
     }
 
     public function test_users_with_two_factor_enabled_are_redirected_to_two_factor_challenge()
@@ -50,7 +120,7 @@ class AuthenticationTest extends TestCase
         ])->save();
 
         $response = $this->post(route('login'), [
-            'email' => $user->email,
+            'nomor_induk' => $user->email,
             'password' => 'password',
         ]);
 
@@ -64,7 +134,7 @@ class AuthenticationTest extends TestCase
         $user = User::factory()->create();
 
         $this->post(route('login.store'), [
-            'email' => $user->email,
+            'nomor_induk' => $user->email,
             'password' => 'wrong-password',
         ]);
 
@@ -88,7 +158,7 @@ class AuthenticationTest extends TestCase
         RateLimiter::increment(md5('login'.implode('|', [$user->email, '127.0.0.1'])), amount: 5);
 
         $response = $this->post(route('login.store'), [
-            'email' => $user->email,
+            'nomor_induk' => $user->email,
             'password' => 'wrong-password',
         ]);
 

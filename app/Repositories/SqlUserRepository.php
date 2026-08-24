@@ -134,11 +134,33 @@ class SqlUserRepository implements UserRepositoryInterface
             ]);
     }
 
-    public function authenticate(string $email)
+    public function authenticate(string $identity)
     {
         $userRaw = DB::table('pengguna')
-            ->where('email', $email)
+            ->where('email', $identity)
             ->first();
+
+        if (! $userRaw) {
+            $student = DB::table('siswa')
+                ->where('nisn', $identity)
+                ->first();
+            if ($student) {
+                $userRaw = DB::table('pengguna')
+                    ->where('id', $student->id_pengguna)
+                    ->first();
+            }
+        }
+
+        if (! $userRaw) {
+            $teacher = DB::table('guru')
+                ->where('nip', $identity)
+                ->first();
+            if ($teacher) {
+                $userRaw = DB::table('pengguna')
+                    ->where('id', $teacher->id_pengguna)
+                    ->first();
+            }
+        }
 
         if (! $userRaw) {
             return null;
@@ -149,9 +171,9 @@ class SqlUserRepository implements UserRepositoryInterface
 
     public function register(array $data)
     {
-        DB::transaction(function () use ($data) {
+        return DB::transaction(function () use ($data) {
             $userId = DB::table('pengguna')->insertGetId([
-                'nama' => $data['name'],
+                'nama' => $data['name'] ?? $data['nama'],
                 'email' => $data['email'],
                 'kata_sandi' => bcrypt($data['password']),
                 'peran' => 'siswa',
@@ -164,10 +186,12 @@ class SqlUserRepository implements UserRepositoryInterface
                 'id' => (string) Uuid::v7(),
                 'id_pengguna' => $userId,
                 'nisn' => $data['nisn'],
-                'alamat' => $data['address'],
+                'alamat' => $data['alamat'] ?? $data['address'] ?? '',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+
+            return User::find($userId);
         });
     }
 }

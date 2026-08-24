@@ -45,7 +45,7 @@ return [
     |
     */
 
-    'username' => 'email',
+    'username' => 'nomor_induk',
 
     'email' => 'email',
 
@@ -144,7 +144,7 @@ return [
     */
 
     'features' => [
-        // Features::registration(), // Web registration disabled. Registration is strictly handled via Mobile API (/api/register)
+        Features::registration(),
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::twoFactorAuthentication([

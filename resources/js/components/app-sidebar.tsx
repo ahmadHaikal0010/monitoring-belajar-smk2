@@ -57,11 +57,13 @@ export function AppSidebar() {
         });
     }
 
-    mainNavItems.push({
-        title: 'Materi Pembelajaran',
-        href: '/teacher/materials',
-        icon: BookOpen,
-    });
+    if (auth?.user?.role === 'admin' || auth?.user?.role === 'guru') {
+        mainNavItems.push({
+            title: 'Materi Pembelajaran',
+            href: '/teacher/materials',
+            icon: BookOpen,
+        });
+    }
 
     if (auth?.user?.role === 'guru') {
         mainNavItems.push({
