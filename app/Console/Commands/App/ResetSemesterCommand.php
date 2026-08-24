@@ -47,7 +47,7 @@ class ResetSemesterCommand extends Command
                 // - materials (DB records)
                 // - enrollments (DB records)
                 $this->info('Menghapus data mata pelajaran, materi, dan pendaftaran dari database...');
-                DB::table('subjects')->delete();
+                DB::table('mata_pelajaran')->delete();
 
                 Log::info('Semester Reset: Seluruh data mata pelajaran, materi, dan pendaftaran telah dibersihkan oleh sistem.');
             });

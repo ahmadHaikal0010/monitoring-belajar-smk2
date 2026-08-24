@@ -24,7 +24,7 @@ class StoreTeacherRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nip' => ['required', 'string', 'size:18', 'unique:teachers,nip'],
+            'nip' => ['required', 'string', 'size:18', 'unique:guru,nip'],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'bio' => ['nullable', 'string', 'max:255'],
             'specialization' => ['required', 'string', 'max:100'],

@@ -11,17 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('student_progress', function (Blueprint $table) {
+        Schema::create('progres_siswa', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('enrollment_id')->constrained('enrollments')->onDelete('cascade');
-            $table->foreignUuid('material_id')->constrained('materials')->onDelete('cascade');
-            $table->boolean('is_completed')->default(false);
-            $table->timestamp('completed_at')->nullable();
+            $table->foreignUuid('id_pendaftaran')->constrained('pendaftaran')->onDelete('cascade');
+            $table->foreignUuid('id_materi')->constrained('materi')->onDelete('cascade');
+            $table->boolean('selesai')->default(false);
+            $table->timestamp('diselesaikan_pada')->nullable();
             $table->timestamps();
 
             $table->index('id');
-            $table->index('enrollment_id');
-            $table->index('material_id');
+            $table->index('id_pendaftaran');
+            $table->index('id_materi');
         });
     }
 
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('student_progress');
+        Schema::dropIfExists('progres_siswa');
     }
 };

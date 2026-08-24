@@ -13,35 +13,37 @@ class SqlStudentRepository implements StudentRepositoryInterface
         $driver = DB::getDriverName();
         $likeOperator = $driver === 'pgsql' ? 'ilike' : 'like';
 
-        $query = DB::table('students')
-            ->join('users', 'students.user_id', '=', 'users.id')
+        $query = DB::table('siswa')
+            ->join('pengguna', 'siswa.id_pengguna', '=', 'pengguna.id')
             ->select([
-                'students.id',
-                'students.nisn',
-                'students.address',
-                'students.photo',
-                'users.name as user_name',
-                'users.email as user_email',
-                'students.created_at',
+                'siswa.id',
+                'siswa.nisn',
+                'siswa.alamat as address',
+                'siswa.foto as photo',
+                'pengguna.nama as user_name',
+                'pengguna.email as user_email',
+                'siswa.created_at',
             ]);
 
         if (! empty($filters['search'])) {
             $query->where(function ($q) use ($filters, $likeOperator) {
-                $q->where('users.name', $likeOperator, '%'.$filters['search'].'%')
-                    ->orWhere('students.nisn', $likeOperator, '%'.$filters['search'].'%')
-                    ->orWhere('users.email', $likeOperator, '%'.$filters['search'].'%');
+                $q->where('pengguna.nama', $likeOperator, '%'.$filters['search'].'%')
+                    ->orWhere('siswa.nisn', $likeOperator, '%'.$filters['search'].'%')
+                    ->orWhere('pengguna.email', $likeOperator, '%'.$filters['search'].'%');
             });
         }
 
-        $sortField = $filters['sort'] ?? 'users.name';
+        $sortField = $filters['sort'] ?? 'pengguna.nama';
         $sortDirection = $filters['direction'] ?? 'asc';
 
-        $allowedSorts = ['users.name', 'students.nisn', 'students.created_at'];
-        if (in_array($sortField, $allowedSorts)) {
-            $query->orderBy($sortField, $sortDirection);
-        } else {
-            $query->orderBy('users.name', 'asc');
-        }
+        $sortFieldMap = [
+            'users.name' => 'pengguna.nama',
+            'students.nisn' => 'siswa.nisn',
+            'students.created_at' => 'siswa.created_at',
+        ];
+
+        $dbSortField = $sortFieldMap[$sortField] ?? ($sortFieldMap[$sortField] ?? 'pengguna.nama');
+        $query->orderBy($dbSortField, $sortDirection);
 
         return $query->paginate($perPage)
             ->withQueryString()
@@ -57,17 +59,17 @@ class SqlStudentRepository implements StudentRepositoryInterface
         $driver = DB::getDriverName();
         $likeOperator = $driver === 'pgsql' ? 'ilike' : 'like';
 
-        $query = DB::table('users')
-            ->leftJoin('students', 'users.id', '=', 'students.user_id')
-            ->whereNull('students.user_id')
-            ->where('users.role', 'siswa')
-            ->where('users.is_approved', true)
-            ->select(['users.id', 'users.name', 'users.email']);
+        $query = DB::table('pengguna')
+            ->leftJoin('siswa', 'pengguna.id', '=', 'siswa.id_pengguna')
+            ->whereNull('siswa.id_pengguna')
+            ->where('pengguna.peran', 'siswa')
+            ->where('pengguna.disetujui', true)
+            ->select(['pengguna.id', 'pengguna.nama as name', 'pengguna.email']);
 
         if (! empty($filters['search'])) {
             $query->where(function ($q) use ($filters, $likeOperator) {
-                $q->where('users.name', $likeOperator, '%'.$filters['search'].'%')
-                    ->orWhere('users.email', $likeOperator, '%'.$filters['search'].'%');
+                $q->where('pengguna.nama', $likeOperator, '%'.$filters['search'].'%')
+                    ->orWhere('pengguna.email', $likeOperator, '%'.$filters['search'].'%');
             });
         }
 
@@ -77,12 +79,22 @@ class SqlStudentRepository implements StudentRepositoryInterface
 
     public function find(string $id)
     {
-        $student = DB::table('students')->where('id', $id)->first();
+        $student = DB::table('siswa')
+            ->where('id', $id)
+            ->select([
+                'id',
+                'id_pengguna as user_id',
+                'nisn',
+                'alamat as address',
+                'foto as photo',
+                'created_at',
+            ])
+            ->first();
 
         if ($student) {
-            $student->user = DB::table('users')
+            $student->user = DB::table('pengguna')
                 ->where('id', $student->user_id)
-                ->select(['id', 'name', 'email'])
+                ->select(['id', 'nama as name', 'email'])
                 ->first();
 
             $student->photo_url = $this->formatPhotoUrl($student->photo);
@@ -104,19 +116,29 @@ class SqlStudentRepository implements StudentRepositoryInterface
         return url('storage/'.ltrim($path, '/'));
     }
 
-    public function findByUserId(int $userId)
+    public function findByUserId(string|int $userId)
     {
-        return DB::table('students')->where('user_id', $userId)->first();
+        return DB::table('siswa')
+            ->where('id_pengguna', $userId)
+            ->select([
+                'id',
+                'id_pengguna as user_id',
+                'nisn',
+                'alamat as address',
+                'foto as photo',
+                'created_at',
+            ])
+            ->first();
     }
 
     public function create(array $data)
     {
-        DB::table('students')->insert([
+        DB::table('siswa')->insert([
             'id' => (string) Uuid::v7(),
-            'user_id' => $data['user_id'],
+            'id_pengguna' => $data['user_id'],
             'nisn' => $data['nisn'],
-            'address' => $data['address'],
-            'photo' => $data['photo'] ?? null,
+            'alamat' => $data['address'],
+            'foto' => $data['photo'] ?? null,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -131,16 +153,16 @@ class SqlStudentRepository implements StudentRepositoryInterface
         }
 
         if (isset($data['address'])) {
-            $updateData['address'] = $data['address'];
+            $updateData['alamat'] = $data['address'];
         }
 
         if (isset($data['photo'])) {
-            $updateData['photo'] = $data['photo'];
+            $updateData['foto'] = $data['photo'];
         }
 
         if (! empty($updateData)) {
             $updateData['updated_at'] = now();
-            DB::table('students')
+            DB::table('siswa')
                 ->where('id', $id)
                 ->update($updateData);
         }
@@ -148,6 +170,6 @@ class SqlStudentRepository implements StudentRepositoryInterface
 
     public function delete(string $id)
     {
-        DB::table('students')->where('id', $id)->delete();
+        DB::table('siswa')->where('id', $id)->delete();
     }
 }

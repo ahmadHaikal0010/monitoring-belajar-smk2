@@ -126,9 +126,9 @@ class ExamController extends Controller
                 ->with('error', 'Ujian tidak ditemukan.');
         }
 
-        $materials = DB::table('materials')
-            ->where('subject_id', $exam->subject_id)
-            ->select(['id', 'title'])
+        $materials = DB::table('materi')
+            ->where('id_mata_pelajaran', $exam->subject_id)
+            ->select(['id', 'judul as title'])
             ->orderBy('created_at', 'asc')
             ->get();
 
@@ -169,13 +169,13 @@ class ExamController extends Controller
         $data = $request->validated();
 
         if (isset($data['status']) && $data['status'] === 'published') {
-            $questionsCount = DB::table('questions')->where('exam_id', $id)->count();
+            $questionsCount = DB::table('soal')->where('id_ujian', $id)->count();
             if ($questionsCount === 0) {
                 return redirect()->route('teacher.exams.show', $id)
                     ->with('error', 'Gagal menerbitkan ujian! Ujian belum memiliki soal.');
             }
 
-            $totalScore = (float) DB::table('questions')->where('exam_id', $id)->sum('score');
+            $totalScore = (float) DB::table('soal')->where('id_ujian', $id)->sum('bobot_skor');
             if (abs($totalScore - 100.0) > 0.001) {
                 $diff = round(abs(100.0 - $totalScore), 2);
                 $msg = $totalScore < 100.0
@@ -213,13 +213,13 @@ class ExamController extends Controller
             abort(403, 'Tindakan tidak diizinkan.');
         }
 
-        $questionsCount = DB::table('questions')->where('exam_id', $id)->count();
+        $questionsCount = DB::table('soal')->where('id_ujian', $id)->count();
         if ($questionsCount === 0) {
             return redirect()->route('teacher.exams.show', $id)
                 ->with('error', 'Gagal menerbitkan ujian! Ujian belum memiliki soal.');
         }
 
-        $totalScore = (float) DB::table('questions')->where('exam_id', $id)->sum('score');
+        $totalScore = (float) DB::table('soal')->where('id_ujian', $id)->sum('bobot_skor');
         if (abs($totalScore - 100.0) > 0.001) {
             $diff = round(abs(100.0 - $totalScore), 2);
             $msg = $totalScore < 100.0

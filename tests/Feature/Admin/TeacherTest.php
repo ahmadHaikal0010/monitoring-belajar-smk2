@@ -60,10 +60,10 @@ class TeacherTest extends TestCase
 
         // $response->assertStatus(201);
         $response->assertRedirect();
-        $this->assertDatabaseHas('teachers', [
-            'user_id' => $user->id,
+        $this->assertDatabaseHas('guru', [
+            'id_pengguna' => $user->id,
             'nip' => '123456789012345678',
-            'specialization' => 'Computer Science',
+            'spesialisasi' => 'Computer Science',
         ]);
     }
 
@@ -144,10 +144,10 @@ class TeacherTest extends TestCase
         $response->assertRedirect(route('admin.teachers.index'));
 
         // Assert teacher is deleted
-        $this->assertDatabaseMissing('teachers', ['id' => $teacher->id]);
+        $this->assertDatabaseMissing('guru', ['id' => $teacher->id]);
 
         // Assert user still exists
-        $this->assertDatabaseHas('users', ['id' => $user->id]);
+        $this->assertDatabaseHas('pengguna', ['id' => $user->id]);
 
         // Assert photo is removed from storage
         Storage::disk('public')->assertMissing($teacher->photo);

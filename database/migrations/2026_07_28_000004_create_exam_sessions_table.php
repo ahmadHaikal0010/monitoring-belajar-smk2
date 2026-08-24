@@ -11,19 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('exam_sessions', function (Blueprint $table) {
+        Schema::create('sesi_ujian', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('exam_id')->constrained('exams')->onDelete('cascade');
-            $table->foreignUuid('student_id')->constrained('students')->onDelete('cascade');
-            $table->timestamp('started_at');
-            $table->timestamp('submitted_at')->nullable();
-            $table->float('total_score')->nullable();
+            $table->foreignUuid('id_ujian')->constrained('ujian')->onDelete('cascade');
+            $table->foreignUuid('id_siswa')->constrained('siswa')->onDelete('cascade');
+            $table->timestamp('dimulai_pada');
+            $table->timestamp('dikumpulkan_pada')->nullable();
+            $table->float('total_skor')->nullable();
             $table->enum('status', ['in_progress', 'submitted', 'graded', 'timed_out'])->default('in_progress');
             $table->timestamps();
 
             $table->index('id');
-            $table->index('exam_id');
-            $table->index('student_id');
+            $table->index('id_ujian');
+            $table->index('id_siswa');
         });
     }
 
@@ -32,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('exam_sessions');
+        Schema::dropIfExists('sesi_ujian');
     }
 };

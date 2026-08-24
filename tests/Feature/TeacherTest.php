@@ -133,7 +133,7 @@ class TeacherTest extends TestCase
 
         $response->assertRedirect();
 
-        $teacher = Teacher::where('user_id', $user->id)->first();
+        $teacher = Teacher::where('id_pengguna', $user->id)->first();
         $this->assertNotNull($teacher->photo);
         Storage::disk('public')->assertExists($teacher->photo);
 

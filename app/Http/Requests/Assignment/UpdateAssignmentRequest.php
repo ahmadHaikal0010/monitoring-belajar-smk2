@@ -16,8 +16,8 @@ class UpdateAssignmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'subject_id' => ['required', 'string', 'exists:subjects,id'],
-            'teacher_id' => ['nullable', 'string', 'exists:teachers,id'],
+            'subject_id' => ['required', 'string', 'exists:mata_pelajaran,id'],
+            'teacher_id' => ['nullable', 'string', 'exists:guru,id'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
             'due_date' => ['nullable', 'date'],

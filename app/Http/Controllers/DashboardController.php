@@ -40,35 +40,35 @@ class DashboardController extends Controller
     {
         return [
             'stats' => [
-                'total_students' => DB::table('users')->where('role', 'siswa')->where('is_approved', true)->count(),
-                'total_teachers' => DB::table('users')->where('role', 'guru')->count(),
-                'total_subjects' => DB::table('subjects')->count(),
-                'total_materials' => DB::table('materials')->count(),
+                'total_students' => DB::table('pengguna')->where('peran', 'siswa')->where('disetujui', true)->count(),
+                'total_teachers' => DB::table('pengguna')->where('peran', 'guru')->count(),
+                'total_subjects' => DB::table('mata_pelajaran')->count(),
+                'total_materials' => DB::table('materi')->count(),
             ],
-            'pending_users' => DB::table('users')
-                ->where('is_approved', false)
+            'pending_users' => DB::table('pengguna')
+                ->where('disetujui', false)
                 ->orderBy('created_at', 'desc')
                 ->limit(5)
                 ->get()
                 ->map(fn ($user) => [
                     'id' => $user->id,
-                    'name' => $user->name,
+                    'name' => $user->nama,
                     'email' => $user->email,
-                    'role' => $user->role,
+                    'role' => $user->peran,
                     'date' => $user->created_at,
                 ]),
-            'subject_progress' => DB::table('subjects')
-                ->join('enrollments', 'subjects.id', '=', 'enrollments.subject_id')
-                ->select('subjects.title as name')
-                ->selectRaw('count(enrollments.id) as count')
-                ->groupBy('subjects.id', 'subjects.title')
+            'subject_progress' => DB::table('mata_pelajaran')
+                ->join('pendaftaran', 'mata_pelajaran.id', '=', 'pendaftaran.id_mata_pelajaran')
+                ->select('mata_pelajaran.judul as name')
+                ->selectRaw('count(pendaftaran.id) as count')
+                ->groupBy('mata_pelajaran.id', 'mata_pelajaran.judul')
                 ->orderBy('count', 'desc')
                 ->limit(4)
                 ->get()
                 ->map(fn ($item) => [
                     'name' => $item->name,
                     'count' => (int) $item->count,
-                    'total' => DB::table('users')->where('role', 'siswa')->where('is_approved', true)->count(),
+                    'total' => DB::table('pengguna')->where('peran', 'siswa')->where('disetujui', true)->count(),
                 ]),
         ];
     }
@@ -78,36 +78,36 @@ class DashboardController extends Controller
         $teacher = $this->teacherService->getTeacherByUserId($user->id);
         $teacherId = $teacher?->id;
 
-        $subjectIds = DB::table('subjects')->where('teacher_id', $teacherId)->pluck('id');
+        $subjectIds = DB::table('mata_pelajaran')->where('id_guru', $teacherId)->pluck('id');
 
         return [
             'stats' => [
-                'total_students' => DB::table('enrollments')->whereIn('subject_id', $subjectIds)->distinct('student_id')->count(),
+                'total_students' => DB::table('pendaftaran')->whereIn('id_mata_pelajaran', $subjectIds)->distinct('id_siswa')->count(),
                 'total_subjects' => count($subjectIds),
-                'total_materials' => DB::table('materials')->whereIn('subject_id', $subjectIds)->count(),
-                'total_enrollments' => DB::table('enrollments')->whereIn('subject_id', $subjectIds)->count(),
+                'total_materials' => DB::table('materi')->whereIn('id_mata_pelajaran', $subjectIds)->count(),
+                'total_enrollments' => DB::table('pendaftaran')->whereIn('id_mata_pelajaran', $subjectIds)->count(),
             ],
-            'recent_enrollments' => DB::table('enrollments')
-                ->join('students', 'enrollments.student_id', '=', 'students.id')
-                ->join('users', 'students.user_id', '=', 'users.id')
-                ->join('subjects', 'enrollments.subject_id', '=', 'subjects.id')
-                ->whereIn('enrollments.subject_id', $subjectIds)
+            'recent_enrollments' => DB::table('pendaftaran')
+                ->join('siswa', 'pendaftaran.id_siswa', '=', 'siswa.id')
+                ->join('pengguna', 'siswa.id_pengguna', '=', 'pengguna.id')
+                ->join('mata_pelajaran', 'pendaftaran.id_mata_pelajaran', '=', 'mata_pelajaran.id')
+                ->whereIn('pendaftaran.id_mata_pelajaran', $subjectIds)
                 ->select([
-                    'users.name as student_name',
-                    'users.email as student_email',
-                    'subjects.title as subject_title',
-                    'enrollments.enrolled_at as date',
+                    'pengguna.nama as student_name',
+                    'pengguna.email as student_email',
+                    'mata_pelajaran.judul as subject_title',
+                    'pendaftaran.terdaftar_pada as date',
                 ])
-                ->orderBy('enrollments.enrolled_at', 'desc')
+                ->orderBy('pendaftaran.terdaftar_pada', 'desc')
                 ->limit(5)
                 ->get(),
-            'subject_progress' => DB::table('subjects')
-                ->where('teacher_id', $teacherId)
-                ->select('id', 'title as name')
+            'subject_progress' => DB::table('mata_pelajaran')
+                ->where('id_guru', $teacherId)
+                ->select('id', 'judul as name')
                 ->get()
                 ->map(function ($subject) {
-                    $enrollmentIds = DB::table('enrollments')->where('subject_id', $subject->id)->pluck('id');
-                    $totalMaterials = DB::table('materials')->where('subject_id', $subject->id)->count();
+                    $enrollmentIds = DB::table('pendaftaran')->where('id_mata_pelajaran', $subject->id)->pluck('id');
+                    $totalMaterials = DB::table('materi')->where('id_mata_pelajaran', $subject->id)->count();
 
                     if (count($enrollmentIds) === 0 || $totalMaterials === 0) {
                         return [
@@ -118,9 +118,9 @@ class DashboardController extends Controller
                         ];
                     }
 
-                    $completedCount = DB::table('student_progress')
-                        ->whereIn('enrollment_id', $enrollmentIds)
-                        ->where('is_completed', true)
+                    $completedCount = DB::table('progres_siswa')
+                        ->whereIn('id_pendaftaran', $enrollmentIds)
+                        ->where('selesai', true)
                         ->count();
 
                     $totalPossibleCompletions = count($enrollmentIds) * $totalMaterials;

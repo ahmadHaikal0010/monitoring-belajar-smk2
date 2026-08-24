@@ -21,10 +21,10 @@ class EnrollmentFactory extends Factory
     {
         return [
             'id' => fake()->uuid(),
-            'student_id' => Student::factory(),
-            'subject_id' => Subject::factory(),
+            'id_siswa' => Student::factory(),
+            'id_mata_pelajaran' => Subject::factory(),
             'status' => 'enrolled',
-            'enrolled_at' => now(),
+            'terdaftar_pada' => now(),
         ];
     }
 }

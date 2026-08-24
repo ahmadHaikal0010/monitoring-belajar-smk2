@@ -11,17 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('assignment_submission_files', function (Blueprint $table) {
+        Schema::create('berkas_pengumpulan_tugas', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('assignment_submission_id')->constrained('assignment_submissions')->onDelete('cascade');
-            $table->string('file_path');
-            $table->string('file_name');
-            $table->enum('file_type', ['image', 'pdf']);
-            $table->integer('file_size')->nullable();
-            $table->string('mime_type')->nullable();
+            $table->foreignUuid('id_pengumpulan_tugas')->constrained('pengumpulan_tugas')->onDelete('cascade');
+            $table->string('jalur_berkas');
+            $table->string('nama_berkas');
+            $table->enum('tipe_berkas', ['image', 'pdf']);
+            $table->integer('ukuran_berkas')->nullable();
+            $table->string('tipe_mime')->nullable();
             $table->timestamps();
 
-            $table->index('assignment_submission_id');
+            $table->index('id_pengumpulan_tugas');
         });
     }
 
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('assignment_submission_files');
+        Schema::dropIfExists('berkas_pengumpulan_tugas');
     }
 };

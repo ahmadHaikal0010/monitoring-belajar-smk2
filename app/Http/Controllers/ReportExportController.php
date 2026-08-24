@@ -32,23 +32,23 @@ class ReportExportController extends Controller
             }
         }
 
-        $materials = DB::table('materials')
-            ->where('subject_id', $subjectId)
-            ->select(['id', 'title', 'content_type'])
+        $materials = DB::table('materi')
+            ->where('id_mata_pelajaran', $subjectId)
+            ->select(['id', 'judul as title', 'tipe_konten as content_type'])
             ->orderBy('created_at', 'asc')
             ->get();
 
-        $exams = DB::table('exams')
-            ->where('subject_id', $subjectId)
+        $exams = DB::table('ujian')
+            ->where('id_mata_pelajaran', $subjectId)
             ->where('status', 'published')
-            ->select(['id', 'title', 'pass_score', 'duration'])
+            ->select(['id', 'judul as title', 'nilai_kkm as pass_score', 'durasi as duration'])
             ->orderBy('created_at', 'asc')
             ->get();
 
-        $assignments = DB::table('assignments')
-            ->where('subject_id', $subjectId)
+        $assignments = DB::table('tugas')
+            ->where('id_mata_pelajaran', $subjectId)
             ->where('status', 'published')
-            ->select(['id', 'title', 'max_score', 'due_date'])
+            ->select(['id', 'judul as title', 'skor_maksimal as max_score', 'tenggat_waktu as due_date'])
             ->orderBy('created_at', 'asc')
             ->get();
 

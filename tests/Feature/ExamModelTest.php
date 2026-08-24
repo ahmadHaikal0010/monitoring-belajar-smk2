@@ -47,9 +47,9 @@ class ExamModelTest extends TestCase
             'is_correct' => false,
         ]);
 
-        $this->assertDatabaseHas('exams', ['id' => $exam->id, 'title' => 'Ujian Algoritma']);
-        $this->assertDatabaseHas('questions', ['id' => $question->id, 'image_path' => 'exams/questions/q1.png']);
-        $this->assertDatabaseHas('options', ['id' => $option1->id, 'is_correct' => true]);
+        $this->assertDatabaseHas('ujian', ['id' => $exam->id, 'judul' => 'Ujian Algoritma']);
+        $this->assertDatabaseHas('soal', ['id' => $question->id, 'jalur_gambar' => 'exams/questions/q1.png']);
+        $this->assertDatabaseHas('opsi_jawaban', ['id' => $option1->id, 'benar' => true]);
 
         $this->assertCount(1, $exam->questions);
         $this->assertCount(2, $question->options);
@@ -79,8 +79,8 @@ class ExamModelTest extends TestCase
             'score_earned' => 1.0,
         ]);
 
-        $this->assertDatabaseHas('exam_sessions', ['id' => $session->id, 'status' => 'in_progress']);
-        $this->assertDatabaseHas('student_answers', ['id' => $answer->id, 'score_earned' => 1.0]);
+        $this->assertDatabaseHas('sesi_ujian', ['id' => $session->id, 'status' => 'in_progress']);
+        $this->assertDatabaseHas('jawaban_siswa', ['id' => $answer->id, 'skor_diperoleh' => 1.0]);
 
         $this->assertCount(1, $session->studentAnswers);
         $this->assertEquals($student->id, $session->student->id);
@@ -101,10 +101,10 @@ class ExamModelTest extends TestCase
 
         $exam->delete();
 
-        $this->assertDatabaseMissing('exams', ['id' => $exam->id]);
-        $this->assertDatabaseMissing('questions', ['id' => $question->id]);
-        $this->assertDatabaseMissing('options', ['id' => $option->id]);
-        $this->assertDatabaseMissing('exam_sessions', ['id' => $session->id]);
-        $this->assertDatabaseMissing('student_answers', ['id' => $answer->id]);
+        $this->assertDatabaseMissing('ujian', ['id' => $exam->id]);
+        $this->assertDatabaseMissing('soal', ['id' => $question->id]);
+        $this->assertDatabaseMissing('opsi_jawaban', ['id' => $option->id]);
+        $this->assertDatabaseMissing('sesi_ujian', ['id' => $session->id]);
+        $this->assertDatabaseMissing('jawaban_siswa', ['id' => $answer->id]);
     }
 }

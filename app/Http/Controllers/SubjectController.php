@@ -52,10 +52,10 @@ class SubjectController extends Controller
 
         $teachers = [];
         if (auth()->user()->role === 'admin') {
-            $teachers = DB::table('teachers')
-                ->join('users', 'teachers.user_id', '=', 'users.id')
-                ->select(['teachers.id', 'users.name'])
-                ->orderBy('users.name')
+            $teachers = DB::table('guru')
+                ->join('pengguna', 'guru.id_pengguna', '=', 'pengguna.id')
+                ->select(['guru.id', 'pengguna.nama as name'])
+                ->orderBy('pengguna.nama')
                 ->get();
         }
 
@@ -114,10 +114,10 @@ class SubjectController extends Controller
 
         $teachers = [];
         if (auth()->user()->role === 'admin') {
-            $teachers = DB::table('teachers')
-                ->join('users', 'teachers.user_id', '=', 'users.id')
-                ->select(['teachers.id', 'users.name'])
-                ->orderBy('users.name')
+            $teachers = DB::table('guru')
+                ->join('pengguna', 'guru.id_pengguna', '=', 'pengguna.id')
+                ->select(['guru.id', 'pengguna.nama as name'])
+                ->orderBy('pengguna.nama')
                 ->get();
         }
 

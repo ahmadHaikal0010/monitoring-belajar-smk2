@@ -26,17 +26,17 @@ class ReportExportService
         $format = $options['format'] ?? 'excel';
 
         // 1. Ambil data Mata Pelajaran & Pengajar
-        $subject = DB::table('subjects')
-            ->leftJoin('teachers', 'subjects.teacher_id', '=', 'teachers.id')
-            ->leftJoin('users', 'teachers.user_id', '=', 'users.id')
-            ->where('subjects.id', $subjectId)
+        $subject = DB::table('mata_pelajaran')
+            ->leftJoin('guru', 'mata_pelajaran.id_guru', '=', 'guru.id')
+            ->leftJoin('pengguna', 'guru.id_pengguna', '=', 'pengguna.id')
+            ->where('mata_pelajaran.id', $subjectId)
             ->select([
-                'subjects.id',
-                'subjects.title',
-                'subjects.code',
-                'subjects.description',
-                'users.name as teacher_name',
-                'teachers.nip as teacher_nip',
+                'mata_pelajaran.id',
+                'mata_pelajaran.judul as title',
+                'mata_pelajaran.kode as code',
+                'mata_pelajaran.deskripsi as description',
+                'pengguna.nama as teacher_name',
+                'guru.nip as teacher_nip',
             ])
             ->first();
 
@@ -45,29 +45,29 @@ class ReportExportService
         }
 
         // 2. Ambil seluruh siswa terdaftar pada mata pelajaran ini
-        $enrollments = DB::table('enrollments')
-            ->join('students', 'enrollments.student_id', '=', 'students.id')
-            ->join('users', 'students.user_id', '=', 'users.id')
-            ->where('enrollments.subject_id', $subjectId)
+        $enrollments = DB::table('pendaftaran')
+            ->join('siswa', 'pendaftaran.id_siswa', '=', 'siswa.id')
+            ->join('pengguna', 'siswa.id_pengguna', '=', 'pengguna.id')
+            ->where('pendaftaran.id_mata_pelajaran', $subjectId)
             ->select([
-                'enrollments.id as enrollment_id',
-                'enrollments.student_id',
-                'enrollments.status as enrollment_status',
-                'users.name as student_name',
-                'users.email as student_email',
-                'students.nisn',
-                'students.address',
+                'pendaftaran.id as enrollment_id',
+                'pendaftaran.id_siswa as student_id',
+                'pendaftaran.status as enrollment_status',
+                'pengguna.nama as student_name',
+                'pengguna.email as student_email',
+                'siswa.nisn',
+                'siswa.alamat as address',
             ])
-            ->orderBy('users.name', 'asc')
+            ->orderBy('pengguna.nama', 'asc')
             ->get();
 
         // 3. Ambil data Materi (jika dicentang)
         $materials = collect();
         $studentProgressMap = [];
         if ($includeMaterials) {
-            $materialsQuery = DB::table('materials')
-                ->where('subject_id', $subjectId)
-                ->select(['id', 'title', 'content_type'])
+            $materialsQuery = DB::table('materi')
+                ->where('id_mata_pelajaran', $subjectId)
+                ->select(['id', 'judul as title', 'tipe_konten as content_type'])
                 ->orderBy('created_at', 'asc');
 
             if (! empty($options['material_ids']) && is_array($options['material_ids'])) {
@@ -78,12 +78,12 @@ class ReportExportService
             $selectedMaterialIds = $materials->pluck('id')->toArray();
 
             if (! empty($selectedMaterialIds)) {
-                $progressRows = DB::table('student_progress')
-                    ->join('enrollments', 'student_progress.enrollment_id', '=', 'enrollments.id')
-                    ->where('enrollments.subject_id', $subjectId)
-                    ->where('student_progress.is_completed', true)
-                    ->whereIn('student_progress.material_id', $selectedMaterialIds)
-                    ->select(['enrollments.student_id', 'student_progress.material_id'])
+                $progressRows = DB::table('progres_siswa')
+                    ->join('pendaftaran', 'progres_siswa.id_pendaftaran', '=', 'pendaftaran.id')
+                    ->where('pendaftaran.id_mata_pelajaran', $subjectId)
+                    ->where('progres_siswa.selesai', true)
+                    ->whereIn('progres_siswa.id_materi', $selectedMaterialIds)
+                    ->select(['pendaftaran.id_siswa as student_id', 'progres_siswa.id_materi as material_id'])
                     ->get();
 
                 foreach ($progressRows as $row) {
@@ -96,10 +96,10 @@ class ReportExportService
         $exams = collect();
         $studentExamsMap = [];
         if ($includeExams) {
-            $examsQuery = DB::table('exams')
-                ->where('subject_id', $subjectId)
+            $examsQuery = DB::table('ujian')
+                ->where('id_mata_pelajaran', $subjectId)
                 ->where('status', 'published')
-                ->select(['id', 'title', 'pass_score', 'duration'])
+                ->select(['id', 'judul as title', 'nilai_kkm as pass_score', 'durasi as duration'])
                 ->orderBy('created_at', 'asc');
 
             if (! empty($options['exam_ids']) && is_array($options['exam_ids'])) {
@@ -110,16 +110,16 @@ class ReportExportService
             $selectedExamIds = $exams->pluck('id')->toArray();
 
             if (! empty($selectedExamIds)) {
-                $examSessions = DB::table('exam_sessions')
-                    ->join('exams', 'exam_sessions.exam_id', '=', 'exams.id')
-                    ->where('exams.subject_id', $subjectId)
-                    ->whereIn('exam_sessions.exam_id', $selectedExamIds)
+                $examSessions = DB::table('sesi_ujian')
+                    ->join('ujian', 'sesi_ujian.id_ujian', '=', 'ujian.id')
+                    ->where('ujian.id_mata_pelajaran', $subjectId)
+                    ->whereIn('sesi_ujian.id_ujian', $selectedExamIds)
                     ->select([
-                        'exam_sessions.student_id',
-                        'exam_sessions.exam_id',
-                        'exam_sessions.status as session_status',
-                        'exam_sessions.total_score',
-                        'exams.pass_score',
+                        'sesi_ujian.id_siswa as student_id',
+                        'sesi_ujian.id_ujian as exam_id',
+                        'sesi_ujian.status as session_status',
+                        'sesi_ujian.total_skor as total_score',
+                        'ujian.nilai_kkm as pass_score',
                     ])
                     ->get();
 
@@ -138,10 +138,10 @@ class ReportExportService
         $assignments = collect();
         $studentAssignmentsMap = [];
         if ($includeAssignments) {
-            $assignmentsQuery = DB::table('assignments')
-                ->where('subject_id', $subjectId)
+            $assignmentsQuery = DB::table('tugas')
+                ->where('id_mata_pelajaran', $subjectId)
                 ->where('status', 'published')
-                ->select(['id', 'title', 'max_score', 'due_date'])
+                ->select(['id', 'judul as title', 'skor_maksimal as max_score', 'tenggat_waktu as due_date'])
                 ->orderBy('created_at', 'asc');
 
             if (! empty($options['assignment_ids']) && is_array($options['assignment_ids'])) {
@@ -152,16 +152,16 @@ class ReportExportService
             $selectedAssignmentIds = $assignments->pluck('id')->toArray();
 
             if (! empty($selectedAssignmentIds)) {
-                $submissions = DB::table('assignment_submissions')
-                    ->join('assignments', 'assignment_submissions.assignment_id', '=', 'assignments.id')
-                    ->where('assignments.subject_id', $subjectId)
-                    ->whereIn('assignment_submissions.assignment_id', $selectedAssignmentIds)
+                $submissions = DB::table('pengumpulan_tugas')
+                    ->join('tugas', 'pengumpulan_tugas.id_tugas', '=', 'tugas.id')
+                    ->where('tugas.id_mata_pelajaran', $subjectId)
+                    ->whereIn('pengumpulan_tugas.id_tugas', $selectedAssignmentIds)
                     ->select([
-                        'assignment_submissions.student_id',
-                        'assignment_submissions.assignment_id',
-                        'assignment_submissions.status as submission_status',
-                        'assignment_submissions.score',
-                        'assignments.max_score',
+                        'pengumpulan_tugas.id_siswa as student_id',
+                        'pengumpulan_tugas.id_tugas as assignment_id',
+                        'pengumpulan_tugas.status as submission_status',
+                        'pengumpulan_tugas.skor as score',
+                        'tugas.skor_maksimal as max_score',
                     ])
                     ->get();
 

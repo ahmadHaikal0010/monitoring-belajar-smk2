@@ -24,12 +24,12 @@ class AssignmentSubmissionFileFactory extends Factory
 
         return [
             'id' => fake()->uuid(),
-            'assignment_submission_id' => AssignmentSubmission::factory(),
-            'file_path' => 'assignments/submissions/sample.'.$extension,
-            'file_name' => fake()->word().'.'.$extension,
-            'file_type' => $fileType,
-            'file_size' => fake()->numberBetween(10240, 5242880),
-            'mime_type' => $mime,
+            'id_pengumpulan_tugas' => AssignmentSubmission::factory(),
+            'jalur_berkas' => 'assignments/submissions/sample.'.$extension,
+            'nama_berkas' => fake()->word().'.'.$extension,
+            'tipe_berkas' => $fileType,
+            'ukuran_berkas' => fake()->numberBetween(10240, 5242880),
+            'tipe_mime' => $mime,
         ];
     }
 }

@@ -20,10 +20,10 @@ class StudentFactory extends Factory
     {
         return [
             'id' => fake()->uuid(),
-            'user_id' => User::factory(),
+            'id_pengguna' => User::factory(),
             'nisn' => fake()->unique()->numerify('##########'),
-            'address' => fake()->address(),
-            'photo' => null,
+            'alamat' => fake()->address(),
+            'foto' => null,
         ];
     }
 }

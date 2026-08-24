@@ -24,8 +24,8 @@ class StoreStudentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => ['required', 'exists:users,id', 'unique:students,user_id'],
-            'nisn' => ['required', 'string', 'size:10', 'unique:students,nisn'],
+            'user_id' => ['required', 'exists:pengguna,id', 'unique:siswa,id_pengguna'],
+            'nisn' => ['required', 'string', 'size:10', 'unique:siswa,nisn'],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'address' => ['required', 'string'],
         ];

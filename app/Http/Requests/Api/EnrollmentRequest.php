@@ -14,7 +14,7 @@ class EnrollmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'code' => ['required', 'string', 'exists:subjects,code'],
+            'code' => ['required', 'string', 'exists:mata_pelajaran,kode'],
         ];
     }
 

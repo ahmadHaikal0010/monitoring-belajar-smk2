@@ -25,12 +25,12 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            'nama' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'role' => fake()->randomElement(['admin', 'guru', 'siswa']),
-            'is_approved' => true,
+            'email_diverifikasi_pada' => now(),
+            'kata_sandi' => static::$password ??= Hash::make('password'),
+            'peran' => fake()->randomElement(['admin', 'guru', 'siswa']),
+            'disetujui' => true,
             'remember_token' => Str::random(10),
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
@@ -44,7 +44,7 @@ class UserFactory extends Factory
     public function unverified(): static
     {
         return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
+            'email_diverifikasi_pada' => null,
         ]);
     }
 
@@ -54,7 +54,7 @@ class UserFactory extends Factory
     public function unapproved(): static
     {
         return $this->state(fn (array $attributes) => [
-            'is_approved' => false,
+            'disetujui' => false,
         ]);
     }
 

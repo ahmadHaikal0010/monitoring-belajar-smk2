@@ -15,7 +15,7 @@ class StoreQuestionRequest extends FormRequest
     {
         return [
             'question_text' => ['required', 'string'],
-            'material_id' => ['nullable', 'string', 'exists:materials,id'],
+            'material_id' => ['nullable', 'string', 'exists:materi,id'],
             'question_type' => ['required', 'in:multiple_choice,essay'],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'remove_image' => ['nullable', 'boolean'],

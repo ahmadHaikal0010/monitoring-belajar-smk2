@@ -21,11 +21,11 @@ class ExamSessionFactory extends Factory
     {
         return [
             'id' => fake()->uuid(),
-            'exam_id' => Exam::factory(),
-            'student_id' => Student::factory(),
-            'started_at' => now(),
-            'submitted_at' => null,
-            'total_score' => null,
+            'id_ujian' => Exam::factory(),
+            'id_siswa' => Student::factory(),
+            'dimulai_pada' => now(),
+            'dikumpulkan_pada' => null,
+            'total_skor' => null,
             'status' => 'in_progress',
         ];
     }

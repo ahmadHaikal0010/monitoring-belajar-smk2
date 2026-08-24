@@ -6,7 +6,7 @@ interface TeacherRepositoryInterface
 {
     public function create(array $data);
 
-    public function getByUserId(int $userId);
+    public function getByUserId(string|int $userId);
 
     public function getPaginated(array $filters = [], int $perPage = 10);
 

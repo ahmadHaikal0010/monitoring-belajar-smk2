@@ -35,9 +35,9 @@ class ResetSemesterCommandTest extends TestCase
             ->assertExitCode(0);
 
         // Assert database is empty for these tables
-        $this->assertDatabaseCount('subjects', 0);
-        $this->assertDatabaseCount('materials', 0);
-        $this->assertDatabaseCount('enrollments', 0);
+        $this->assertDatabaseCount('mata_pelajaran', 0);
+        $this->assertDatabaseCount('materi', 0);
+        $this->assertDatabaseCount('pendaftaran', 0);
 
         // Assert files are deleted
         Storage::disk('public')->assertMissing('materials/documents/test.pdf');
@@ -53,6 +53,6 @@ class ResetSemesterCommandTest extends TestCase
             ->expectsOutput('Proses reset semester dibatalkan.')
             ->assertExitCode(0);
 
-        $this->assertDatabaseCount('subjects', 1);
+        $this->assertDatabaseCount('mata_pelajaran', 1);
     }
 }

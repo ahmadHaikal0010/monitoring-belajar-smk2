@@ -114,7 +114,7 @@ class UserTest extends TestCase
         $response = $this->actingAs($admin)->delete(route('admin.users.destroy', ['user' => $admin->id]));
 
         $response->assertStatus(403);
-        $this->assertDatabaseHas('users', ['id' => $admin->id]);
+        $this->assertDatabaseHas('pengguna', ['id' => $admin->id]);
     }
 
     public function test_unapproved_user_is_redirected_to_pending()

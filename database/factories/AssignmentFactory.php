@@ -21,13 +21,13 @@ class AssignmentFactory extends Factory
     {
         return [
             'id' => fake()->uuid(),
-            'subject_id' => Subject::factory(),
-            'teacher_id' => Teacher::factory(),
-            'title' => fake()->sentence(4),
-            'description' => fake()->paragraph(),
-            'due_date' => now()->addDays(7),
-            'max_score' => 100,
-            'allowed_file_types' => ['image', 'pdf'],
+            'id_mata_pelajaran' => Subject::factory(),
+            'id_guru' => Teacher::factory(),
+            'judul' => fake()->sentence(4),
+            'deskripsi' => fake()->paragraph(),
+            'tenggat_waktu' => now()->addDays(7),
+            'skor_maksimal' => 100,
+            'tipe_berkas_diizinkan' => ['image', 'pdf'],
             'status' => 'published',
         ];
     }

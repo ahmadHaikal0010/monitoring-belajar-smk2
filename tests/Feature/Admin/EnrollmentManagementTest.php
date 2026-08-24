@@ -92,7 +92,7 @@ class EnrollmentManagementTest extends TestCase
         $response = $this->actingAs($this->teacherUser)->delete(route('admin.enrollments.destroy', $enrollment->id));
 
         $response->assertRedirect();
-        $this->assertDatabaseMissing('enrollments', ['id' => $enrollment->id]);
+        $this->assertDatabaseMissing('pendaftaran', ['id' => $enrollment->id]);
     }
 
     public function test_guru_cannot_delete_enrollment_from_other_teacher_subject()
@@ -103,6 +103,6 @@ class EnrollmentManagementTest extends TestCase
         $response = $this->actingAs($this->teacherUser)->delete(route('admin.enrollments.destroy', $enrollment->id));
 
         $response->assertStatus(403);
-        $this->assertDatabaseHas('enrollments', ['id' => $enrollment->id]);
+        $this->assertDatabaseHas('pendaftaran', ['id' => $enrollment->id]);
     }
 }

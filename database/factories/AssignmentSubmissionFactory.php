@@ -21,12 +21,12 @@ class AssignmentSubmissionFactory extends Factory
     {
         return [
             'id' => fake()->uuid(),
-            'assignment_id' => Assignment::factory(),
-            'student_id' => Student::factory(),
-            'submitted_at' => now(),
-            'notes' => fake()->optional()->sentence(),
-            'score' => fake()->optional()->randomFloat(1, 60, 100),
-            'feedback' => fake()->optional()->sentence(),
+            'id_tugas' => Assignment::factory(),
+            'id_siswa' => Student::factory(),
+            'dikumpulkan_pada' => now(),
+            'catatan' => fake()->optional()->sentence(),
+            'skor' => fake()->optional()->randomFloat(1, 60, 100),
+            'umpan_balik' => fake()->optional()->sentence(),
             'status' => 'submitted',
         ];
     }

@@ -28,11 +28,11 @@ class MaterialFactory extends Factory
 
         return [
             'id' => fake()->uuid(),
-            'subject_id' => Subject::factory(),
-            'title' => fake()->sentence(4),
-            'content_type' => $type,
-            'content_body' => $body,
-            'description' => fake()->optional()->paragraph(),
+            'id_mata_pelajaran' => Subject::factory(),
+            'judul' => fake()->sentence(4),
+            'tipe_konten' => $type,
+            'isi_konten' => $body,
+            'deskripsi' => fake()->optional()->paragraph(),
         ];
     }
 }

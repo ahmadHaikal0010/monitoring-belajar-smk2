@@ -34,7 +34,7 @@ class UpdateTeacherRequest extends FormRequest
                 'required',
                 'string',
                 'size:18',
-                Rule::unique('teachers', 'nip')->ignore($teacher->id),
+                Rule::unique('guru', 'nip')->ignore($teacher->id),
             ],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'bio' => ['nullable', 'string', 'max:255'],

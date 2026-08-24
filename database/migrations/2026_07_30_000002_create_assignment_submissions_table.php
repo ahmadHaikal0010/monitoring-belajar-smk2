@@ -11,20 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('assignment_submissions', function (Blueprint $table) {
+        Schema::create('pengumpulan_tugas', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('assignment_id')->constrained('assignments')->onDelete('cascade');
-            $table->foreignUuid('student_id')->constrained('students')->onDelete('cascade');
-            $table->timestamp('submitted_at');
-            $table->text('notes')->nullable();
-            $table->float('score')->nullable();
-            $table->text('feedback')->nullable();
+            $table->foreignUuid('id_tugas')->constrained('tugas')->onDelete('cascade');
+            $table->foreignUuid('id_siswa')->constrained('siswa')->onDelete('cascade');
+            $table->timestamp('dikumpulkan_pada');
+            $table->text('catatan')->nullable();
+            $table->float('skor')->nullable();
+            $table->text('umpan_balik')->nullable();
             $table->enum('status', ['submitted', 'graded', 'late', 'returned'])->default('submitted');
             $table->timestamps();
 
-            $table->unique(['assignment_id', 'student_id']);
-            $table->index('assignment_id');
-            $table->index('student_id');
+            $table->unique(['id_tugas', 'id_siswa']);
+            $table->index('id_tugas');
+            $table->index('id_siswa');
         });
     }
 
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('assignment_submissions');
+        Schema::dropIfExists('pengumpulan_tugas');
     }
 };

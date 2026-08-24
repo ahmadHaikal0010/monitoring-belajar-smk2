@@ -16,8 +16,8 @@ class RegisterRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'nisn' => 'required|string|size:10|unique:students',
+            'email' => 'required|string|email|max:255|unique:pengguna,email',
+            'nisn' => 'required|string|size:10|unique:siswa,nisn',
             'address' => 'required|string',
             'password' => ['required', 'confirmed', Password::defaults()],
         ];

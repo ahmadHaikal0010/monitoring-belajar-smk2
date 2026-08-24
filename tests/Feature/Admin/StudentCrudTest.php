@@ -54,12 +54,12 @@ class StudentCrudTest extends TestCase
         ]);
 
         $response->assertRedirect(route('admin.students.index'));
-        $this->assertDatabaseHas('students', [
-            'user_id' => $user->id,
+        $this->assertDatabaseHas('siswa', [
+            'id_pengguna' => $user->id,
             'nisn' => '1234567890',
         ]);
 
-        $student = Student::where('user_id', $user->id)->first();
+        $student = Student::where('id_pengguna', $user->id)->first();
         Storage::disk('public')->assertExists($student->photo);
     }
 
@@ -75,10 +75,10 @@ class StudentCrudTest extends TestCase
         ]);
 
         $response->assertRedirect(route('admin.students.index'));
-        $this->assertDatabaseHas('students', [
+        $this->assertDatabaseHas('siswa', [
             'id' => $student->id,
             'nisn' => '2222222222',
-            'address' => 'Alamat Baru',
+            'alamat' => 'Alamat Baru',
         ]);
 
         Storage::disk('public')->assertExists(Student::find($student->id)->photo);
@@ -91,6 +91,6 @@ class StudentCrudTest extends TestCase
         $response = $this->actingAs($this->admin)->delete(route('admin.students.destroy', $student->id));
 
         $response->assertRedirect(route('admin.students.index'));
-        $this->assertDatabaseMissing('students', ['id' => $student->id]);
+        $this->assertDatabaseMissing('siswa', ['id' => $student->id]);
     }
 }
