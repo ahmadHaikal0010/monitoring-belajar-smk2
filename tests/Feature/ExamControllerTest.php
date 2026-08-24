@@ -57,11 +57,11 @@ class ExamControllerTest extends TestCase
         ]);
 
         $response->assertRedirect(route('teacher.exams.index', ['subject_id' => $subject->id]));
-        $this->assertDatabaseHas('exams', [
-            'subject_id' => $subject->id,
-            'teacher_id' => $teacher->id,
-            'title' => 'Ujian Akhir Semester',
-            'duration' => 90,
+        $this->assertDatabaseHas('ujian', [
+            'id_mata_pelajaran' => $subject->id,
+            'id_guru' => $teacher->id,
+            'judul' => 'Ujian Akhir Semester',
+            'durasi' => 90,
         ]);
     }
 
@@ -85,14 +85,14 @@ class ExamControllerTest extends TestCase
         ]);
 
         $response->assertRedirect(route('teacher.exams.show', $exam->id));
-        $this->assertDatabaseHas('questions', [
-            'exam_id' => $exam->id,
-            'question_text' => 'Berapa 5 x 5?',
-            'score' => 5.0,
+        $this->assertDatabaseHas('soal', [
+            'id_ujian' => $exam->id,
+            'teks_soal' => 'Berapa 5 x 5?',
+            'bobot_skor' => 5.0,
         ]);
-        $this->assertDatabaseHas('options', [
-            'option_text' => '25',
-            'is_correct' => true,
+        $this->assertDatabaseHas('opsi_jawaban', [
+            'teks_opsi' => '25',
+            'benar' => true,
         ]);
     }
 
@@ -107,6 +107,6 @@ class ExamControllerTest extends TestCase
         $response = $this->actingAs($user)->delete(route('teacher.exams.questions.destroy', [$exam->id, $question->id]));
 
         $response->assertRedirect(route('teacher.exams.show', $exam->id));
-        $this->assertDatabaseMissing('questions', ['id' => $question->id]);
+        $this->assertDatabaseMissing('soal', ['id' => $question->id]);
     }
 }

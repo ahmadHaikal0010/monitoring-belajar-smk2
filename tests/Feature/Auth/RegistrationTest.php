@@ -32,11 +32,11 @@ class RegistrationTest extends TestCase
             'success' => true,
         ]);
 
-        $this->assertDatabaseHas('users', [
-            'name' => 'Siswa Baru Mobile',
+        $this->assertDatabaseHas('pengguna', [
+            'nama' => 'Siswa Baru Mobile',
             'email' => 'siswabaru@example.com',
-            'role' => 'siswa',
-            'is_approved' => false,
+            'peran' => 'siswa',
+            'disetujui' => false,
         ]);
     }
 }

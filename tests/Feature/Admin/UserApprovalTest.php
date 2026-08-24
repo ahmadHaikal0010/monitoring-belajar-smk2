@@ -51,9 +51,9 @@ class UserApprovalTest extends TestCase
         $response->assertRedirect(route('admin.users.approval'));
         $response->assertSessionHas('success');
 
-        $this->assertDatabaseHas('users', [
+        $this->assertDatabaseHas('pengguna', [
             'id' => $user->id,
-            'is_approved' => true,
+            'disetujui' => true,
         ]);
     }
 
@@ -69,9 +69,9 @@ class UserApprovalTest extends TestCase
         $response = $this->actingAs($teacher)->put(route('admin.users.approve', ['id' => $user->id]));
 
         $response->assertStatus(403);
-        $this->assertDatabaseHas('users', [
+        $this->assertDatabaseHas('pengguna', [
             'id' => $user->id,
-            'is_approved' => false,
+            'disetujui' => false,
         ]);
     }
 }

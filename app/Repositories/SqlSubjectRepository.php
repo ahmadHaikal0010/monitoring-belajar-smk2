@@ -13,12 +13,12 @@ class SqlSubjectRepository implements SubjectRepositoryInterface
     {
         $code = $this->generateUniqueCode();
 
-        DB::table('subjects')->insert([
+        DB::table('mata_pelajaran')->insert([
             'id' => (string) Uuid::v7(),
-            'teacher_id' => $data['teacher_id'],
-            'title' => $data['title'],
-            'code' => $data['code'] ?? $code,
-            'description' => $data['description'] ?? null,
+            'id_guru' => $data['teacher_id'],
+            'judul' => $data['title'],
+            'kode' => $data['code'] ?? $code,
+            'deskripsi' => $data['description'] ?? null,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -28,7 +28,7 @@ class SqlSubjectRepository implements SubjectRepositoryInterface
     {
         do {
             $code = strtoupper(Str::random(6));
-        } while (DB::table('subjects')->where('code', $code)->exists());
+        } while (DB::table('mata_pelajaran')->where('kode', $code)->exists());
 
         return $code;
     }
@@ -38,63 +38,65 @@ class SqlSubjectRepository implements SubjectRepositoryInterface
         $driver = DB::getDriverName();
         $likeOperator = $driver === 'pgsql' ? 'ilike' : 'like';
 
-        $query = DB::table('subjects')
-            ->join('teachers', 'subjects.teacher_id', '=', 'teachers.id')
-            ->join('users', 'teachers.user_id', '=', 'users.id')
+        $query = DB::table('mata_pelajaran')
+            ->join('guru', 'mata_pelajaran.id_guru', '=', 'guru.id')
+            ->join('pengguna', 'guru.id_pengguna', '=', 'pengguna.id')
             ->select([
-                'subjects.id',
-                'subjects.teacher_id',
-                'teachers.user_id as teacher_user_id',
-                'subjects.title',
-                'subjects.code',
-                'subjects.description',
-                'subjects.created_at',
-                'users.name as teacher_name',
-                'users.email as teacher_email',
+                'mata_pelajaran.id',
+                'mata_pelajaran.id_guru as teacher_id',
+                'guru.id_pengguna as teacher_user_id',
+                'mata_pelajaran.judul as title',
+                'mata_pelajaran.kode as code',
+                'mata_pelajaran.deskripsi as description',
+                'mata_pelajaran.created_at',
+                'pengguna.nama as teacher_name',
+                'pengguna.email as teacher_email',
             ]);
 
         if (! empty($filters['teacher_id'])) {
-            $query->where('subjects.teacher_id', $filters['teacher_id']);
+            $query->where('mata_pelajaran.id_guru', $filters['teacher_id']);
         }
 
         if (! empty($filters['search'])) {
             $query->where(function ($q) use ($filters, $likeOperator) {
-                $q->where('subjects.title', $likeOperator, '%'.$filters['search'].'%')
-                    ->orWhere('subjects.description', $likeOperator, '%'.$filters['search'].'%')
-                    ->orWhere('users.name', $likeOperator, '%'.$filters['search'].'%')
-                    ->orWhere('users.email', $likeOperator, '%'.$filters['search'].'%');
+                $q->where('mata_pelajaran.judul', $likeOperator, '%'.$filters['search'].'%')
+                    ->orWhere('mata_pelajaran.deskripsi', $likeOperator, '%'.$filters['search'].'%')
+                    ->orWhere('pengguna.nama', $likeOperator, '%'.$filters['search'].'%')
+                    ->orWhere('pengguna.email', $likeOperator, '%'.$filters['search'].'%');
             });
         }
 
-        $sortField = $filters['sort'] ?? 'subjects.title';
+        $sortField = $filters['sort'] ?? 'mata_pelajaran.judul';
         $sortDirection = $filters['direction'] ?? 'asc';
 
-        $allowedSorts = ['subjects.title', 'subjects.created_at', 'users.name'];
-        if (in_array($sortField, $allowedSorts)) {
-            $query->orderBy($sortField, $sortDirection);
-        } else {
-            $query->orderBy('subjects.title', 'asc');
-        }
+        $sortFieldMap = [
+            'subjects.title' => 'mata_pelajaran.judul',
+            'subjects.created_at' => 'mata_pelajaran.created_at',
+            'users.name' => 'pengguna.nama',
+        ];
+
+        $dbSortField = $sortFieldMap[$sortField] ?? ($sortFieldMap[$sortField] ?? 'mata_pelajaran.judul');
+        $query->orderBy($dbSortField, $sortDirection);
 
         return $query->paginate($perPage)->withQueryString();
     }
 
     public function find(string $id)
     {
-        return DB::table('subjects')
-            ->join('teachers', 'subjects.teacher_id', '=', 'teachers.id')
-            ->join('users', 'teachers.user_id', '=', 'users.id')
-            ->where('subjects.id', $id)
+        return DB::table('mata_pelajaran')
+            ->join('guru', 'mata_pelajaran.id_guru', '=', 'guru.id')
+            ->join('pengguna', 'guru.id_pengguna', '=', 'pengguna.id')
+            ->where('mata_pelajaran.id', $id)
             ->select([
-                'subjects.id',
-                'subjects.teacher_id',
-                'teachers.user_id as teacher_user_id',
-                'subjects.title',
-                'subjects.code',
-                'subjects.description',
-                'subjects.created_at',
-                'users.name as teacher_name',
-                'users.email as teacher_email',
+                'mata_pelajaran.id',
+                'mata_pelajaran.id_guru as teacher_id',
+                'guru.id_pengguna as teacher_user_id',
+                'mata_pelajaran.judul as title',
+                'mata_pelajaran.kode as code',
+                'mata_pelajaran.deskripsi as description',
+                'mata_pelajaran.created_at',
+                'pengguna.nama as teacher_name',
+                'pengguna.email as teacher_email',
             ])
             ->first();
     }
@@ -102,41 +104,50 @@ class SqlSubjectRepository implements SubjectRepositoryInterface
     public function update(string $id, array $data)
     {
         $updateData = [
-            'teacher_id' => $data['teacher_id'],
-            'title' => $data['title'],
-            'description' => $data['description'] ?? null,
+            'id_guru' => $data['teacher_id'],
+            'judul' => $data['title'],
+            'deskripsi' => $data['description'] ?? null,
             'updated_at' => now(),
         ];
 
         if (isset($data['code'])) {
-            $updateData['code'] = $data['code'];
+            $updateData['kode'] = $data['code'];
         }
 
-        DB::table('subjects')
+        DB::table('mata_pelajaran')
             ->where('id', $id)
             ->update($updateData);
     }
 
     public function delete(string $id)
     {
-        DB::table('subjects')
+        DB::table('mata_pelajaran')
             ->where('id', $id)
             ->delete();
     }
 
     public function getTeacherSubjects(string $teacherId)
     {
-        return DB::table('subjects')
-            ->where('teacher_id', $teacherId)
-            ->select(['id', 'title'])
-            ->orderBy('title', 'asc')
+        return DB::table('mata_pelajaran')
+            ->where('id_guru', $teacherId)
+            ->select(['id', 'judul as title'])
+            ->orderBy('judul', 'asc')
             ->get();
     }
 
     public function getMaterials(string $id)
     {
-        return DB::table('materials')
-            ->where('subject_id', $id)
+        return DB::table('materi')
+            ->where('id_mata_pelajaran', $id)
+            ->select([
+                'id',
+                'id_mata_pelajaran as subject_id',
+                'judul as title',
+                'tipe_konten as content_type',
+                'isi_konten as content_body',
+                'deskripsi as description',
+                'created_at',
+            ])
             ->orderBy('created_at', 'asc')
             ->get();
     }

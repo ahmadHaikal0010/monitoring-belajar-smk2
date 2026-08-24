@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('options', function (Blueprint $table) {
+        Schema::create('opsi_jawaban', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('question_id')->constrained('questions')->onDelete('cascade');
-            $table->text('option_text');
-            $table->boolean('is_correct')->default(false);
-            $table->integer('order')->default(0);
+            $table->foreignUuid('id_soal')->constrained('soal')->onDelete('cascade');
+            $table->text('teks_opsi');
+            $table->boolean('benar')->default(false);
+            $table->integer('urutan')->default(0);
             $table->timestamps();
 
             $table->index('id');
-            $table->index('question_id');
+            $table->index('id_soal');
         });
     }
 
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('options');
+        Schema::dropIfExists('opsi_jawaban');
     }
 };

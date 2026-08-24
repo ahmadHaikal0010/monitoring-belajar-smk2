@@ -6,7 +6,9 @@ use App\Models\Assignment;
 use App\Models\AssignmentSubmission;
 use App\Models\AssignmentSubmissionFile;
 use App\Repositories\Interfaces\AssignmentRepositoryInterface;
+use Carbon\CarbonInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class SqlAssignmentRepository implements AssignmentRepositoryInterface
@@ -18,11 +20,11 @@ class SqlAssignmentRepository implements AssignmentRepositoryInterface
             ->withCount('submissions');
 
         if (! empty($filters['subject_id'])) {
-            $query->where('subject_id', $filters['subject_id']);
+            $query->where('id_mata_pelajaran', $filters['subject_id']);
         }
 
         if (! empty($filters['teacher_id'])) {
-            $query->where('teacher_id', $filters['teacher_id']);
+            $query->where('id_guru', $filters['teacher_id']);
         }
 
         if (! empty($filters['status'])) {
@@ -32,8 +34,8 @@ class SqlAssignmentRepository implements AssignmentRepositoryInterface
         if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+                $q->where('judul', 'like', "%{$search}%")
+                    ->orWhere('deskripsi', 'like', "%{$search}%");
             });
         }
 
@@ -86,13 +88,13 @@ class SqlAssignmentRepository implements AssignmentRepositoryInterface
 
         $submissions = AssignmentSubmission::query()
             ->with(['student.user', 'files'])
-            ->where('assignment_id', $assignmentId);
+            ->where('id_tugas', $assignmentId);
 
         if (! empty($filters['status'])) {
             $submissions->where('status', $filters['status']);
         }
 
-        return $submissions->orderBy('submitted_at', 'desc')->get()->toArray();
+        return $submissions->orderBy('dikumpulkan_pada', 'desc')->get()->toArray();
     }
 
     public function getSubmissionById(string $submissionId): ?AssignmentSubmission
@@ -106,12 +108,12 @@ class SqlAssignmentRepository implements AssignmentRepositoryInterface
         return DB::transaction(function () use ($submissionData, $files) {
             $submission = AssignmentSubmission::updateOrCreate(
                 [
-                    'assignment_id' => $submissionData['assignment_id'],
-                    'student_id' => $submissionData['student_id'],
+                    'id_tugas' => $submissionData['assignment_id'] ?? $submissionData['id_tugas'],
+                    'id_siswa' => $submissionData['student_id'] ?? $submissionData['id_siswa'],
                 ],
                 [
-                    'submitted_at' => now(),
-                    'notes' => $submissionData['notes'] ?? null,
+                    'dikumpulkan_pada' => now(),
+                    'catatan' => $submissionData['notes'] ?? $submissionData['catatan'] ?? null,
                     'status' => 'submitted',
                 ]
             );
@@ -119,12 +121,12 @@ class SqlAssignmentRepository implements AssignmentRepositoryInterface
             if (! empty($files)) {
                 foreach ($files as $fileData) {
                     AssignmentSubmissionFile::create([
-                        'assignment_submission_id' => $submission->id,
-                        'file_path' => $fileData['file_path'],
-                        'file_name' => $fileData['file_name'],
-                        'file_type' => $fileData['file_type'],
-                        'file_size' => $fileData['file_size'] ?? null,
-                        'mime_type' => $fileData['mime_type'] ?? null,
+                        'id_pengumpulan_tugas' => $submission->id,
+                        'jalur_berkas' => $fileData['file_path'],
+                        'nama_berkas' => $fileData['file_name'],
+                        'tipe_berkas' => $fileData['file_type'],
+                        'ukuran_berkas' => $fileData['file_size'] ?? null,
+                        'tipe_mime' => $fileData['mime_type'] ?? null,
                     ]);
                 }
             }
@@ -141,35 +143,42 @@ class SqlAssignmentRepository implements AssignmentRepositoryInterface
         }
 
         return $submission->update([
-            'score' => $score,
-            'feedback' => $feedback,
+            'skor' => $score,
+            'umpan_balik' => $feedback,
             'status' => 'graded',
         ]);
     }
 
     public function getStudentAssignmentsForSubject(string $subjectId, string $studentId): array
     {
-        $assignments = Assignment::where('subject_id', $subjectId)
+        $assignments = Assignment::where('id_mata_pelajaran', $subjectId)
             ->where('status', 'published')
             ->orderBy('created_at', 'asc')
             ->get();
 
         return $assignments->map(function ($assignment) use ($studentId) {
             $submission = AssignmentSubmission::with('files')
-                ->where('assignment_id', $assignment->id)
-                ->where('student_id', $studentId)
+                ->where('id_tugas', $assignment->id)
+                ->where('id_siswa', $studentId)
                 ->first();
 
-            return [
-                'id' => $assignment->id,
-                'title' => $assignment->title,
-                'description' => $assignment->description,
-                'due_date' => $assignment->due_date?->toIso8601String(),
-                'max_score' => $assignment->max_score,
-                'allowed_file_types' => $assignment->allowed_file_types,
-                'submission' => $submission ? [
+            $dueDate = $assignment->due_date;
+            $dueDateIso = null;
+            if ($dueDate) {
+                $dueDateIso = $dueDate instanceof CarbonInterface ? $dueDate->toIso8601String() : Carbon::parse($dueDate)->toIso8601String();
+            }
+
+            $submissionData = null;
+            if ($submission) {
+                $submittedAt = $submission->submitted_at;
+                $submittedAtIso = null;
+                if ($submittedAt) {
+                    $submittedAtIso = $submittedAt instanceof CarbonInterface ? $submittedAt->toIso8601String() : Carbon::parse($submittedAt)->toIso8601String();
+                }
+
+                $submissionData = [
                     'id' => $submission->id,
-                    'submitted_at' => $submission->submitted_at->toIso8601String(),
+                    'submitted_at' => $submittedAtIso,
                     'notes' => $submission->notes,
                     'score' => $submission->score,
                     'feedback' => $submission->feedback,
@@ -180,7 +189,17 @@ class SqlAssignmentRepository implements AssignmentRepositoryInterface
                         'file_name' => $f->file_name,
                         'file_type' => $f->file_type,
                     ]),
-                ] : null,
+                ];
+            }
+
+            return [
+                'id' => $assignment->id,
+                'title' => $assignment->title,
+                'description' => $assignment->description,
+                'due_date' => $dueDateIso,
+                'max_score' => $assignment->max_score,
+                'allowed_file_types' => $assignment->allowed_file_types,
+                'submission' => $submissionData,
             ];
         })->toArray();
     }

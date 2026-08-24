@@ -105,10 +105,10 @@ class SubjectTest extends TestCase
         $response = $this->actingAs($teacherUser)->delete(route('teacher.subjects.destroy', ['subject' => $subject->id]));
 
         $response->assertRedirect(route('teacher.subjects.index'));
-        $this->assertDatabaseMissing('materials', [
-            'subject_id' => $subject->id,
+        $this->assertDatabaseMissing('materi', [
+            'id_mata_pelajaran' => $subject->id,
         ]);
-        $this->assertDatabaseMissing('subjects', [
+        $this->assertDatabaseMissing('mata_pelajaran', [
             'id' => $subject->id,
         ]);
     }

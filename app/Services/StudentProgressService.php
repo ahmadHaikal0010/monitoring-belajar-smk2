@@ -59,30 +59,30 @@ class StudentProgressService
         $materials = $this->materialRepository->getBySubjectId($subjectId);
         $progress = $this->progressRepository->getByEnrollment($enrollment->id);
 
-        $completedMaterialIds = $progress->where('is_completed', true)->pluck('material_id')->toArray();
+        $completedMaterialIds = $progress->filter(fn ($p) => $p->is_completed || $p->selesai)->map(fn ($p) => $p->material_id ?? $p->id_materi)->values()->toArray();
 
         $totalMaterials = count($materials);
         $completedMaterials = count($completedMaterialIds);
         $percentage = $totalMaterials > 0 ? round(($completedMaterials / $totalMaterials) * 100) : 0;
 
-        $examResults = DB::table('exams')
-            ->leftJoin('exam_sessions', function ($join) use ($studentId) {
-                $join->on('exams.id', '=', 'exam_sessions.exam_id')
-                    ->where('exam_sessions.student_id', '=', $studentId);
+        $examResults = DB::table('ujian')
+            ->leftJoin('sesi_ujian', function ($join) use ($studentId) {
+                $join->on('ujian.id', '=', 'sesi_ujian.id_ujian')
+                    ->where('sesi_ujian.id_siswa', '=', $studentId);
             })
-            ->where('exams.subject_id', $subjectId)
-            ->where('exams.status', 'published')
+            ->where('ujian.id_mata_pelajaran', $subjectId)
+            ->where('ujian.status', 'published')
             ->select([
-                'exams.id as exam_id',
-                'exams.title as exam_title',
-                'exams.pass_score',
-                'exams.duration',
-                'exam_sessions.id as session_id',
-                'exam_sessions.status as session_status',
-                'exam_sessions.total_score',
-                'exam_sessions.submitted_at',
+                'ujian.id as exam_id',
+                'ujian.judul as exam_title',
+                'ujian.nilai_kkm as pass_score',
+                'ujian.durasi as duration',
+                'sesi_ujian.id as session_id',
+                'sesi_ujian.status as session_status',
+                'sesi_ujian.total_skor as total_score',
+                'sesi_ujian.dikumpulkan_pada as submitted_at',
             ])
-            ->orderBy('exams.created_at', 'asc')
+            ->orderBy('ujian.created_at', 'asc')
             ->get()
             ->map(function ($item) {
                 $item->is_passed = $item->total_score !== null ? ((float) $item->total_score >= (float) $item->pass_score) : null;

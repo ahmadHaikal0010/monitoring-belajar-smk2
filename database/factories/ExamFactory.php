@@ -21,17 +21,17 @@ class ExamFactory extends Factory
     {
         return [
             'id' => fake()->uuid(),
-            'subject_id' => Subject::factory(),
-            'teacher_id' => Teacher::factory(),
-            'title' => fake()->sentence(3),
-            'description' => fake()->optional()->paragraph(),
-            'duration' => fake()->randomElement([30, 60, 90, 120]),
-            'pass_score' => 75,
-            'randomize_questions' => fake()->boolean(),
-            'randomize_options' => fake()->boolean(),
+            'id_mata_pelajaran' => Subject::factory(),
+            'id_guru' => Teacher::factory(),
+            'judul' => fake()->sentence(3),
+            'deskripsi' => fake()->optional()->paragraph(),
+            'durasi' => fake()->randomElement([30, 60, 90, 120]),
+            'nilai_kkm' => 75,
+            'acak_soal' => fake()->boolean(),
+            'acak_opsi' => fake()->boolean(),
             'status' => 'published',
-            'start_time' => now(),
-            'end_time' => now()->addDays(7),
+            'waktu_mulai' => now(),
+            'waktu_selesai' => now()->addDays(7),
         ];
     }
 }

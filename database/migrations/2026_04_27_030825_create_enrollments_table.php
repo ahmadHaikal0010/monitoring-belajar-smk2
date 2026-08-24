@@ -11,17 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('enrollments', function (Blueprint $table) {
+        Schema::create('pendaftaran', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('student_id')->constrained('students')->onDelete('cascade');
-            $table->foreignUuid('subject_id')->constrained('subjects')->onDelete('cascade');
+            $table->foreignUuid('id_siswa')->constrained('siswa')->onDelete('cascade');
+            $table->foreignUuid('id_mata_pelajaran')->constrained('mata_pelajaran')->onDelete('cascade');
             $table->enum('status', ['enrolled', 'completed', 'dropped'])->default('enrolled');
-            $table->timestamp('enrolled_at')->useCurrent();
+            $table->timestamp('terdaftar_pada')->useCurrent();
             $table->timestamps();
 
             $table->index('id');
-            $table->index('student_id');
-            $table->index('subject_id');
+            $table->index('id_siswa');
+            $table->index('id_mata_pelajaran');
         });
     }
 
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('enrollments');
+        Schema::dropIfExists('pendaftaran');
     }
 };

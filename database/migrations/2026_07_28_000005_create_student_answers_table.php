@@ -11,19 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('student_answers', function (Blueprint $table) {
+        Schema::create('jawaban_siswa', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('exam_session_id')->constrained('exam_sessions')->onDelete('cascade');
-            $table->foreignUuid('question_id')->constrained('questions')->onDelete('cascade');
-            $table->foreignUuid('selected_option_id')->nullable()->constrained('options')->onDelete('cascade');
-            $table->text('essay_answer')->nullable();
-            $table->boolean('is_correct')->nullable();
-            $table->float('score_earned')->default(0.0);
+            $table->foreignUuid('id_sesi_ujian')->constrained('sesi_ujian')->onDelete('cascade');
+            $table->foreignUuid('id_soal')->constrained('soal')->onDelete('cascade');
+            $table->foreignUuid('id_opsi_dipilih')->nullable()->constrained('opsi_jawaban')->onDelete('cascade');
+            $table->text('jawaban_esai')->nullable();
+            $table->boolean('benar')->nullable();
+            $table->float('skor_diperoleh')->default(0.0);
             $table->timestamps();
 
             $table->index('id');
-            $table->index('exam_session_id');
-            $table->index('question_id');
+            $table->index('id_sesi_ujian');
+            $table->index('id_soal');
         });
     }
 
@@ -32,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('student_answers');
+        Schema::dropIfExists('jawaban_siswa');
     }
 };

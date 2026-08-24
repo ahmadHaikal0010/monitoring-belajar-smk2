@@ -10,38 +10,54 @@ class SqlStudentProgressRepository implements StudentProgressRepositoryInterface
 {
     public function getByEnrollmentAndMaterial(string $enrollmentId, string $materialId): ?StudentProgress
     {
-        return StudentProgress::where('enrollment_id', $enrollmentId)
-            ->where('material_id', $materialId)
+        return StudentProgress::where('id_pendaftaran', $enrollmentId)
+            ->where('id_materi', $materialId)
             ->first();
     }
 
     public function updateOrCreate(array $criteria, array $data): StudentProgress
     {
-        return StudentProgress::updateOrCreate($criteria, $data);
+        $dbCriteria = [];
+        if (isset($criteria['enrollment_id'])) {
+            $dbCriteria['id_pendaftaran'] = $criteria['enrollment_id'];
+        }
+        if (isset($criteria['material_id'])) {
+            $dbCriteria['id_materi'] = $criteria['material_id'];
+        }
+
+        $dbData = [];
+        if (isset($data['is_completed'])) {
+            $dbData['selesai'] = $data['is_completed'];
+        }
+        if (isset($data['completed_at'])) {
+            $dbData['diselesaikan_pada'] = $data['completed_at'];
+        }
+
+        return StudentProgress::updateOrCreate($dbCriteria, $dbData);
     }
 
     public function getByEnrollment(string $enrollmentId)
     {
-        return StudentProgress::where('enrollment_id', $enrollmentId)->get();
+        return StudentProgress::where('id_pendaftaran', $enrollmentId)->get();
     }
 
     public function getOverallStats(string $studentId): array
     {
-        $enrollments = DB::table('enrollments')
-            ->where('student_id', $studentId)
-            ->pluck('id', 'subject_id')
+        $enrollments = DB::table('pendaftaran')
+            ->where('id_siswa', $studentId)
+            ->pluck('id', 'id_mata_pelajaran')
             ->toArray();
 
         $subjectIds = array_keys($enrollments);
         $enrollmentIds = array_values($enrollments);
 
-        $totalMaterials = DB::table('materials')
-            ->whereIn('subject_id', $subjectIds)
+        $totalMaterials = DB::table('materi')
+            ->whereIn('id_mata_pelajaran', $subjectIds)
             ->count();
 
-        $completedMaterials = DB::table('student_progress')
-            ->whereIn('enrollment_id', $enrollmentIds)
-            ->where('is_completed', true)
+        $completedMaterials = DB::table('progres_siswa')
+            ->whereIn('id_pendaftaran', $enrollmentIds)
+            ->where('selesai', true)
             ->count();
 
         $percentage = $totalMaterials > 0 ? round(($completedMaterials / $totalMaterials) * 100) : 0;
@@ -55,19 +71,19 @@ class SqlStudentProgressRepository implements StudentProgressRepositoryInterface
 
     public function getRecentActivities(string $studentId, int $limit = 5)
     {
-        return DB::table('student_progress')
-            ->join('enrollments', 'student_progress.enrollment_id', '=', 'enrollments.id')
-            ->join('materials', 'student_progress.material_id', '=', 'materials.id')
-            ->join('subjects', 'materials.subject_id', '=', 'subjects.id')
-            ->where('enrollments.student_id', $studentId)
-            ->where('student_progress.is_completed', true)
+        return DB::table('progres_siswa')
+            ->join('pendaftaran', 'progres_siswa.id_pendaftaran', '=', 'pendaftaran.id')
+            ->join('materi', 'progres_siswa.id_materi', '=', 'materi.id')
+            ->join('mata_pelajaran', 'materi.id_mata_pelajaran', '=', 'mata_pelajaran.id')
+            ->where('pendaftaran.id_siswa', $studentId)
+            ->where('progres_siswa.selesai', true)
             ->select([
-                'materials.id as material_id',
-                'materials.title as material_title',
-                'subjects.title as subject_title',
-                'student_progress.completed_at as last_accessed',
+                'materi.id as material_id',
+                'materi.judul as material_title',
+                'mata_pelajaran.judul as subject_title',
+                'progres_siswa.diselesaikan_pada as last_accessed',
             ])
-            ->orderBy('student_progress.completed_at', 'desc')
+            ->orderBy('progres_siswa.diselesaikan_pada', 'desc')
             ->limit($limit)
             ->get();
     }

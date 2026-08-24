@@ -26,7 +26,7 @@ class StoreSubjectRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
-            'teacher_id' => ['nullable', 'string', 'exists:teachers,id'],
+            'teacher_id' => ['nullable', 'string', 'exists:guru,id'],
         ];
     }
 

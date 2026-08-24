@@ -11,17 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('materials', function (Blueprint $table) {
+        Schema::create('materi', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('subject_id')->constrained('subjects')->onDelete('cascade');
-            $table->string('title');
-            $table->enum('content_type', ['video', 'document', 'url']);
-            $table->text('content_body')->nullable();
-            $table->text('description')->nullable();
+            $table->foreignUuid('id_mata_pelajaran')->constrained('mata_pelajaran')->onDelete('cascade');
+            $table->string('judul');
+            $table->enum('tipe_konten', ['video', 'document', 'url']);
+            $table->text('isi_konten')->nullable();
+            $table->text('deskripsi')->nullable();
             $table->timestamps();
 
             $table->index('id');
-            $table->index('subject_id');
+            $table->index('id_mata_pelajaran');
         });
     }
 
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('materials');
+        Schema::dropIfExists('materi');
     }
 };

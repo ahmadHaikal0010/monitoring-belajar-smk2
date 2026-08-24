@@ -32,7 +32,7 @@ class UpdateStudentRequest extends FormRequest
                 'required',
                 'string',
                 'size:10',
-                Rule::unique('students', 'nisn')->ignore($student->id),
+                Rule::unique('siswa', 'nisn')->ignore($student->id),
             ],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'address' => ['required', 'string'],

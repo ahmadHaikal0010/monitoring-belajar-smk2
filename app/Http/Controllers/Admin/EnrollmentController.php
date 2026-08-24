@@ -87,32 +87,32 @@ class EnrollmentController extends Controller
         $materials = $this->subjectService->getMaterialsBySubjectId($enrollment->subject_id);
 
         // Get specific completion status for each material
-        $completedMaterialIds = DB::table('student_progress')
-            ->where('enrollment_id', $id)
-            ->where('is_completed', true)
-            ->pluck('material_id')
+        $completedMaterialIds = DB::table('progres_siswa')
+            ->where('id_pendaftaran', $id)
+            ->where('selesai', true)
+            ->pluck('id_materi')
             ->toArray();
 
         // Get exam results for this student in this subject
-        $examResults = DB::table('exams')
-            ->leftJoin('exam_sessions', function ($join) use ($enrollment) {
-                $join->on('exams.id', '=', 'exam_sessions.exam_id')
-                    ->where('exam_sessions.student_id', '=', $enrollment->student_id);
+        $examResults = DB::table('ujian')
+            ->leftJoin('sesi_ujian', function ($join) use ($enrollment) {
+                $join->on('ujian.id', '=', 'sesi_ujian.id_ujian')
+                    ->where('sesi_ujian.id_siswa', '=', $enrollment->student_id);
             })
-            ->where('exams.subject_id', $enrollment->subject_id)
-            ->where('exams.status', 'published')
+            ->where('ujian.id_mata_pelajaran', $enrollment->subject_id)
+            ->where('ujian.status', 'published')
             ->select([
-                'exams.id as exam_id',
-                'exams.title as exam_title',
-                'exams.pass_score',
-                'exams.duration',
-                'exam_sessions.id as session_id',
-                'exam_sessions.status as session_status',
-                'exam_sessions.total_score',
-                'exam_sessions.submitted_at',
-                'exam_sessions.started_at',
+                'ujian.id as exam_id',
+                'ujian.judul as exam_title',
+                'ujian.nilai_kkm as pass_score',
+                'ujian.durasi as duration',
+                'sesi_ujian.id as session_id',
+                'sesi_ujian.status as session_status',
+                'sesi_ujian.total_skor as total_score',
+                'sesi_ujian.dikumpulkan_pada as submitted_at',
+                'sesi_ujian.dimulai_pada as started_at',
             ])
-            ->orderBy('exams.created_at', 'asc')
+            ->orderBy('ujian.created_at', 'asc')
             ->get()
             ->map(function ($item) {
                 $item->is_passed = $item->total_score !== null ? ((float) $item->total_score >= (float) $item->pass_score) : null;
@@ -121,25 +121,25 @@ class EnrollmentController extends Controller
             });
 
         // Get assignment results for this student in this subject
-        $assignmentResults = DB::table('assignments')
-            ->leftJoin('assignment_submissions', function ($join) use ($enrollment) {
-                $join->on('assignments.id', '=', 'assignment_submissions.assignment_id')
-                    ->where('assignment_submissions.student_id', '=', $enrollment->student_id);
+        $assignmentResults = DB::table('tugas')
+            ->leftJoin('pengumpulan_tugas', function ($join) use ($enrollment) {
+                $join->on('tugas.id', '=', 'pengumpulan_tugas.id_tugas')
+                    ->where('pengumpulan_tugas.id_siswa', '=', $enrollment->student_id);
             })
-            ->where('assignments.subject_id', $enrollment->subject_id)
-            ->where('assignments.status', 'published')
+            ->where('tugas.id_mata_pelajaran', $enrollment->subject_id)
+            ->where('tugas.status', 'published')
             ->select([
-                'assignments.id as assignment_id',
-                'assignments.title as assignment_title',
-                'assignments.max_score',
-                'assignments.due_date',
-                'assignment_submissions.id as submission_id',
-                'assignment_submissions.status as submission_status',
-                'assignment_submissions.score',
-                'assignment_submissions.feedback',
-                'assignment_submissions.submitted_at',
+                'tugas.id as assignment_id',
+                'tugas.judul as assignment_title',
+                'tugas.skor_maksimal as max_score',
+                'tugas.tenggat_waktu as due_date',
+                'pengumpulan_tugas.id as submission_id',
+                'pengumpulan_tugas.status as submission_status',
+                'pengumpulan_tugas.skor as score',
+                'pengumpulan_tugas.umpan_balik as feedback',
+                'pengumpulan_tugas.dikumpulkan_pada as submitted_at',
             ])
-            ->orderBy('assignments.created_at', 'asc')
+            ->orderBy('tugas.created_at', 'asc')
             ->get();
 
         return Inertia::render('Admin/Enrollments/progress', [

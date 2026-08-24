@@ -20,11 +20,11 @@ class TeacherFactory extends Factory
     {
         return [
             'id' => fake()->uuid(),
-            'user_id' => User::factory(),
+            'id_pengguna' => User::factory(),
             'nip' => $this->faker->unique()->numerify('##################'), // 18 digits
-            'specialization' => $this->faker->randomElement(['Rekayasa Perangkat Lunak', 'Teknik Komputer dan Jaringan', 'Multimedia', 'Sistem Informasi']),
+            'spesialisasi' => $this->faker->randomElement(['Rekayasa Perangkat Lunak', 'Teknik Komputer dan Jaringan', 'Multimedia', 'Sistem Informasi']),
             'bio' => $this->faker->sentence(),
-            'photo' => null,
+            'foto' => null,
         ];
     }
 }

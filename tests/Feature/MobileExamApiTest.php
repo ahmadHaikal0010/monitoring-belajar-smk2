@@ -75,11 +75,11 @@ class MobileExamApiTest extends TestCase
             ]);
 
         $answerResponse->assertStatus(200);
-        $this->assertDatabaseHas('student_answers', [
-            'exam_session_id' => $sessionId,
-            'question_id' => $question->id,
-            'is_correct' => true,
-            'score_earned' => 100,
+        $this->assertDatabaseHas('jawaban_siswa', [
+            'id_sesi_ujian' => $sessionId,
+            'id_soal' => $question->id,
+            'benar' => true,
+            'skor_diperoleh' => 100,
         ]);
 
         // 2b. Test Resume Ujian (Memastikan jawaban tersimpan dikembalikan saat masuk ulang)

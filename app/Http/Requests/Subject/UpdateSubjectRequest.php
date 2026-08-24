@@ -33,13 +33,13 @@ class UpdateSubjectRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
-            'teacher_id' => ['nullable', 'string', 'exists:teachers,id'],
+            'teacher_id' => ['nullable', 'string', 'exists:guru,id'],
             'code' => [
                 'required',
                 'string',
                 'min:3',
                 'max:10',
-                'unique:subjects,code,'.$subject->id,
+                'unique:mata_pelajaran,kode,'.$subject->id,
             ],
         ];
     }

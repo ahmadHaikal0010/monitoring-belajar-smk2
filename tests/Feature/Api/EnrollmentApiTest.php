@@ -31,12 +31,12 @@ class EnrollmentApiTest extends TestCase
         $subject = Subject::factory()->create();
 
         // Manual insert since we don't have enrollment factory fully tested yet or want to isolate
-        DB::table('enrollments')->insert([
+        DB::table('pendaftaran')->insert([
             'id' => Str::uuid(),
-            'student_id' => $this->student->id,
-            'subject_id' => $subject->id,
+            'id_siswa' => $this->student->id,
+            'id_mata_pelajaran' => $subject->id,
             'status' => 'enrolled',
-            'enrolled_at' => now(),
+            'terdaftar_pada' => now(),
         ]);
 
         $response = $this->actingAs($this->studentUser, 'sanctum')->getJson('/api/subjects');
@@ -57,9 +57,9 @@ class EnrollmentApiTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonPath('success', true);
 
-        $this->assertDatabaseHas('enrollments', [
-            'student_id' => $this->student->id,
-            'subject_id' => $subject->id,
+        $this->assertDatabaseHas('pendaftaran', [
+            'id_siswa' => $this->student->id,
+            'id_mata_pelajaran' => $subject->id,
         ]);
     }
 

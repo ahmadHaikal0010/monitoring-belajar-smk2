@@ -21,12 +21,12 @@ class StudentAnswerFactory extends Factory
     {
         return [
             'id' => fake()->uuid(),
-            'exam_session_id' => ExamSession::factory(),
-            'question_id' => Question::factory(),
-            'selected_option_id' => null,
-            'essay_answer' => null,
-            'is_correct' => null,
-            'score_earned' => 0.0,
+            'id_sesi_ujian' => ExamSession::factory(),
+            'id_soal' => Question::factory(),
+            'id_opsi_dipilih' => null,
+            'jawaban_esai' => null,
+            'benar' => null,
+            'skor_diperoleh' => 0.0,
         ];
     }
 }

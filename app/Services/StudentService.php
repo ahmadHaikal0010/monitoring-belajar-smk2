@@ -17,7 +17,7 @@ class StudentService
         protected ImageConverterInterface $imageConverter
     ) {}
 
-    public function getStudentByUserId(int $userId)
+    public function getStudentByUserId(string|int $userId)
     {
         return $this->studentRepository->findByUserId($userId);
     }
@@ -52,7 +52,7 @@ class StudentService
         return $this->studentRepository->create($data);
     }
 
-    public function updateStudentProfile(int $userId, array $data)
+    public function updateStudentProfile(string|int $userId, array $data)
     {
         $student = $this->studentRepository->findByUserId($userId);
 

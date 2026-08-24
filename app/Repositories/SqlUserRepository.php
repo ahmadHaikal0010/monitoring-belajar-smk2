@@ -14,41 +14,45 @@ class SqlUserRepository implements UserRepositoryInterface
         $driver = DB::getDriverName();
         $likeOperator = $driver === 'pgsql' ? 'ilike' : 'like';
 
-        $query = DB::table('users')
+        $query = DB::table('pengguna')
             ->select([
                 'id',
-                'name',
+                'nama as name',
                 'email',
-                'role',
-                'is_approved',
+                'peran as role',
+                'disetujui as is_approved',
                 'created_at',
             ]);
 
         if (! empty($filters['status'])) {
             if ($filters['status'] === 'pending') {
-                $query->where('is_approved', false);
+                $query->where('disetujui', false);
             } elseif ($filters['status'] === 'approved') {
-                $query->where('is_approved', true);
+                $query->where('disetujui', true);
             }
         }
 
         if (! empty($filters['search'])) {
             $query->where(function ($q) use ($filters, $likeOperator) {
-                $q->where('name', $likeOperator, '%'.$filters['search'].'%')
+                $q->where('nama', $likeOperator, '%'.$filters['search'].'%')
                     ->orWhere('email', $likeOperator, '%'.$filters['search'].'%')
-                    ->orWhere('role', $likeOperator, '%'.$filters['search'].'%');
+                    ->orWhere('peran', $likeOperator, '%'.$filters['search'].'%');
             });
         }
+
+        $sortFieldMap = [
+            'name' => 'nama',
+            'email' => 'email',
+            'role' => 'peran',
+            'is_approved' => 'disetujui',
+            'created_at' => 'created_at',
+        ];
 
         $sortField = $filters['sort'] ?? 'name';
         $sortDirection = $filters['direction'] ?? 'asc';
 
-        $allowedSorts = ['name', 'email', 'role', 'is_approved', 'created_at'];
-        if (in_array($sortField, $allowedSorts)) {
-            $query->orderBy($sortField, $sortDirection);
-        } else {
-            $query->orderBy('name', 'asc');
-        }
+        $dbSortField = $sortFieldMap[$sortField] ?? 'nama';
+        $query->orderBy($dbSortField, $sortDirection);
 
         return $query->paginate($perPage)
             ->withQueryString();
@@ -56,12 +60,12 @@ class SqlUserRepository implements UserRepositoryInterface
 
     public function create(array $data)
     {
-        DB::table('users')->insert([
-            'name' => $data['name'],
+        DB::table('pengguna')->insert([
+            'nama' => $data['name'],
             'email' => $data['email'],
-            'password' => bcrypt($data['password']),
-            'role' => $data['role'] ?? 'user',
-            'is_approved' => $data['is_approved'] ?? false,
+            'kata_sandi' => bcrypt($data['password']),
+            'peran' => $data['role'] ?? 'siswa',
+            'disetujui' => $data['is_approved'] ?? false,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -72,7 +76,7 @@ class SqlUserRepository implements UserRepositoryInterface
         $updateData = [];
 
         if (isset($data['name'])) {
-            $updateData['name'] = $data['name'];
+            $updateData['nama'] = $data['name'];
         }
 
         if (isset($data['email'])) {
@@ -80,20 +84,20 @@ class SqlUserRepository implements UserRepositoryInterface
         }
 
         if (isset($data['role'])) {
-            $updateData['role'] = $data['role'];
+            $updateData['peran'] = $data['role'];
         }
 
         if (isset($data['is_approved'])) {
-            $updateData['is_approved'] = $data['is_approved'];
+            $updateData['disetujui'] = $data['is_approved'];
         }
 
         if (! empty($data['password'])) {
-            $updateData['password'] = bcrypt($data['password']);
+            $updateData['kata_sandi'] = bcrypt($data['password']);
         }
 
         if (! empty($updateData)) {
             $updateData['updated_at'] = now();
-            DB::table('users')
+            DB::table('pengguna')
                 ->where('id', $id)
                 ->update($updateData);
         }
@@ -101,13 +105,13 @@ class SqlUserRepository implements UserRepositoryInterface
 
     public function find(int $id)
     {
-        return DB::table('users')
+        return DB::table('pengguna')
             ->select([
                 'id',
-                'name',
+                'nama as name',
                 'email',
-                'role',
-                'is_approved',
+                'peran as role',
+                'disetujui as is_approved',
                 'created_at',
             ])
             ->where('id', $id)
@@ -116,25 +120,29 @@ class SqlUserRepository implements UserRepositoryInterface
 
     public function delete(int $id)
     {
-        DB::table('users')
+        DB::table('pengguna')
             ->where('id', $id)
             ->delete();
     }
 
     public function approve(int $id)
     {
-        DB::table('users')
+        DB::table('pengguna')
             ->where('id', $id)
             ->update([
-                'is_approved' => true,
+                'disetujui' => true,
             ]);
     }
 
     public function authenticate(string $email)
     {
-        $userRaw = DB::table('users')
+        $userRaw = DB::table('pengguna')
             ->where('email', $email)
             ->first();
+
+        if (! $userRaw) {
+            return null;
+        }
 
         return User::hydrate([(array) $userRaw])->first();
     }
@@ -142,21 +150,21 @@ class SqlUserRepository implements UserRepositoryInterface
     public function register(array $data)
     {
         DB::transaction(function () use ($data) {
-            $userId = DB::table('users')->insertGetId([
-                'name' => $data['name'],
+            $userId = DB::table('pengguna')->insertGetId([
+                'nama' => $data['name'],
                 'email' => $data['email'],
-                'password' => bcrypt($data['password']),
-                'role' => 'siswa',
-                'is_approved' => false,
+                'kata_sandi' => bcrypt($data['password']),
+                'peran' => 'siswa',
+                'disetujui' => false,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
-            DB::table('students')->insert([
+            DB::table('siswa')->insert([
                 'id' => (string) Uuid::v7(),
-                'user_id' => $userId,
+                'id_pengguna' => $userId,
                 'nisn' => $data['nisn'],
-                'address' => $data['address'],
+                'alamat' => $data['address'],
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

@@ -32,7 +32,7 @@ class TeacherService
         return $this->teacherRepository->create($data);
     }
 
-    public function updateTeacher(array $data, int $userId)
+    public function updateTeacher(array $data, string|int $userId)
     {
         $teacher = $this->teacherRepository->getByUserId($userId);
 
@@ -47,7 +47,7 @@ class TeacherService
         return $this->teacherRepository->update($teacher->id, $data);
     }
 
-    public function isProfileCompleted(int $userId): bool
+    public function isProfileCompleted(string|int $userId): bool
     {
         $data = $this->teacherRepository->getByUserId($userId);
 
@@ -63,7 +63,7 @@ class TeacherService
         return $this->imageConverter->convertAndStore($file, 'teacher-photos', 'public', 80);
     }
 
-    public function getTeacherByUserId(int $userId)
+    public function getTeacherByUserId(string|int $userId)
     {
         return $this->teacherRepository->getByUserId($userId);
     }

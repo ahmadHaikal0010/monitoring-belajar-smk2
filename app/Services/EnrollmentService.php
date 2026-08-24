@@ -52,7 +52,7 @@ class EnrollmentService
 
     public function enrollByCode(string $studentId, string $code)
     {
-        $subject = DB::table('subjects')->where('code', $code)->first();
+        $subject = DB::table('mata_pelajaran')->where('kode', $code)->first();
 
         if (! $subject) {
             abort(404, 'Mata pelajaran dengan kode tersebut tidak ditemukan.');

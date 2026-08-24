@@ -20,10 +20,10 @@ class SubjectFactory extends Factory
     {
         return [
             'id' => fake()->uuid(),
-            'teacher_id' => Teacher::factory(),
-            'title' => fake()->sentence(3),
-            'code' => strtoupper(fake()->unique()->bothify('??####')),
-            'description' => fake()->paragraph(),
+            'id_guru' => Teacher::factory(),
+            'judul' => fake()->sentence(3),
+            'kode' => strtoupper(fake()->unique()->bothify('??####')),
+            'deskripsi' => fake()->paragraph(),
         ];
     }
 }

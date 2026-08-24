@@ -20,12 +20,12 @@ class QuestionFactory extends Factory
     {
         return [
             'id' => fake()->uuid(),
-            'exam_id' => Exam::factory(),
-            'question_text' => fake()->sentence(8).'?',
-            'question_type' => 'multiple_choice',
-            'image_path' => null,
-            'score' => 1.0,
-            'order' => fake()->numberBetween(1, 20),
+            'id_ujian' => Exam::factory(),
+            'teks_soal' => fake()->sentence(8).'?',
+            'tipe_soal' => 'multiple_choice',
+            'jalur_gambar' => null,
+            'bobot_skor' => 1.0,
+            'urutan' => fake()->numberBetween(1, 20),
         ];
     }
 }

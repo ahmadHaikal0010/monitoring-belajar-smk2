@@ -15,56 +15,62 @@ class SqlExamRepository implements ExamRepositoryInterface
         $driver = DB::getDriverName();
         $likeOperator = $driver === 'pgsql' ? 'ilike' : 'like';
 
-        $query = DB::table('exams')
-            ->join('subjects', 'exams.subject_id', '=', 'subjects.id')
-            ->join('teachers', 'exams.teacher_id', '=', 'teachers.id')
+        $query = DB::table('ujian')
+            ->join('mata_pelajaran', 'ujian.id_mata_pelajaran', '=', 'mata_pelajaran.id')
+            ->join('guru', 'ujian.id_guru', '=', 'guru.id')
             ->select([
-                'exams.id',
-                'exams.subject_id',
-                'exams.teacher_id',
-                'exams.title',
-                'exams.description',
-                'exams.duration',
-                'exams.pass_score',
-                'exams.randomize_questions',
-                'exams.randomize_options',
-                'exams.status',
-                'exams.start_time',
-                'exams.end_time',
-                'exams.created_at',
-                'subjects.title as subject_title',
-                'teachers.id as teacher_id',
+                'ujian.id',
+                'ujian.id_mata_pelajaran as subject_id',
+                'ujian.id_guru as teacher_id',
+                'ujian.judul as title',
+                'ujian.deskripsi as description',
+                'ujian.durasi as duration',
+                'ujian.nilai_kkm as pass_score',
+                'ujian.acak_soal as randomize_questions',
+                'ujian.acak_opsi as randomize_options',
+                'ujian.status',
+                'ujian.waktu_mulai as start_time',
+                'ujian.waktu_selesai as end_time',
+                'ujian.created_at',
+                'mata_pelajaran.judul as subject_title',
+                'guru.id as teacher_id',
             ]);
 
         if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search, $likeOperator) {
-                $q->where('exams.title', $likeOperator, "%{$search}%")
-                    ->orWhere('subjects.title', $likeOperator, "%{$search}%");
+                $q->where('ujian.judul', $likeOperator, "%{$search}%")
+                    ->orWhere('mata_pelajaran.judul', $likeOperator, "%{$search}%");
             });
         }
 
         if (! empty($filters['subject_id'])) {
-            $query->where('exams.subject_id', $filters['subject_id']);
+            $query->where('ujian.id_mata_pelajaran', $filters['subject_id']);
         }
 
         if (! empty($filters['teacher_id'])) {
-            $query->where('exams.teacher_id', $filters['teacher_id']);
+            $query->where('ujian.id_guru', $filters['teacher_id']);
         }
 
         if (! empty($filters['status'])) {
-            $query->where('exams.status', $filters['status']);
+            $query->where('ujian.status', $filters['status']);
         }
 
+        $sortMap = [
+            'title' => 'judul',
+            'created_at' => 'created_at',
+            'status' => 'status',
+        ];
         $sort = $filters['sort'] ?? 'created_at';
+        $dbSort = $sortMap[$sort] ?? 'created_at';
         $direction = $filters['direction'] ?? 'desc';
-        $query->orderBy("exams.{$sort}", $direction);
+        $query->orderBy("ujian.{$dbSort}", $direction);
 
         $paginator = $query->paginate($perPage);
 
         $results = $paginator->through(function ($exam) {
-            $exam->question_count = DB::table('questions')->where('exam_id', $exam->id)->count();
-            $exam->session_count = DB::table('exam_sessions')->where('exam_id', $exam->id)->count();
+            $exam->question_count = DB::table('soal')->where('id_ujian', $exam->id)->count();
+            $exam->session_count = DB::table('sesi_ujian')->where('id_ujian', $exam->id)->count();
 
             return $exam;
         });
@@ -74,20 +80,32 @@ class SqlExamRepository implements ExamRepositoryInterface
 
     public function find(string $id)
     {
-        $exam = DB::table('exams')
-            ->join('subjects', 'exams.subject_id', '=', 'subjects.id')
-            ->join('teachers', 'exams.teacher_id', '=', 'teachers.id')
-            ->where('exams.id', $id)
+        $exam = DB::table('ujian')
+            ->join('mata_pelajaran', 'ujian.id_mata_pelajaran', '=', 'mata_pelajaran.id')
+            ->join('guru', 'ujian.id_guru', '=', 'guru.id')
+            ->where('ujian.id', $id)
             ->select([
-                'exams.*',
-                'subjects.title as subject_title',
-                'teachers.user_id as teacher_user_id',
+                'ujian.id',
+                'ujian.id_mata_pelajaran as subject_id',
+                'ujian.id_guru as teacher_id',
+                'ujian.judul as title',
+                'ujian.deskripsi as description',
+                'ujian.durasi as duration',
+                'ujian.nilai_kkm as pass_score',
+                'ujian.acak_soal as randomize_questions',
+                'ujian.acak_opsi as randomize_options',
+                'ujian.status',
+                'ujian.waktu_mulai as start_time',
+                'ujian.waktu_selesai as end_time',
+                'ujian.created_at',
+                'mata_pelajaran.judul as subject_title',
+                'guru.id_pengguna as teacher_user_id',
             ])
             ->first();
 
         if ($exam) {
-            $exam->question_count = DB::table('questions')->where('exam_id', $exam->id)->count();
-            $exam->session_count = DB::table('exam_sessions')->where('exam_id', $exam->id)->count();
+            $exam->question_count = DB::table('soal')->where('id_ujian', $exam->id)->count();
+            $exam->session_count = DB::table('sesi_ujian')->where('id_ujian', $exam->id)->count();
         }
 
         return $exam;
@@ -101,23 +119,38 @@ class SqlExamRepository implements ExamRepositoryInterface
             return null;
         }
 
-        $questions = DB::table('questions')
-            ->leftJoin('materials', 'questions.material_id', '=', 'materials.id')
-            ->where('questions.exam_id', $id)
+        $questions = DB::table('soal')
+            ->leftJoin('materi', 'soal.id_materi', '=', 'materi.id')
+            ->where('soal.id_ujian', $id)
             ->select([
-                'questions.*',
-                'materials.title as material_title',
+                'soal.id',
+                'soal.id_ujian as exam_id',
+                'soal.id_materi as material_id',
+                'soal.teks_soal as question_text',
+                'soal.tipe_soal as question_type',
+                'soal.jalur_gambar as image_path',
+                'soal.bobot_skor as score',
+                'soal.urutan as order',
+                'soal.created_at',
+                'materi.judul as material_title',
             ])
-            ->orderBy('questions.order')
+            ->orderBy('soal.urutan')
             ->get();
 
         foreach ($questions as $question) {
             $question->image_url = $this->formatImageUrl($question->image_path);
 
             if ($question->question_type === 'multiple_choice') {
-                $question->options = DB::table('options')
-                    ->where('question_id', $question->id)
-                    ->orderBy('order')
+                $question->options = DB::table('opsi_jawaban')
+                    ->where('id_soal', $question->id)
+                    ->select([
+                        'id',
+                        'id_soal as question_id',
+                        'teks_opsi as option_text',
+                        'benar as is_correct',
+                        'urutan as order',
+                    ])
+                    ->orderBy('urutan')
                     ->get();
             } else {
                 $question->options = [];
@@ -133,19 +166,19 @@ class SqlExamRepository implements ExamRepositoryInterface
     {
         $id = (string) Uuid::v7();
 
-        DB::table('exams')->insert([
+        DB::table('ujian')->insert([
             'id' => $id,
-            'subject_id' => $data['subject_id'],
-            'teacher_id' => $data['teacher_id'],
-            'title' => $data['title'],
-            'description' => $data['description'] ?? null,
-            'duration' => $data['duration'],
-            'pass_score' => $data['pass_score'] ?? 75,
-            'randomize_questions' => $data['randomize_questions'] ?? false,
-            'randomize_options' => $data['randomize_options'] ?? false,
+            'id_mata_pelajaran' => $data['subject_id'],
+            'id_guru' => $data['teacher_id'],
+            'judul' => $data['title'],
+            'deskripsi' => $data['description'] ?? null,
+            'durasi' => $data['duration'],
+            'nilai_kkm' => $data['pass_score'] ?? 75,
+            'acak_soal' => $data['randomize_questions'] ?? false,
+            'acak_opsi' => $data['randomize_options'] ?? false,
             'status' => $data['status'] ?? 'draft',
-            'start_time' => $data['start_time'] ?? null,
-            'end_time' => $data['end_time'] ?? null,
+            'waktu_mulai' => $data['start_time'] ?? null,
+            'waktu_selesai' => $data['end_time'] ?? null,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -155,73 +188,75 @@ class SqlExamRepository implements ExamRepositoryInterface
 
     public function update(string $id, array $data)
     {
-        $updateFields = [];
-        $allowedKeys = [
-            'subject_id',
-            'teacher_id',
-            'title',
-            'description',
-            'duration',
-            'pass_score',
-            'randomize_questions',
-            'randomize_options',
-            'status',
-            'start_time',
-            'end_time',
+        $fieldMap = [
+            'subject_id' => 'id_mata_pelajaran',
+            'teacher_id' => 'id_guru',
+            'title' => 'judul',
+            'description' => 'deskripsi',
+            'duration' => 'durasi',
+            'pass_score' => 'nilai_kkm',
+            'randomize_questions' => 'acak_soal',
+            'randomize_options' => 'acak_opsi',
+            'status' => 'status',
+            'start_time' => 'waktu_mulai',
+            'end_time' => 'waktu_selesai',
         ];
 
-        foreach ($allowedKeys as $key) {
-            if (array_key_exists($key, $data)) {
-                $updateFields[$key] = $data[$key];
+        $updateFields = [];
+        foreach ($fieldMap as $apiKey => $dbCol) {
+            if (array_key_exists($apiKey, $data)) {
+                $updateFields[$dbCol] = $data[$apiKey];
+            } elseif (array_key_exists($dbCol, $data)) {
+                $updateFields[$dbCol] = $data[$dbCol];
             }
         }
 
         $updateFields['updated_at'] = now();
 
-        DB::table('exams')
+        DB::table('ujian')
             ->where('id', $id)
             ->update($updateFields);
     }
 
     public function delete(string $id)
     {
-        $questions = DB::table('questions')->where('exam_id', $id)->get();
+        $questions = DB::table('soal')->where('id_ujian', $id)->get();
         foreach ($questions as $q) {
-            if ($q->image_path) {
-                Storage::disk('public')->delete($q->image_path);
+            if ($q->jalur_gambar) {
+                Storage::disk('public')->delete($q->jalur_gambar);
             }
         }
 
-        DB::table('exams')->where('id', $id)->delete();
+        DB::table('ujian')->where('id', $id)->delete();
     }
 
     public function addQuestion(string $examId, array $questionData, array $optionsData = [])
     {
         $questionId = (string) Uuid::v7();
 
-        $maxOrder = DB::table('questions')->where('exam_id', $examId)->max('order') ?? 0;
+        $maxOrder = DB::table('soal')->where('id_ujian', $examId)->max('urutan') ?? 0;
 
-        DB::table('questions')->insert([
+        DB::table('soal')->insert([
             'id' => $questionId,
-            'exam_id' => $examId,
-            'material_id' => $questionData['material_id'] ?? null,
-            'question_text' => $questionData['question_text'],
-            'question_type' => $questionData['question_type'],
-            'image_path' => $questionData['image_path'] ?? null,
-            'score' => $questionData['score'] ?? 1.0,
-            'order' => $maxOrder + 1,
+            'id_ujian' => $examId,
+            'id_materi' => $questionData['material_id'] ?? null,
+            'teks_soal' => $questionData['question_text'],
+            'tipe_soal' => $questionData['question_type'],
+            'jalur_gambar' => $questionData['image_path'] ?? null,
+            'bobot_skor' => $questionData['score'] ?? 1.0,
+            'urutan' => $maxOrder + 1,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         if ($questionData['question_type'] === 'multiple_choice' && ! empty($optionsData)) {
             foreach ($optionsData as $idx => $opt) {
-                DB::table('options')->insert([
+                DB::table('opsi_jawaban')->insert([
                     'id' => (string) Uuid::v7(),
-                    'question_id' => $questionId,
-                    'option_text' => $opt['option_text'],
-                    'is_correct' => $opt['is_correct'] ?? false,
-                    'order' => $idx + 1,
+                    'id_soal' => $questionId,
+                    'teks_opsi' => $opt['option_text'],
+                    'benar' => $opt['is_correct'] ?? false,
+                    'urutan' => $idx + 1,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -234,47 +269,47 @@ class SqlExamRepository implements ExamRepositoryInterface
     public function updateQuestion(string $questionId, array $questionData, array $optionsData = [])
     {
         $updateFields = [
-            'question_text' => $questionData['question_text'],
-            'material_id' => $questionData['material_id'] ?? null,
-            'question_type' => $questionData['question_type'],
-            'score' => $questionData['score'] ?? 1.0,
+            'teks_soal' => $questionData['question_text'],
+            'id_materi' => $questionData['material_id'] ?? null,
+            'tipe_soal' => $questionData['question_type'],
+            'bobot_skor' => $questionData['score'] ?? 1.0,
             'updated_at' => now(),
         ];
 
         if (! empty($questionData['remove_image'])) {
-            $existing = DB::table('questions')->where('id', $questionId)->first();
-            if ($existing && $existing->image_path) {
-                Storage::disk('public')->delete($existing->image_path);
+            $existing = DB::table('soal')->where('id', $questionId)->first();
+            if ($existing && $existing->jalur_gambar) {
+                Storage::disk('public')->delete($existing->jalur_gambar);
             }
-            $updateFields['image_path'] = null;
+            $updateFields['jalur_gambar'] = null;
         } elseif (array_key_exists('image_path', $questionData)) {
-            $existing = DB::table('questions')->where('id', $questionId)->first();
-            if ($existing && $existing->image_path && $existing->image_path !== $questionData['image_path']) {
-                Storage::disk('public')->delete($existing->image_path);
+            $existing = DB::table('soal')->where('id', $questionId)->first();
+            if ($existing && $existing->jalur_gambar && $existing->jalur_gambar !== $questionData['image_path']) {
+                Storage::disk('public')->delete($existing->jalur_gambar);
             }
-            $updateFields['image_path'] = $questionData['image_path'];
+            $updateFields['jalur_gambar'] = $questionData['image_path'];
         }
 
-        DB::table('questions')
+        DB::table('soal')
             ->where('id', $questionId)
             ->update($updateFields);
 
         if ($questionData['question_type'] === 'multiple_choice' && ! empty($optionsData)) {
-            DB::table('options')->where('question_id', $questionId)->delete();
+            DB::table('opsi_jawaban')->where('id_soal', $questionId)->delete();
 
             foreach ($optionsData as $idx => $opt) {
-                DB::table('options')->insert([
+                DB::table('opsi_jawaban')->insert([
                     'id' => (string) Uuid::v7(),
-                    'question_id' => $questionId,
-                    'option_text' => $opt['option_text'],
-                    'is_correct' => $opt['is_correct'] ?? false,
-                    'order' => $idx + 1,
+                    'id_soal' => $questionId,
+                    'teks_opsi' => $opt['option_text'],
+                    'benar' => $opt['is_correct'] ?? false,
+                    'urutan' => $idx + 1,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
             }
         } elseif ($questionData['question_type'] === 'essay') {
-            DB::table('options')->where('question_id', $questionId)->delete();
+            DB::table('opsi_jawaban')->where('id_soal', $questionId)->delete();
         }
     }
 
@@ -293,26 +328,33 @@ class SqlExamRepository implements ExamRepositoryInterface
 
     public function deleteQuestion(string $questionId)
     {
-        $question = DB::table('questions')->where('id', $questionId)->first();
-        if ($question && $question->image_path) {
-            Storage::disk('public')->delete($question->image_path);
+        $question = DB::table('soal')->where('id', $questionId)->first();
+        if ($question && $question->jalur_gambar) {
+            Storage::disk('public')->delete($question->jalur_gambar);
         }
 
-        DB::table('questions')->where('id', $questionId)->delete();
+        DB::table('soal')->where('id', $questionId)->delete();
     }
 
     public function getExamSessions(string $examId)
     {
-        return DB::table('exam_sessions')
-            ->join('students', 'exam_sessions.student_id', '=', 'students.id')
-            ->join('users', 'students.user_id', '=', 'users.id')
-            ->where('exam_sessions.exam_id', $examId)
+        return DB::table('sesi_ujian')
+            ->join('siswa', 'sesi_ujian.id_siswa', '=', 'siswa.id')
+            ->join('pengguna', 'siswa.id_pengguna', '=', 'pengguna.id')
+            ->where('sesi_ujian.id_ujian', $examId)
             ->select([
-                'exam_sessions.*',
-                'users.name as student_name',
-                'students.nisn',
+                'sesi_ujian.id',
+                'sesi_ujian.id_ujian as exam_id',
+                'sesi_ujian.id_siswa as student_id',
+                'sesi_ujian.dimulai_pada as started_at',
+                'sesi_ujian.dikumpulkan_pada as submitted_at',
+                'sesi_ujian.total_skor as total_score',
+                'sesi_ujian.status',
+                'sesi_ujian.created_at',
+                'pengguna.nama as student_name',
+                'siswa.nisn',
             ])
-            ->orderBy('exam_sessions.created_at', 'desc')
+            ->orderBy('sesi_ujian.created_at', 'desc')
             ->get();
     }
 
@@ -322,24 +364,24 @@ class SqlExamRepository implements ExamRepositoryInterface
         $tzOffset = $now->format('P');
         $tzName = config('app.timezone', 'Asia/Jakarta');
 
-        return DB::table('exams')
-            ->where('subject_id', $subjectId)
+        return DB::table('ujian')
+            ->where('id_mata_pelajaran', $subjectId)
             ->where('status', 'published')
             ->select([
                 'id',
-                'subject_id',
-                'title',
-                'description',
-                'duration',
-                'pass_score',
-                'start_time',
-                'end_time',
+                'id_mata_pelajaran as subject_id',
+                'judul as title',
+                'deskripsi as description',
+                'durasi as duration',
+                'nilai_kkm as pass_score',
+                'waktu_mulai as start_time',
+                'waktu_selesai as end_time',
                 'created_at',
             ])
             ->orderBy('created_at', 'asc')
             ->get()
             ->map(function ($exam) use ($now, $tzOffset, $tzName) {
-                $exam->question_count = DB::table('questions')->where('exam_id', $exam->id)->count();
+                $exam->question_count = DB::table('soal')->where('id_ujian', $exam->id)->count();
 
                 // ISO 8601 Timezone Aware Datetimes for Mobile
                 $exam->start_time_iso = $exam->start_time ? Carbon::parse($exam->start_time, $tzName)->toIso8601String() : null;
@@ -354,9 +396,19 @@ class SqlExamRepository implements ExamRepositoryInterface
 
     public function getStudentExamSession(string $examId, string $studentId)
     {
-        return DB::table('exam_sessions')
-            ->where('exam_id', $examId)
-            ->where('student_id', $studentId)
+        return DB::table('sesi_ujian')
+            ->where('id_ujian', $examId)
+            ->where('id_siswa', $studentId)
+            ->select([
+                'id',
+                'id_ujian as exam_id',
+                'id_siswa as student_id',
+                'dimulai_pada as started_at',
+                'dikumpulkan_pada as submitted_at',
+                'total_skor as total_score',
+                'status',
+                'created_at',
+            ])
             ->first();
     }
 
@@ -364,11 +416,11 @@ class SqlExamRepository implements ExamRepositoryInterface
     {
         $id = (string) Uuid::v7();
 
-        DB::table('exam_sessions')->insert([
+        DB::table('sesi_ujian')->insert([
             'id' => $id,
-            'exam_id' => $examId,
-            'student_id' => $studentId,
-            'started_at' => now(),
+            'id_ujian' => $examId,
+            'id_siswa' => $studentId,
+            'dimulai_pada' => now(),
             'status' => 'in_progress',
             'created_at' => now(),
             'updated_at' => now(),
@@ -379,18 +431,24 @@ class SqlExamRepository implements ExamRepositoryInterface
 
     public function findExamSession(string $sessionId)
     {
-        $session = DB::table('exam_sessions')
-            ->join('exams', 'exam_sessions.exam_id', '=', 'exams.id')
-            ->where('exam_sessions.id', $sessionId)
+        $session = DB::table('sesi_ujian')
+            ->join('ujian', 'sesi_ujian.id_ujian', '=', 'ujian.id')
+            ->where('sesi_ujian.id', $sessionId)
             ->select([
-                'exam_sessions.*',
-                'exams.title as exam_title',
-                'exams.duration',
-                'exams.pass_score',
-                'exams.randomize_questions',
-                'exams.randomize_options',
-                'exams.start_time',
-                'exams.end_time',
+                'sesi_ujian.id',
+                'sesi_ujian.id_ujian as exam_id',
+                'sesi_ujian.id_siswa as student_id',
+                'sesi_ujian.dimulai_pada as started_at',
+                'sesi_ujian.dikumpulkan_pada as submitted_at',
+                'sesi_ujian.total_skor as total_score',
+                'sesi_ujian.status',
+                'ujian.judul as exam_title',
+                'ujian.durasi as duration',
+                'ujian.nilai_kkm as pass_score',
+                'ujian.acak_soal as randomize_questions',
+                'ujian.acak_opsi as randomize_options',
+                'ujian.waktu_mulai as start_time',
+                'ujian.waktu_selesai as end_time',
             ])
             ->first();
 
@@ -420,25 +478,25 @@ class SqlExamRepository implements ExamRepositoryInterface
 
     public function getExamQuestionsForStudent(string $examId, bool $randomizeQuestions = false, bool $randomizeOptions = false)
     {
-        $query = DB::table('questions')
-            ->leftJoin('materials', 'questions.material_id', '=', 'materials.id')
-            ->where('questions.exam_id', $examId)
+        $query = DB::table('soal')
+            ->leftJoin('materi', 'soal.id_materi', '=', 'materi.id')
+            ->where('soal.id_ujian', $examId)
             ->select([
-                'questions.id',
-                'questions.exam_id',
-                'questions.material_id',
-                'questions.question_text',
-                'questions.question_type',
-                'questions.image_path',
-                'questions.score',
-                'questions.order',
-                'materials.title as material_title',
+                'soal.id',
+                'soal.id_ujian as exam_id',
+                'soal.id_materi as material_id',
+                'soal.teks_soal as question_text',
+                'soal.tipe_soal as question_type',
+                'soal.jalur_gambar as image_path',
+                'soal.bobot_skor as score',
+                'soal.urutan as order',
+                'materi.judul as material_title',
             ]);
 
         if ($randomizeQuestions) {
             $query->inRandomOrder();
         } else {
-            $query->orderBy('questions.order');
+            $query->orderBy('soal.urutan');
         }
 
         $questions = $query->get();
@@ -447,14 +505,14 @@ class SqlExamRepository implements ExamRepositoryInterface
             $question->image_url = $this->formatImageUrl($question->image_path);
 
             if ($question->question_type === 'multiple_choice') {
-                $optQuery = DB::table('options')
-                    ->where('question_id', $question->id)
-                    ->select(['id', 'question_id', 'option_text', 'order']);
+                $optQuery = DB::table('opsi_jawaban')
+                    ->where('id_soal', $question->id)
+                    ->select(['id', 'id_soal as question_id', 'teks_opsi as option_text', 'urutan as order']);
 
                 if ($randomizeOptions) {
                     $optQuery->inRandomOrder();
                 } else {
-                    $optQuery->orderBy('order');
+                    $optQuery->orderBy('urutan');
                 }
 
                 $question->options = $optQuery->get();
@@ -468,12 +526,12 @@ class SqlExamRepository implements ExamRepositoryInterface
 
     public function getSavedStudentAnswers(string $sessionId)
     {
-        return DB::table('student_answers')
-            ->where('exam_session_id', $sessionId)
+        return DB::table('jawaban_siswa')
+            ->where('id_sesi_ujian', $sessionId)
             ->select([
-                'question_id',
-                'selected_option_id',
-                'essay_answer',
+                'id_soal as question_id',
+                'id_opsi_dipilih as selected_option_id',
+                'jawaban_esai as essay_answer',
                 'updated_at',
             ])
             ->get()
@@ -496,7 +554,7 @@ class SqlExamRepository implements ExamRepositoryInterface
 
     public function saveStudentAnswer(string $sessionId, string $questionId, ?string $selectedOptionId = null, ?string $essayAnswer = null)
     {
-        $question = DB::table('questions')->where('id', $questionId)->first();
+        $question = DB::table('soal')->where('id', $questionId)->first();
         if (! $question) {
             return;
         }
@@ -504,36 +562,36 @@ class SqlExamRepository implements ExamRepositoryInterface
         $isCorrect = null;
         $scoreEarned = 0.0;
 
-        if ($question->question_type === 'multiple_choice' && $selectedOptionId) {
-            $option = DB::table('options')->where('id', $selectedOptionId)->first();
-            $isCorrect = $option ? (bool) $option->is_correct : false;
-            $scoreEarned = $isCorrect ? (float) $question->score : 0.0;
+        if ($question->tipe_soal === 'multiple_choice' && $selectedOptionId) {
+            $option = DB::table('opsi_jawaban')->where('id', $selectedOptionId)->first();
+            $isCorrect = $option ? (bool) $option->benar : false;
+            $scoreEarned = $isCorrect ? (float) $question->bobot_skor : 0.0;
         }
 
-        $existing = DB::table('student_answers')
-            ->where('exam_session_id', $sessionId)
-            ->where('question_id', $questionId)
+        $existing = DB::table('jawaban_siswa')
+            ->where('id_sesi_ujian', $sessionId)
+            ->where('id_soal', $questionId)
             ->first();
 
         if ($existing) {
-            DB::table('student_answers')
+            DB::table('jawaban_siswa')
                 ->where('id', $existing->id)
                 ->update([
-                    'selected_option_id' => $selectedOptionId,
-                    'essay_answer' => $essayAnswer,
-                    'is_correct' => $isCorrect,
-                    'score_earned' => $scoreEarned,
+                    'id_opsi_dipilih' => $selectedOptionId,
+                    'jawaban_esai' => $essayAnswer,
+                    'benar' => $isCorrect,
+                    'skor_diperoleh' => $scoreEarned,
                     'updated_at' => now(),
                 ]);
         } else {
-            DB::table('student_answers')->insert([
+            DB::table('jawaban_siswa')->insert([
                 'id' => (string) Uuid::v7(),
-                'exam_session_id' => $sessionId,
-                'question_id' => $questionId,
-                'selected_option_id' => $selectedOptionId,
-                'essay_answer' => $essayAnswer,
-                'is_correct' => $isCorrect,
-                'score_earned' => $scoreEarned,
+                'id_sesi_ujian' => $sessionId,
+                'id_soal' => $questionId,
+                'id_opsi_dipilih' => $selectedOptionId,
+                'jawaban_esai' => $essayAnswer,
+                'benar' => $isCorrect,
+                'skor_diperoleh' => $scoreEarned,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -542,16 +600,16 @@ class SqlExamRepository implements ExamRepositoryInterface
 
     public function submitExamSession(string $sessionId)
     {
-        $totalScore = DB::table('student_answers')
-            ->where('exam_session_id', $sessionId)
-            ->sum('score_earned');
+        $totalScore = DB::table('jawaban_siswa')
+            ->where('id_sesi_ujian', $sessionId)
+            ->sum('skor_diperoleh');
 
-        DB::table('exam_sessions')
+        DB::table('sesi_ujian')
             ->where('id', $sessionId)
             ->update([
                 'status' => 'submitted',
-                'submitted_at' => now(),
-                'total_score' => (float) $totalScore,
+                'dikumpulkan_pada' => now(),
+                'total_skor' => (float) $totalScore,
                 'updated_at' => now(),
             ]);
 
@@ -560,14 +618,20 @@ class SqlExamRepository implements ExamRepositoryInterface
 
     public function getExamResultDetails(string $sessionId)
     {
-        $session = DB::table('exam_sessions')
-            ->join('exams', 'exam_sessions.exam_id', '=', 'exams.id')
-            ->where('exam_sessions.id', $sessionId)
+        $session = DB::table('sesi_ujian')
+            ->join('ujian', 'sesi_ujian.id_ujian', '=', 'ujian.id')
+            ->where('sesi_ujian.id', $sessionId)
             ->select([
-                'exam_sessions.*',
-                'exams.title as exam_title',
-                'exams.pass_score',
-                'exams.duration',
+                'sesi_ujian.id',
+                'sesi_ujian.id_ujian as exam_id',
+                'sesi_ujian.id_siswa as student_id',
+                'sesi_ujian.dimulai_pada as started_at',
+                'sesi_ujian.dikumpulkan_pada as submitted_at',
+                'sesi_ujian.total_skor as total_score',
+                'sesi_ujian.status',
+                'ujian.judul as exam_title',
+                'ujian.nilai_kkm as pass_score',
+                'ujian.durasi as duration',
             ])
             ->first();
 
@@ -585,24 +649,24 @@ class SqlExamRepository implements ExamRepositoryInterface
 
         $session->is_passed = ($session->total_score ?? 0) >= $session->pass_score;
 
-        $answers = DB::table('student_answers')
-            ->join('questions', 'student_answers.question_id', '=', 'questions.id')
-            ->leftJoin('materials', 'questions.material_id', '=', 'materials.id')
-            ->leftJoin('options', 'student_answers.selected_option_id', '=', 'options.id')
-            ->where('student_answers.exam_session_id', $sessionId)
+        $answers = DB::table('jawaban_siswa')
+            ->join('soal', 'jawaban_siswa.id_soal', '=', 'soal.id')
+            ->leftJoin('materi', 'soal.id_materi', '=', 'materi.id')
+            ->leftJoin('opsi_jawaban', 'jawaban_siswa.id_opsi_dipilih', '=', 'opsi_jawaban.id')
+            ->where('jawaban_siswa.id_sesi_ujian', $sessionId)
             ->select([
-                'student_answers.id',
-                'student_answers.question_id',
-                'student_answers.selected_option_id',
-                'student_answers.essay_answer',
-                'student_answers.is_correct',
-                'student_answers.score_earned',
-                'questions.question_text',
-                'questions.question_type',
-                'questions.score as max_score',
-                'questions.material_id',
-                'materials.title as material_title',
-                'options.option_text as selected_option_text',
+                'jawaban_siswa.id',
+                'jawaban_siswa.id_soal as question_id',
+                'jawaban_siswa.id_opsi_dipilih as selected_option_id',
+                'jawaban_siswa.jawaban_esai as essay_answer',
+                'jawaban_siswa.benar as is_correct',
+                'jawaban_siswa.skor_diperoleh as score_earned',
+                'soal.teks_soal as question_text',
+                'soal.tipe_soal as question_type',
+                'soal.bobot_skor as max_score',
+                'soal.id_materi as material_id',
+                'materi.judul as material_title',
+                'opsi_jawaban.teks_opsi as selected_option_text',
             ])
             ->get();
 

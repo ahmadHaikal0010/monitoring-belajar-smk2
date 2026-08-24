@@ -11,18 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('questions', function (Blueprint $table) {
+        Schema::create('soal', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('exam_id')->constrained('exams')->onDelete('cascade');
-            $table->text('question_text');
-            $table->enum('question_type', ['multiple_choice', 'essay'])->default('multiple_choice');
-            $table->string('image_path')->nullable();
-            $table->float('score')->default(1.0);
-            $table->integer('order')->default(0);
+            $table->foreignUuid('id_ujian')->constrained('ujian')->onDelete('cascade');
+            $table->foreignUuid('id_materi')->nullable()->constrained('materi')->nullOnDelete();
+            $table->text('teks_soal');
+            $table->enum('tipe_soal', ['multiple_choice', 'essay'])->default('multiple_choice');
+            $table->string('jalur_gambar')->nullable();
+            $table->float('bobot_skor')->default(1.0);
+            $table->integer('urutan')->default(0);
             $table->timestamps();
 
             $table->index('id');
-            $table->index('exam_id');
+            $table->index('id_ujian');
+            $table->index('id_materi');
         });
     }
 
@@ -31,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('questions');
+        Schema::dropIfExists('soal');
     }
 };

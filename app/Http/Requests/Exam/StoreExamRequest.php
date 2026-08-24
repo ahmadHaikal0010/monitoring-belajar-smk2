@@ -14,7 +14,7 @@ class StoreExamRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'subject_id' => ['required', 'exists:subjects,id'],
+            'subject_id' => ['required', 'exists:mata_pelajaran,id'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'duration' => ['required', 'integer', 'min:1', 'max:300'],

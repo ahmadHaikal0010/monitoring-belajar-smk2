@@ -61,14 +61,14 @@ class StudentProgressApiTest extends TestCase
             ->assertJson([
                 'success' => true,
                 'data' => [
-                    'material_id' => $material->id,
-                    'is_completed' => true,
+                    'id_materi' => $material->id,
+                    'selesai' => true,
                 ],
             ]);
 
-        $this->assertDatabaseHas('student_progress', [
-            'material_id' => $material->id,
-            'is_completed' => true,
+        $this->assertDatabaseHas('progres_siswa', [
+            'id_materi' => $material->id,
+            'selesai' => true,
         ]);
     }
 

@@ -20,10 +20,10 @@ class OptionFactory extends Factory
     {
         return [
             'id' => fake()->uuid(),
-            'question_id' => Question::factory(),
-            'option_text' => fake()->word(),
-            'is_correct' => false,
-            'order' => fake()->numberBetween(1, 5),
+            'id_soal' => Question::factory(),
+            'teks_opsi' => fake()->word(),
+            'benar' => false,
+            'urutan' => fake()->numberBetween(1, 5),
         ];
     }
 }

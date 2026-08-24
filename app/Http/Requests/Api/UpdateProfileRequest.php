@@ -24,13 +24,13 @@ class UpdateProfileRequest extends FormRequest
                 'string',
                 'email',
                 'max:255',
-                Rule::unique('users')->ignore($user->id),
+                Rule::unique('pengguna')->ignore($user->id),
             ],
             'nisn' => [
                 'nullable',
                 'string',
                 'size:10',
-                Rule::unique('students')->ignore($student->id ?? null),
+                Rule::unique('siswa')->ignore($student->id ?? null),
             ],
             'address' => 'nullable|string',
             'photo' => 'nullable|image|max:2048', // Max 2MB

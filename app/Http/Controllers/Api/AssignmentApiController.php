@@ -22,7 +22,7 @@ class AssignmentApiController extends Controller
     public function getSubjectAssignments(Request $request, string $subjectId): JsonResponse
     {
         $user = $request->user();
-        $student = Student::where('user_id', $user->id)->first();
+        $student = Student::where('id_pengguna', $user->id)->first();
 
         if (! $student) {
             return response()->json([
@@ -45,7 +45,7 @@ class AssignmentApiController extends Controller
     public function getAssignmentDetail(Request $request, string $assignmentId): JsonResponse
     {
         $user = $request->user();
-        $student = Student::where('user_id', $user->id)->first();
+        $student = Student::where('id_pengguna', $user->id)->first();
 
         $assignment = $this->assignmentService->getAssignmentById($assignmentId);
 
@@ -59,8 +59,8 @@ class AssignmentApiController extends Controller
         $submission = null;
         if ($student) {
             $sub = AssignmentSubmission::with('files')
-                ->where('assignment_id', $assignmentId)
-                ->where('student_id', $student->id)
+                ->where('id_tugas', $assignmentId)
+                ->where('id_siswa', $student->id)
                 ->first();
 
             if ($sub) {
@@ -103,7 +103,7 @@ class AssignmentApiController extends Controller
     public function submitAssignment(Request $request, string $assignmentId): JsonResponse
     {
         $user = $request->user();
-        $student = Student::where('user_id', $user->id)->first();
+        $student = Student::where('id_pengguna', $user->id)->first();
 
         if (! $student) {
             return response()->json([

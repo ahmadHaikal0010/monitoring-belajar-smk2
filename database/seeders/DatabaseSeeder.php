@@ -27,28 +27,13 @@ class DatabaseSeeder extends Seeder
         // Teacher::factory(100)->create();
         // User::factory(100)->create();
 
-        // User::factory()->create([
-        //     'name' => 'guru',
-        //     'email' => 'guru@gmail.com',
-        //     'password' => bcrypt('guru12345'),
-        //     'role' => 'guru',
-        //     'is_approved' => true,
-        // ]);
-
         User::factory()->create([
-            'name' => 'admin',
+            'nama' => 'admin',
             'email' => 'admin@example.com',
-            'password' => bcrypt('admin12345'),
-            'role' => 'admin',
-            'is_approved' => true,
+            'kata_sandi' => bcrypt('admin12345'),
+            'peran' => 'admin',
+            'disetujui' => true,
         ]);
 
-        // User::factory()->create([
-        //     'name' => 'siswa',
-        //     'email' => 'siswa@gmail.com',
-        //     'password' => bcrypt('siswa12345'),
-        //     'role' => 'siswa',
-        //     'is_approved' => true,
-        // ]);
     }
 }

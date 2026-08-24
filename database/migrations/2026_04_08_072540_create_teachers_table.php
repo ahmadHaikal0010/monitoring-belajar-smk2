@@ -11,17 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('teachers', function (Blueprint $table) {
+        Schema::create('guru', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('id_pengguna')->constrained('pengguna')->onDelete('cascade');
             $table->string('nip', 18)->unique();
-            $table->string('photo')->nullable();
+            $table->string('foto')->nullable();
             $table->string('bio')->nullable();
-            $table->string('specialization')->nullable();
+            $table->string('spesialisasi')->nullable();
             $table->timestamps();
 
             $table->index('id');
-            $table->index('user_id');
+            $table->index('id_pengguna');
             $table->index('nip');
         });
     }
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('teachers');
+        Schema::dropIfExists('guru');
     }
 };

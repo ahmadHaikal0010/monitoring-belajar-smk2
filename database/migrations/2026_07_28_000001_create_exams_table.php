@@ -11,24 +11,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('exams', function (Blueprint $table) {
+        Schema::create('ujian', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('subject_id')->constrained('subjects')->onDelete('cascade');
-            $table->foreignUuid('teacher_id')->constrained('teachers')->onDelete('cascade');
-            $table->string('title');
-            $table->text('description')->nullable();
-            $table->integer('duration'); // in minutes
-            $table->integer('pass_score')->default(75);
-            $table->boolean('randomize_questions')->default(false);
-            $table->boolean('randomize_options')->default(false);
+            $table->foreignUuid('id_mata_pelajaran')->constrained('mata_pelajaran')->onDelete('cascade');
+            $table->foreignUuid('id_guru')->constrained('guru')->onDelete('cascade');
+            $table->string('judul');
+            $table->text('deskripsi')->nullable();
+            $table->integer('durasi'); // in minutes
+            $table->integer('nilai_kkm')->default(75);
+            $table->boolean('acak_soal')->default(false);
+            $table->boolean('acak_opsi')->default(false);
             $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
-            $table->timestamp('start_time')->nullable();
-            $table->timestamp('end_time')->nullable();
+            $table->timestamp('waktu_mulai')->nullable();
+            $table->timestamp('waktu_selesai')->nullable();
             $table->timestamps();
 
             $table->index('id');
-            $table->index('subject_id');
-            $table->index('teacher_id');
+            $table->index('id_mata_pelajaran');
+            $table->index('id_guru');
         });
     }
 
@@ -37,6 +37,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('exams');
+        Schema::dropIfExists('ujian');
     }
 };

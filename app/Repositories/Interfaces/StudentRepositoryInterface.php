@@ -10,7 +10,7 @@ interface StudentRepositoryInterface
 
     public function find(string $id);
 
-    public function findByUserId(int $userId);
+    public function findByUserId(string|int $userId);
 
     public function create(array $data);
 

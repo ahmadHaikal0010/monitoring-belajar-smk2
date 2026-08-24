@@ -55,11 +55,11 @@ class AssignmentControllerTest extends TestCase
         ]);
 
         $response->assertRedirect(route('teacher.assignments.index'));
-        $this->assertDatabaseHas('assignments', [
-            'subject_id' => $subject->id,
-            'teacher_id' => $teacher->id,
-            'title' => 'Tugas Laporan Praktikum',
-            'max_score' => 100,
+        $this->assertDatabaseHas('tugas', [
+            'id_mata_pelajaran' => $subject->id,
+            'id_guru' => $teacher->id,
+            'judul' => 'Tugas Laporan Praktikum',
+            'skor_maksimal' => 100,
         ]);
     }
 
@@ -88,10 +88,10 @@ class AssignmentControllerTest extends TestCase
         );
 
         $response->assertRedirect(route('teacher.assignments.show', $assignment->id));
-        $this->assertDatabaseHas('assignment_submissions', [
+        $this->assertDatabaseHas('pengumpulan_tugas', [
             'id' => $submission->id,
-            'score' => 95,
-            'feedback' => 'Pekerjaan sangat rapi dan lengkap.',
+            'skor' => 95,
+            'umpan_balik' => 'Pekerjaan sangat rapi dan lengkap.',
             'status' => 'graded',
         ]);
     }
