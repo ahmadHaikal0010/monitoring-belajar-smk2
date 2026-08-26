@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\Teacher\UpdateTeacherRequest;
 use App\Models\Teacher;
 use App\Services\TeacherService;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -111,5 +112,40 @@ class TeacherController extends Controller
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan saat menghapus profil guru. Silakan coba lagi.');
         }
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'max:5120'],
+        ]);
+
+        try {
+            $result = $this->teacherService->importTeachersFromCsv($request->file('file'));
+
+            $message = "Import selesai! {$result['imported']} data guru berhasil ditambahkan.";
+            if ($result['skipped'] > 0) {
+                $message .= " ({$result['skipped']} data dilewati).";
+            }
+
+            return redirect()->route('admin.teachers.index')
+                ->with('success', $message);
+        } catch (Exception $e) {
+            Log::error('Error importing teachers CSV: '.$e->getMessage());
+
+            return redirect()->back()
+                ->with('error', $e->getMessage());
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $csvHeader = "nip,nama,email,spesialisasi,bio\n";
+        $csvContent = $csvHeader."199001012022011001,Drs. Budi Santoso,budi@example.com,Teknik Komputer dan Jaringan,Guru Senior TKJ\n199203152022012002,Siti Rahma S.Pd,siti@example.com,Rekayasa Perangkat Lunak,Guru Pemrograman\n";
+
+        return response($csvContent, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="template_import_guru.csv"',
+        ]);
     }
 }

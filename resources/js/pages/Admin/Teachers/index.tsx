@@ -18,6 +18,9 @@ import {
     Trash2,
     AlertTriangle,
     Eye,
+    FileSpreadsheet,
+    Upload,
+    Download,
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -39,6 +42,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import admin from '@/routes/admin';
 
 interface Teacher {
@@ -106,6 +110,29 @@ export default function TeacherList({ teachers, filters }: Props) {
         null,
     );
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isImportOpen, setIsImportOpen] = useState(false);
+    const [importFile, setImportFile] = useState<File | null>(null);
+    const [isImporting, setIsImporting] = useState(false);
+
+    const handleImportSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!importFile) {
+return;
+}
+
+        setIsImporting(true);
+        const formData = new FormData();
+        formData.append('file', importFile);
+
+        router.post('/admin/teachers/import', formData, {
+            onSuccess: () => {
+                setIsImportOpen(false);
+                setImportFile(null);
+            },
+            onFinish: () => setIsImporting(false),
+        });
+    };
 
     const handleDelete = () => {
         if (!teacherToDelete) {
@@ -260,15 +287,26 @@ export default function TeacherList({ teachers, filters }: Props) {
                             </Button>
                         </div>
 
-                        <Button
-                            className="h-10 w-full gap-2 shadow-lg shadow-primary/20 sm:w-auto"
-                            asChild
-                        >
-                            <Link href={admin.teachers.create.url()}>
-                                <UserPlus className="h-4 w-4" />
-                                <span>Tambah Guru Baru</span>
-                            </Link>
-                        </Button>
+                        <div className="flex w-full items-center gap-2 sm:w-auto">
+                            <Button
+                                variant="outline"
+                                className="h-10 w-full gap-2 border-dashed sm:w-auto"
+                                onClick={() => setIsImportOpen(true)}
+                            >
+                                <FileSpreadsheet className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                                <span>Import CSV</span>
+                            </Button>
+
+                            <Button
+                                className="h-10 w-full gap-2 shadow-lg shadow-primary/20 sm:w-auto"
+                                asChild
+                            >
+                                <Link href={admin.teachers.create.url()}>
+                                    <UserPlus className="h-4 w-4" />
+                                    <span>Tambah Guru Baru</span>
+                                </Link>
+                            </Button>
+                        </div>
                     </div>
                 </div>
 
@@ -622,6 +660,75 @@ export default function TeacherList({ teachers, filters }: Props) {
                                 Hapus Profil
                             </Button>
                         </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Import CSV Dialog */}
+                <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
+                    <DialogContent className="sm:max-w-[480px]">
+                        <DialogHeader>
+                            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400">
+                                <FileSpreadsheet className="h-6 w-6" />
+                            </div>
+                            <DialogTitle>Import Data Guru (CSV / Excel)</DialogTitle>
+                            <DialogDescription>
+                                Unggah berkas CSV untuk mendaftarkan banyak guru sekaligus. Kata sandi default akun adalah <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono font-bold">password123</code>.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <form onSubmit={handleImportSubmit} className="space-y-4 pt-2">
+                            <div className="rounded-xl border border-zinc-200/80 bg-zinc-50/80 p-3.5 text-xs dark:border-zinc-800 dark:bg-zinc-800/40">
+                                <div className="flex items-center justify-between">
+                                    <span className="font-semibold text-zinc-800 dark:text-zinc-200">Format Kolom CSV:</span>
+                                    <a
+                                        href="/admin/teachers/import-template"
+                                        download
+                                        className="inline-flex items-center gap-1 font-bold text-primary hover:underline"
+                                    >
+                                        <Download className="h-3.5 w-3.5" />
+                                        Unduh Template
+                                    </a>
+                                </div>
+                                <p className="mt-1 text-zinc-500 font-mono text-[11px]">
+                                    nip, nama, email, spesialisasi, bio
+                                </p>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label htmlFor="csv_file" className="text-xs font-medium">Pilih Berkas CSV</Label>
+                                <Input
+                                    id="csv_file"
+                                    type="file"
+                                    accept=".csv,.txt,.xlsx,.xls"
+                                    required
+                                    onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                                    className="h-10 cursor-pointer text-xs"
+                                />
+                            </div>
+
+                            <DialogFooter className="mt-6 gap-2 sm:gap-0">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    onClick={() => setIsImportOpen(false)}
+                                    disabled={isImporting}
+                                >
+                                    Batal
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    disabled={!importFile || isImporting}
+                                    className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+                                >
+                                    {isImporting ? (
+                                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                    ) : (
+                                        <Upload className="h-4 w-4" />
+                                    )}
+                                    Proses Import
+                                </Button>
+                            </DialogFooter>
+                        </form>
                     </DialogContent>
                 </Dialog>
             </div>

@@ -69,6 +69,8 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
 
     // * Admin ONLY Routes
     Route::prefix('admin')->name('admin.')->middleware(AdminAccess::class)->group(function () {
+        Route::post('teachers/import', [AdminTeacherController::class, 'import'])->name('teachers.import');
+        Route::get('teachers/import-template', [AdminTeacherController::class, 'downloadTemplate'])->name('teachers.import-template');
         Route::resource('teachers', AdminTeacherController::class);
         Route::resource('users', AdminUserController::class);
         Route::resource('students', AdminStudentController::class);

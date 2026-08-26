@@ -9,6 +9,7 @@ use App\Services\SubjectService;
 use App\Services\TeacherService;
 use App\Services\UserService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
@@ -34,6 +35,8 @@ class DashboardController extends Controller
         } elseif ($user->role === 'siswa') {
             $data = $this->getStudentDashboardData($user);
         }
+
+        $data['must_change_password'] = Hash::check('password123', $user->kata_sandi) || Hash::check('guru123', $user->kata_sandi);
 
         return Inertia::render('dashboard', $data);
     }
