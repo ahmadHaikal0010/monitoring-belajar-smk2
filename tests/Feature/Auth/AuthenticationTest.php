@@ -34,6 +34,21 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect(route('dashboard', absolute: false));
     }
 
+    public function test_users_can_authenticate_with_remember_me()
+    {
+        $user = User::factory()->create();
+
+        $response = $this->post(route('login.store'), [
+            'nomor_induk' => $user->email,
+            'password' => 'password',
+            'remember' => 'on',
+        ]);
+
+        $this->assertAuthenticatedAs($user);
+        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertCookie(auth()->guard()->getRecallerName());
+    }
+
     public function test_students_can_authenticate_using_nisn_on_web()
     {
         $user = User::factory()->create([
