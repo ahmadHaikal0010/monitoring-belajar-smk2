@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
@@ -116,6 +117,22 @@ export default function Login({
                                     >
                                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                     </button>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between pt-1">
+                                <div className="flex items-center gap-2">
+                                    <Checkbox
+                                        id="remember"
+                                        name="remember"
+                                        tabIndex={3}
+                                    />
+                                    <Label
+                                        htmlFor="remember"
+                                        className="text-xs font-medium text-zinc-600 dark:text-zinc-400 cursor-pointer select-none"
+                                    >
+                                        Ingat Saya di Perangkat Ini
+                                    </Label>
                                 </div>
                             </div>
 
