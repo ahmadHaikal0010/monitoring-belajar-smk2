@@ -10,6 +10,8 @@ import {
     CheckCircle2,
     ClipboardList,
     Award,
+    ShieldAlert,
+    KeyRound,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -67,6 +69,7 @@ interface Props {
     recent_enrollments?: RecentEnrollment[];
     subject_progress?: SubjectProgress[];
     enrolled_subjects_list?: EnrolledSubjectItem[];
+    must_change_password?: boolean;
 }
 
 export default function Dashboard({
@@ -75,6 +78,7 @@ export default function Dashboard({
     recent_enrollments,
     subject_progress = [],
     enrolled_subjects_list = [],
+    must_change_password = false,
 }: Props) {
     const { auth } = usePage().props as any;
     const isGuru = auth.user.role === 'guru';
@@ -150,6 +154,31 @@ export default function Dashboard({
                             : 'Berikut adalah ringkasan data pembelajaran hari ini.'}
                     </p>
                 </div>
+
+                {/* Must Change Password Alert Banner */}
+                {must_change_password && (
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl border border-amber-300/80 bg-amber-50/90 p-4 shadow-sm dark:border-amber-900/50 dark:bg-amber-950/40">
+                        <div className="flex items-start gap-3">
+                            <div className="rounded-xl bg-amber-500/10 p-2 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5 sm:mt-0">
+                                <ShieldAlert className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <h4 className="text-sm font-bold text-amber-900 dark:text-amber-200">
+                                    Peringatan Keamanan Akun
+                                </h4>
+                                <p className="text-xs text-amber-800/90 dark:text-amber-300">
+                                    Anda masih menggunakan kata sandi bawaan default (<code className="font-mono font-bold bg-amber-200/50 px-1 py-0.5 rounded">password123</code>). Demi keamanan akun Anda, segera perbarui kata sandi Anda.
+                                </p>
+                            </div>
+                        </div>
+                        <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs gap-1.5 shrink-0" asChild>
+                            <Link href="/settings/profile">
+                                <KeyRound className="h-3.5 w-3.5" />
+                                Ubah Kata Sandi Sekarang
+                            </Link>
+                        </Button>
+                    </div>
+                )}
 
                 {/* Main Stats */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

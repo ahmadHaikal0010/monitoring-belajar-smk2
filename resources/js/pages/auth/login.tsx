@@ -45,7 +45,7 @@ export default function Login({
                 <div className="flex items-start gap-3 rounded-xl border border-zinc-200/80 bg-zinc-50/80 p-3.5 text-xs text-zinc-600 dark:border-zinc-800 dark:bg-zinc-800/40 dark:text-zinc-400">
                     <Info className="h-4 w-4 shrink-0 text-zinc-500 mt-0.5" />
                     <div>
-                        Login untuk <strong className="font-semibold text-zinc-800 dark:text-zinc-200">Siswa, Guru, dan Administrator</strong>.
+                        Silakan masuk menggunakan <strong className="font-semibold text-zinc-800 dark:text-zinc-200">NISN (Siswa), NIP (Guru), atau Email (Administrator)</strong>.
                     </div>
                 </div>
 

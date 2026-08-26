@@ -24,6 +24,18 @@ class PasswordConfirmationTest extends TestCase
         );
     }
 
+    public function test_password_can_be_confirmed()
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post(route('password.confirm.store'), [
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+    }
+
     public function test_password_confirmation_requires_authentication()
     {
         $response = $this->get(route('password.confirm'));

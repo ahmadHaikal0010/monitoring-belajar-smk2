@@ -43,6 +43,10 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::createUsersUsing(CreateNewUser::class);
 
+        Fortify::confirmPasswordsUsing(function ($user, string $password) {
+            return Hash::check($password, $user->kata_sandi);
+        });
+
         Fortify::authenticateUsing(function (Request $request) {
             $identity = $request->input('nomor_induk') ?? $request->input('email') ?? $request->input('username');
             $password = $request->input('password');
