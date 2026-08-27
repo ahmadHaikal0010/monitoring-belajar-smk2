@@ -12,11 +12,13 @@ use Illuminate\Database\Eloquent\Model;
 
 #[Fillable([
     'id_mata_pelajaran',
+    'id_kelas',
     'judul',
     'tipe_konten',
     'isi_konten',
     'deskripsi',
     'subject_id',
+    'classroom_id',
     'title',
     'content_type',
     'content_body',
@@ -32,11 +34,13 @@ class Material extends Model
 
     protected $fillable = [
         'id_mata_pelajaran',
+        'id_kelas',
         'judul',
         'tipe_konten',
         'isi_konten',
         'deskripsi',
         'subject_id',
+        'classroom_id',
         'title',
         'content_type',
         'content_body',
@@ -45,6 +49,7 @@ class Material extends Model
 
     protected $appends = [
         'subject_id',
+        'classroom_id',
         'title',
         'content_type',
         'content_body',
@@ -60,6 +65,16 @@ class Material extends Model
     public function setSubjectIdAttribute($value): void
     {
         $this->attributes['id_mata_pelajaran'] = $value;
+    }
+
+    public function getClassroomIdAttribute(): ?string
+    {
+        return $this->attributes['id_kelas'] ?? null;
+    }
+
+    public function setClassroomIdAttribute($value): void
+    {
+        $this->attributes['id_kelas'] = $value;
     }
 
     public function getTitleAttribute(): ?string
@@ -105,6 +120,11 @@ class Material extends Model
     public function subject()
     {
         return $this->belongsTo(Subject::class, 'id_mata_pelajaran');
+    }
+
+    public function classroom()
+    {
+        return $this->belongsTo(Classroom::class, 'id_kelas');
     }
 
     public function progress()

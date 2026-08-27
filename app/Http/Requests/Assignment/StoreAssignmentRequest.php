@@ -16,6 +16,7 @@ class StoreAssignmentRequest extends FormRequest
     {
         return [
             'subject_id' => ['required', 'string', 'exists:mata_pelajaran,id'],
+            'classroom_id' => ['nullable', 'string', 'exists:kelas,id'],
             'teacher_id' => ['nullable', 'string', 'exists:guru,id'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],

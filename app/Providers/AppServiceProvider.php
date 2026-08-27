@@ -3,8 +3,11 @@
 namespace App\Providers;
 
 use App\Repositories\Interfaces\AssignmentRepositoryInterface;
+use App\Repositories\Interfaces\ClassEnrollmentRepositoryInterface;
+use App\Repositories\Interfaces\ClassroomRepositoryInterface;
 use App\Repositories\Interfaces\EnrollmentRepositoryInterface;
 use App\Repositories\Interfaces\ExamRepositoryInterface;
+use App\Repositories\Interfaces\MajorRepositoryInterface;
 use App\Repositories\Interfaces\MaterialRepositoryInterface;
 use App\Repositories\Interfaces\StudentProgressRepositoryInterface;
 use App\Repositories\Interfaces\StudentRepositoryInterface;
@@ -12,8 +15,11 @@ use App\Repositories\Interfaces\SubjectRepositoryInterface;
 use App\Repositories\Interfaces\TeacherRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Repositories\SqlAssignmentRepository;
+use App\Repositories\SqlClassEnrollmentRepository;
+use App\Repositories\SqlClassroomRepository;
 use App\Repositories\SqlEnrollmentRepository;
 use App\Repositories\SqlExamRepository;
+use App\Repositories\SqlMajorRepository;
 use App\Repositories\SqlMaterialRepository;
 use App\Repositories\SqlStudentProgressRepository;
 use App\Repositories\SqlStudentRepository;
@@ -78,6 +84,21 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             AssignmentRepositoryInterface::class,
             SqlAssignmentRepository::class
+        );
+
+        $this->app->bind(
+            MajorRepositoryInterface::class,
+            SqlMajorRepository::class
+        );
+
+        $this->app->bind(
+            ClassroomRepositoryInterface::class,
+            SqlClassroomRepository::class
+        );
+
+        $this->app->bind(
+            ClassEnrollmentRepositoryInterface::class,
+            SqlClassEnrollmentRepository::class
         );
 
         $this->app->bind(

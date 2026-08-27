@@ -102,4 +102,10 @@ class Subject extends Model
     {
         return $this->hasMany(Enrollment::class, 'id_mata_pelajaran');
     }
+
+    public function classrooms()
+    {
+        return $this->belongsToMany(Classroom::class, 'kelas_mata_pelajaran', 'id_mata_pelajaran', 'id_kelas')
+            ->withTimestamps();
+    }
 }

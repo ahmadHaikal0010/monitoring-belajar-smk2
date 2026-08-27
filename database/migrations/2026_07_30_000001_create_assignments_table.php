@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('tugas', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('id_mata_pelajaran')->constrained('mata_pelajaran')->onDelete('cascade');
+            $table->foreignUuid('id_kelas')->nullable()->constrained('kelas')->onDelete('cascade');
             $table->foreignUuid('id_guru')->constrained('guru')->onDelete('cascade');
             $table->string('judul');
             $table->text('deskripsi')->nullable();
@@ -25,6 +26,7 @@ return new class extends Migration
 
             $table->index('id');
             $table->index('id_mata_pelajaran');
+            $table->index('id_kelas');
             $table->index('id_guru');
         });
     }

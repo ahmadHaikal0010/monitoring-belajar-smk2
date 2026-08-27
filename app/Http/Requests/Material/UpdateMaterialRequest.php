@@ -29,6 +29,7 @@ class UpdateMaterialRequest extends FormRequest
         $type = $this->input('content_type');
 
         return [
+            'classroom_id' => ['nullable', 'exists:kelas,id'],
             'title' => ['required', 'string', 'max:255'],
             'content_type' => ['required', 'string', 'in:video,document'],
             'content_body_file' => [

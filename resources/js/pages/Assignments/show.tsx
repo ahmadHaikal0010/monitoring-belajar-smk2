@@ -49,12 +49,14 @@ interface Submission {
 
 interface Assignment {
     id: string;
+    subject_id?: string;
     title: string;
     description: string;
     due_date: string | null;
     max_score: number;
     allowed_file_types: string[] | null;
     status: 'draft' | 'published' | 'archived';
+    classroom_id?: string;
     subject?: {
         id: string;
         title: string;
@@ -89,11 +91,25 @@ export default function ShowAssignment({ assignment, submissions = [] }: Props) 
         }
     }, [flash]);
 
+    const subjectId = assignment.subject?.id || assignment.subject_id;
+
+    const backUrl = assignment.classroom_id && subjectId
+        ? `/teacher/subjects/${subjectId}/classrooms/${assignment.classroom_id}/assignments`
+        : `/teacher/assignments${subjectId ? `?subject_id=${subjectId}` : ''}`;
+
     setLayoutProps({
-        breadcrumbs: [
-            { title: 'Manajemen Tugas', href: '/teacher/assignments' },
-            { title: assignment.title, href: `/teacher/assignments/${assignment.id}` },
-        ],
+        breadcrumbs: assignment.classroom_id && subjectId
+            ? [
+                  { title: 'Mata Pelajaran', href: '/teacher/subjects' },
+                  { title: assignment.subject?.title || 'Detail Mapel', href: `/teacher/subjects/${subjectId}` },
+                  { title: 'Tugas Kelas', href: backUrl },
+                  { title: assignment.title, href: '#' },
+              ]
+            : [
+                  { title: 'Manajemen Tugas', href: '/teacher/assignments' },
+                  ...(subjectId ? [{ title: assignment.subject?.title || 'Mata Pelajaran', href: `/teacher/assignments?subject_id=${subjectId}` }] : []),
+                  { title: assignment.title, href: '#' },
+              ],
     });
 
     const getSubmissionStatusBadge = (submission: Submission) => {
@@ -156,7 +172,7 @@ export default function ShowAssignment({ assignment, submissions = [] }: Props) 
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div className="flex items-center gap-4">
                         <Button variant="outline" size="icon" asChild className="shrink-0">
-                            <Link href="/teacher/assignments">
+                            <Link href={backUrl}>
                                 <ArrowLeft className="h-4 w-4" />
                             </Link>
                         </Button>

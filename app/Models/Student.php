@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['id_pengguna', 'nisn', 'foto', 'alamat', 'user_id', 'address', 'photo'])]
+#[Fillable(['id_pengguna', 'id_kelas', 'nisn', 'foto', 'alamat', 'user_id', 'classroom_id', 'address', 'photo'])]
 class Student extends Model
 {
     /** @use HasFactory<StudentFactory> */
@@ -19,10 +19,12 @@ class Student extends Model
 
     protected $fillable = [
         'id_pengguna',
+        'id_kelas',
         'nisn',
         'foto',
         'alamat',
         'user_id',
+        'classroom_id',
         'photo',
         'address',
     ];
@@ -34,10 +36,21 @@ class Student extends Model
      */
     protected $appends = [
         'user_id',
+        'classroom_id',
         'photo',
         'address',
         'photo_url',
     ];
+
+    public function getClassroomIdAttribute()
+    {
+        return $this->attributes['id_kelas'] ?? null;
+    }
+
+    public function setClassroomIdAttribute($value): void
+    {
+        $this->attributes['id_kelas'] = $value;
+    }
 
     // Property compatibility accessors & mutators
     public function getUserIdAttribute()
@@ -73,6 +86,11 @@ class Student extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'id_pengguna');
+    }
+
+    public function classroom()
+    {
+        return $this->belongsTo(Classroom::class, 'id_kelas');
     }
 
     public function enrollments()

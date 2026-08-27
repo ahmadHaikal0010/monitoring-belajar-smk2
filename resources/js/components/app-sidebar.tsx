@@ -2,14 +2,11 @@ import { Link, usePage } from '@inertiajs/react';
 import {
     LayoutGrid,
     Library,
-    TrendingUp,
-    BookOpen,
-    Award,
-    CheckSquare,
     Users,
     GraduationCap,
     Shield,
     UserCheck,
+    School,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -24,8 +21,8 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
-import adminRoutes from '@/routes/admin';
+import adminRoutes from '@/routes/admin/index';
+import { dashboard } from '@/routes/index';
 import type { NavItem } from '@/types';
 import type { Auth } from '@/types/auth';
 
@@ -42,44 +39,22 @@ export function AppSidebar() {
         },
     ];
 
-    // Tambahkan menu Admin jika role sesuai
+    // Tambahkan menu Admin/Guru jika role sesuai
     if (auth?.user?.role === 'admin' || auth?.user?.role === 'guru') {
         mainNavItems.push({
             title: 'Mata Pelajaran',
             href: '/teacher/subjects',
             icon: Library,
         });
-
-        mainNavItems.push({
-            title: 'Progress Siswa',
-            href: '/admin/enrollments',
-            icon: TrendingUp,
-        });
-    }
-
-    if (auth?.user?.role === 'admin' || auth?.user?.role === 'guru') {
-        mainNavItems.push({
-            title: 'Materi Pembelajaran',
-            href: '/teacher/materials',
-            icon: BookOpen,
-        });
-    }
-
-    if (auth?.user?.role === 'guru') {
-        mainNavItems.push({
-            title: 'Manajemen Ujian',
-            href: '/teacher/exams',
-            icon: Award,
-        });
-
-        mainNavItems.push({
-            title: 'Manajemen Tugas',
-            href: '/teacher/assignments',
-            icon: CheckSquare,
-        });
     }
 
     if (auth?.user?.role === 'admin') {
+        mainNavItems.push({
+            title: 'Manajemen Jurusan & Kelas',
+            href: adminRoutes.majors.index.url(),
+            icon: School,
+        });
+
         mainNavItems.push({
             title: 'Daftar Guru',
             href: adminRoutes.teachers.index.url(),

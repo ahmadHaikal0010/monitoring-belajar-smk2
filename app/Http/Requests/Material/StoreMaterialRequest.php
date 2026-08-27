@@ -27,6 +27,7 @@ class StoreMaterialRequest extends FormRequest
 
         return [
             'subject_id' => ['required', 'exists:mata_pelajaran,id'],
+            'classroom_id' => ['nullable', 'exists:kelas,id'],
             'title' => ['required', 'string', 'max:255'],
             'content_type' => ['required', 'string', 'in:video,document'],
             'content_body_file' => [

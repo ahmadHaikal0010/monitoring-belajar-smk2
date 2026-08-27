@@ -11,6 +11,7 @@ import {
     Loader2,
     Video,
     File,
+    School,
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -56,14 +57,31 @@ interface ExportOptionsResponse {
     assignments: AssignmentOption[];
 }
 
+interface ClassroomOption {
+    id: string;
+    name: string;
+    major_code?: string;
+}
+
 interface Props {
     isOpen: boolean;
     onClose: () => void;
     subjectId: string;
     subjectTitle: string;
+    classrooms?: ClassroomOption[];
+    classroomId?: string;
 }
 
-export function ExportReportModal({ isOpen, onClose, subjectId, subjectTitle }: Props) {
+const EMPTY_CLASSROOMS: ClassroomOption[] = [];
+
+export function ExportReportModal({
+    isOpen,
+    onClose,
+    subjectId,
+    subjectTitle,
+    classrooms = EMPTY_CLASSROOMS,
+    classroomId,
+}: Props) {
     const [loading, setLoading] = useState(false);
     const [materials, setMaterials] = useState<MaterialOption[]>([]);
     const [exams, setExams] = useState<ExamOption[]>([]);
@@ -73,11 +91,47 @@ export function ExportReportModal({ isOpen, onClose, subjectId, subjectTitle }: 
     const [selectedExams, setSelectedExams] = useState<Set<string>>(new Set());
     const [selectedAssignments, setSelectedAssignments] = useState<Set<string>>(new Set());
 
-    const [expandedMaterials, setExpandedMaterials] = useState(true);
-    const [expandedExams, setExpandedExams] = useState(true);
-    const [expandedAssignments, setExpandedAssignments] = useState(true);
+    // Accordions default to CLOSED as requested
+    const [expandedMaterials, setExpandedMaterials] = useState(false);
+    const [expandedExams, setExpandedExams] = useState(false);
+    const [expandedAssignments, setExpandedAssignments] = useState(false);
 
+    // Classroom checkboxes selection state (supports multi-selection)
+    const [selectedClassroomIds, setSelectedClassroomIds] = useState<Set<string>>(new Set());
     const [format, setFormat] = useState<'excel' | 'print'>('excel');
+
+    useEffect(() => {
+        if (!isOpen) {
+            return;
+        }
+
+        if (classroomId) {
+            setSelectedClassroomIds((prev) => {
+                if (prev.size === 1 && prev.has(classroomId)) {
+                    return prev;
+                }
+
+                return new Set([classroomId]);
+            });
+        } else if (classrooms.length > 0) {
+            const newIds = classrooms.map((c) => c.id);
+            setSelectedClassroomIds((prev) => {
+                if (prev.size === newIds.length && newIds.every((id) => prev.has(id))) {
+                    return prev;
+                }
+
+                return new Set(newIds);
+            });
+        } else {
+            setSelectedClassroomIds((prev) => {
+                if (prev.size === 0) {
+                    return prev;
+                }
+
+                return new Set();
+            });
+        }
+    }, [isOpen, classroomId, classrooms]);
 
     const fetchExportOptions = useCallback(async () => {
         setLoading(true);
@@ -108,7 +162,28 @@ export function ExportReportModal({ isOpen, onClose, subjectId, subjectTitle }: 
         }
     }, [isOpen, subjectId, fetchExportOptions]);
 
-    // Master Toggles
+    // Classroom Toggles
+    const toggleAllClassrooms = (checked: boolean) => {
+        if (checked) {
+            setSelectedClassroomIds(new Set(classrooms.map((c) => c.id)));
+        } else {
+            setSelectedClassroomIds(new Set());
+        }
+    };
+
+    const toggleClassroom = (id: string) => {
+        const next = new Set(selectedClassroomIds);
+
+        if (next.has(id)) {
+            next.delete(id);
+        } else {
+            next.add(id);
+        }
+
+        setSelectedClassroomIds(next);
+    };
+
+    // Master Component Toggles
     const toggleAllMaterials = (checked: boolean) => {
         if (checked) {
             setSelectedMaterials(new Set(materials.map((m) => m.id)));
@@ -197,12 +272,34 @@ export function ExportReportModal({ isOpen, onClose, subjectId, subjectTitle }: 
             queryParams.set('include_assignments', '0');
         }
 
+        if (classroomId) {
+            queryParams.set('classroom_ids', classroomId);
+        } else if (selectedClassroomIds.size > 0) {
+            queryParams.set('classroom_ids', Array.from(selectedClassroomIds).join(','));
+        }
+
         queryParams.set('format', format);
 
         const exportUrl = `/admin/subjects/${subjectId}/export?${queryParams.toString()}`;
-        window.open(exportUrl, '_blank');
+
+        if (format === 'print') {
+            window.open(exportUrl, '_blank');
+        } else {
+            const link = document.createElement('a');
+            link.href = exportUrl;
+            link.setAttribute('download', '');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         onClose();
     };
+
+    const canExport =
+        !loading &&
+        totalItemsSelected > 0 &&
+        (!classrooms.length || classroomId || selectedClassroomIds.size > 0);
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -228,6 +325,62 @@ export function ExportReportModal({ isOpen, onClose, subjectId, subjectTitle }: 
                         </div>
                     ) : (
                         <>
+                            {/* Classroom Selection Checkboxes (Multi-select) */}
+                            {classrooms.length > 0 && !classroomId && (
+                                <div className="rounded-xl border border-border bg-card/50 overflow-hidden transition-all space-y-0">
+                                    <div className="flex items-center justify-between p-3.5 bg-accent/40 border-b border-border/60">
+                                        <div className="flex items-center gap-3">
+                                            <input
+                                                type="checkbox"
+                                                id="master-classrooms"
+                                                checked={selectedClassroomIds.size === classrooms.length}
+                                                onChange={(e) => toggleAllClassrooms(e.target.checked)}
+                                                className="h-4 w-4 rounded border-input text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                                            />
+                                            <label htmlFor="master-classrooms" className="flex items-center gap-2 text-sm font-bold cursor-pointer">
+                                                <School className="h-4 w-4 text-primary" />
+                                                <span>Pilih Rombel Kelas Diajar</span>
+                                            </label>
+                                        </div>
+                                        <Badge variant="outline" className="text-xs font-semibold">
+                                            {selectedClassroomIds.size} / {classrooms.length} Kelas Dipilih
+                                        </Badge>
+                                    </div>
+
+                                    <div className="p-3 grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto">
+                                        {classrooms.map((c) => {
+                                            const isSelected = selectedClassroomIds.has(c.id);
+
+                                            return (
+                                                <label
+                                                    key={c.id}
+                                                    className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer transition-all text-xs ${
+                                                        isSelected
+                                                            ? 'border-emerald-500/50 bg-emerald-500/5 font-semibold text-emerald-950 dark:text-emerald-200'
+                                                            : 'border-border hover:bg-accent/60 text-muted-foreground'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-center gap-2.5 min-w-0">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={isSelected}
+                                                            onChange={() => toggleClassroom(c.id)}
+                                                            className="h-3.5 w-3.5 rounded border-input text-emerald-600 focus:ring-emerald-500 cursor-pointer shrink-0"
+                                                        />
+                                                        <span className="truncate font-medium">Kelas {c.name}</span>
+                                                    </div>
+                                                    {c.major_code && (
+                                                        <Badge variant="outline" className="text-[10px] py-0 h-5 shrink-0">
+                                                            {c.major_code}
+                                                        </Badge>
+                                                    )}
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Format File Selection */}
                             <div className="space-y-2.5">
                                 <Label className="flex items-center gap-2 font-semibold text-xs uppercase tracking-wider text-muted-foreground">
@@ -284,7 +437,7 @@ export function ExportReportModal({ isOpen, onClose, subjectId, subjectTitle }: 
                                     </Badge>
                                 </div>
 
-                                {/* SECTION 1: MATERI */}
+                                {/* SECTION 1: MATERI (Default CLOSED) */}
                                 <div className="rounded-xl border border-border bg-card/50 overflow-hidden transition-all">
                                     <div className="flex items-center justify-between p-3.5 bg-accent/40 border-b border-border/60">
                                         <div className="flex items-center gap-3">
@@ -347,7 +500,7 @@ export function ExportReportModal({ isOpen, onClose, subjectId, subjectTitle }: 
                                     )}
                                 </div>
 
-                                {/* SECTION 2: UJIAN */}
+                                {/* SECTION 2: UJIAN (Default CLOSED) */}
                                 <div className="rounded-xl border border-border bg-card/50 overflow-hidden transition-all">
                                     <div className="flex items-center justify-between p-3.5 bg-accent/40 border-b border-border/60">
                                         <div className="flex items-center gap-3">
@@ -414,7 +567,7 @@ export function ExportReportModal({ isOpen, onClose, subjectId, subjectTitle }: 
                                     )}
                                 </div>
 
-                                {/* SECTION 3: TUGAS */}
+                                {/* SECTION 3: TUGAS (Default CLOSED) */}
                                 <div className="rounded-xl border border-border bg-card/50 overflow-hidden transition-all">
                                     <div className="flex items-center justify-between p-3.5 bg-accent/40 border-b border-border/60">
                                         <div className="flex items-center gap-3">
@@ -484,6 +637,8 @@ export function ExportReportModal({ isOpen, onClose, subjectId, subjectTitle }: 
                     <div className="text-xs text-muted-foreground">
                         {totalItemsSelected === 0 ? (
                             <span className="text-destructive font-semibold">Pilih minimal 1 item untuk diexport.</span>
+                        ) : classrooms.length > 0 && !classroomId && selectedClassroomIds.size === 0 ? (
+                            <span className="text-destructive font-semibold">Pilih minimal 1 rombel kelas.</span>
                         ) : (
                             <span>{totalItemsSelected} item siap diexport</span>
                         )}
@@ -494,7 +649,7 @@ export function ExportReportModal({ isOpen, onClose, subjectId, subjectTitle }: 
                         </Button>
                         <Button
                             onClick={handleExport}
-                            disabled={loading || totalItemsSelected === 0}
+                            disabled={!canExport}
                             className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-md"
                         >
                             <Download className="h-4 w-4" />
@@ -506,3 +661,5 @@ export function ExportReportModal({ isOpen, onClose, subjectId, subjectTitle }: 
         </Dialog>
     );
 }
+
+export default ExportReportModal;

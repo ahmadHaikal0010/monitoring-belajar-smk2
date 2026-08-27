@@ -21,6 +21,7 @@ class SqlExamRepository implements ExamRepositoryInterface
             ->select([
                 'ujian.id',
                 'ujian.id_mata_pelajaran as subject_id',
+                'ujian.id_kelas as classroom_id',
                 'ujian.id_guru as teacher_id',
                 'ujian.judul as title',
                 'ujian.deskripsi as description',
@@ -63,7 +64,7 @@ class SqlExamRepository implements ExamRepositoryInterface
         ];
         $sort = $filters['sort'] ?? 'created_at';
         $dbSort = $sortMap[$sort] ?? 'created_at';
-        $direction = $filters['direction'] ?? 'desc';
+        $direction = $filters['direction'] ?? 'asc';
         $query->orderBy("ujian.{$dbSort}", $direction);
 
         $paginator = $query->paginate($perPage);
@@ -87,6 +88,7 @@ class SqlExamRepository implements ExamRepositoryInterface
             ->select([
                 'ujian.id',
                 'ujian.id_mata_pelajaran as subject_id',
+                'ujian.id_kelas as classroom_id',
                 'ujian.id_guru as teacher_id',
                 'ujian.judul as title',
                 'ujian.deskripsi as description',
@@ -169,6 +171,7 @@ class SqlExamRepository implements ExamRepositoryInterface
         DB::table('ujian')->insert([
             'id' => $id,
             'id_mata_pelajaran' => $data['subject_id'],
+            'id_kelas' => $data['classroom_id'] ?? null,
             'id_guru' => $data['teacher_id'],
             'judul' => $data['title'],
             'deskripsi' => $data['description'] ?? null,
@@ -190,6 +193,7 @@ class SqlExamRepository implements ExamRepositoryInterface
     {
         $fieldMap = [
             'subject_id' => 'id_mata_pelajaran',
+            'classroom_id' => 'id_kelas',
             'teacher_id' => 'id_guru',
             'title' => 'judul',
             'description' => 'deskripsi',

@@ -26,8 +26,7 @@ class ReportExportController extends Controller
 
         $user = auth()->user();
         if ($user->role === 'guru') {
-            $teacher = $this->teacherService->getTeacherByUserId($user->id);
-            if ($subject->teacher_id !== ($teacher->id ?? null)) {
+            if ((string) $subject->teacher_user_id !== (string) $user->id) {
                 return response()->json(['message' => 'Anda tidak memiliki hak akses untuk mengunduh laporan mata pelajaran ini.'], 403);
             }
         }
@@ -74,8 +73,7 @@ class ReportExportController extends Controller
 
         $user = auth()->user();
         if ($user->role === 'guru') {
-            $teacher = $this->teacherService->getTeacherByUserId($user->id);
-            if ($subject->teacher_id !== ($teacher->id ?? null)) {
+            if ((string) $subject->teacher_user_id !== (string) $user->id) {
                 abort(403, 'Anda tidak memiliki hak akses untuk mengunduh laporan mata pelajaran ini.');
             }
         }
@@ -98,6 +96,7 @@ class ReportExportController extends Controller
             'material_ids' => $parseIds($request->input('material_ids')),
             'exam_ids' => $parseIds($request->input('exam_ids')),
             'assignment_ids' => $parseIds($request->input('assignment_ids')),
+            'classroom_ids' => $parseIds($request->input('classroom_ids') ?? $request->input('classroom_id')),
             'format' => $request->query('format', 'excel'),
         ];
 

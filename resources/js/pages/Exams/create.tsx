@@ -1,5 +1,5 @@
-import { Head, useForm, setLayoutProps } from '@inertiajs/react';
-import { ArrowLeft, Save, FileQuestion } from 'lucide-react';
+import { Head, Link, useForm, setLayoutProps } from '@inertiajs/react';
+import { ArrowLeft, Save, FileQuestion, School } from 'lucide-react';
 import { ExamSchedulePicker } from '@/components/ExamSchedulePicker';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,13 +12,21 @@ interface Subject {
     code: string;
 }
 
-interface Props {
-    subject: Subject;
+interface ClassroomOption {
+    id: string;
+    name: string;
 }
 
-export default function ExamCreate({ subject }: Props) {
+interface Props {
+    subject: Subject;
+    classrooms?: ClassroomOption[];
+    classroomId?: string;
+}
+
+export default function ExamCreate({ subject, classrooms = [], classroomId = '' }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         subject_id: subject.id,
+        classroom_id: classroomId || '',
         title: '',
         description: '',
         duration: 60,
@@ -30,12 +38,22 @@ export default function ExamCreate({ subject }: Props) {
         end_time: '',
     });
 
+    const backUrl = classroomId
+        ? `/teacher/subjects/${subject.id}/classrooms/${classroomId}/exams`
+        : `/teacher/exams?subject_id=${subject.id}`;
+
     setLayoutProps({
-        breadcrumbs: [
-            { title: 'Manajemen Ujian', href: '/teacher/exams' },
-            { title: subject.title, href: `/teacher/exams?subject_id=${subject.id}` },
-            { title: 'Buat Ujian', href: `/teacher/exams/create?subject_id=${subject.id}` },
-        ],
+        breadcrumbs: classroomId
+            ? [
+                  { title: 'Mata Pelajaran', href: '/teacher/subjects' },
+                  { title: subject.title, href: `/teacher/subjects/${subject.id}` },
+                  { title: 'Buat Ujian Kelas', href: '#' },
+              ]
+            : [
+                  { title: 'Manajemen Ujian', href: '/teacher/exams' },
+                  { title: subject.title, href: `/teacher/exams?subject_id=${subject.id}` },
+                  { title: 'Buat Ujian', href: '#' },
+              ],
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -49,8 +67,10 @@ export default function ExamCreate({ subject }: Props) {
 
             <div className="flex flex-col gap-6 p-6 max-w-4xl mx-auto">
                 <div className="flex items-center gap-4">
-                    <Button variant="outline" size="icon" className="h-10 w-10" onClick={() => window.history.back()}>
-                        <ArrowLeft className="h-5 w-5" />
+                    <Button variant="outline" size="icon" className="h-10 w-10" asChild>
+                        <Link href={backUrl}>
+                            <ArrowLeft className="h-5 w-5" />
+                        </Link>
                     </Button>
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Buat Ujian Baru</h1>
@@ -81,6 +101,27 @@ export default function ExamCreate({ subject }: Props) {
                                 />
                                 {errors.title && <p className="text-xs text-destructive">{errors.title}</p>}
                             </div>
+
+                            {classrooms && classrooms.length > 0 && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="classroom_id" className="flex items-center gap-2">
+                                        <School className="h-4 w-4 text-primary" /> Target Rombel Kelas (Opsional)
+                                    </Label>
+                                    <select
+                                        id="classroom_id"
+                                        value={data.classroom_id}
+                                        onChange={(e) => setData('classroom_id', e.target.value)}
+                                        className="w-full h-10 rounded-md border border-input bg-background/50 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                    >
+                                        <option value="">-- Semua Kelas / Umum --</option>
+                                        {classrooms.map((c) => (
+                                            <option key={c.id} value={c.id}>
+                                                {c.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
 
                             <div className="space-y-2">
                                 <Label htmlFor="description">Petunjuk / Deskripsi Pengerjaan</Label>
@@ -178,8 +219,8 @@ export default function ExamCreate({ subject }: Props) {
                     </Card>
 
                     <div className="flex justify-end gap-3">
-                        <Button type="button" variant="outline" onClick={() => window.history.back()}>
-                            Batal
+                        <Button type="button" variant="outline" asChild>
+                            <Link href={backUrl}>Batal</Link>
                         </Button>
                         <Button type="submit" disabled={processing} className="gap-2 shadow-lg shadow-primary/20">
                             {processing ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" /> : <Save className="h-4 w-4" />}

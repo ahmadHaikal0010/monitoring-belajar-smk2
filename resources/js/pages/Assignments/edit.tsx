@@ -8,6 +8,7 @@ import {
     Award,
     Loader2,
     CheckSquare,
+    School,
 } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -22,9 +23,15 @@ interface Subject {
     code: string;
 }
 
+interface ClassroomOption {
+    id: string;
+    name: string;
+}
+
 interface Assignment {
     id: string;
     subject_id: string;
+    classroom_id?: string;
     teacher_id: string;
     title: string;
     description: string;
@@ -37,19 +44,20 @@ interface Assignment {
 interface Props {
     assignment: Assignment;
     subjects: Subject[];
+    classrooms?: ClassroomOption[];
 }
 
-export default function EditAssignment({ assignment, subjects = [] }: Props) {
+export default function EditAssignment({ assignment, subjects = [], classrooms = [] }: Props) {
     const formatDatetimeLocal = (dateString: string | null) => {
         if (!dateString) {
-return '';
-}
+            return '';
+        }
 
         const date = new Date(dateString);
 
         if (isNaN(date.getTime())) {
-return '';
-}
+            return '';
+        }
 
         const pad = (n: number) => n.toString().padStart(2, '0');
 
@@ -60,6 +68,7 @@ return '';
 
     const { data, setData, put, processing, errors } = useForm({
         subject_id: assignment.subject_id || '',
+        classroom_id: assignment.classroom_id || '',
         title: assignment.title || '',
         description: assignment.description || '',
         due_date: formattedDueDate,
@@ -68,12 +77,22 @@ return '';
         status: assignment.status || 'published',
     });
 
+    const backUrl = assignment.classroom_id && assignment.subject_id
+        ? `/teacher/subjects/${assignment.subject_id}/classrooms/${assignment.classroom_id}/assignments`
+        : `/teacher/assignments?subject_id=${assignment.subject_id}`;
+
     setLayoutProps({
-        breadcrumbs: [
-            { title: 'Manajemen Tugas', href: '/teacher/assignments' },
-            { title: assignment.title, href: `/teacher/assignments/${assignment.id}` },
-            { title: 'Edit', href: '#' },
-        ],
+        breadcrumbs: assignment.classroom_id && assignment.subject_id
+            ? [
+                  { title: 'Mata Pelajaran', href: '/teacher/subjects' },
+                  { title: 'Detail Mapel', href: `/teacher/subjects/${assignment.subject_id}` },
+                  { title: 'Edit Tugas', href: '#' },
+              ]
+            : [
+                  { title: 'Manajemen Tugas', href: '/teacher/assignments' },
+                  { title: assignment.title, href: `/teacher/assignments/${assignment.id}` },
+                  { title: 'Edit', href: '#' },
+              ],
     });
 
     const submit = (e: React.FormEvent) => {
@@ -104,7 +123,7 @@ return '';
             <div className="mx-auto max-w-4xl space-y-6 p-6">
                 <div className="flex items-center gap-4">
                     <Button variant="outline" size="icon" asChild className="shrink-0">
-                        <Link href="/teacher/assignments">
+                        <Link href={backUrl}>
                             <ArrowLeft className="h-4 w-4" />
                         </Link>
                     </Button>
@@ -156,6 +175,28 @@ return '';
                             </select>
                             <InputError message={errors.subject_id} />
                         </div>
+
+                        {classrooms && classrooms.length > 0 && (
+                            <div className="grid gap-2">
+                                <Label htmlFor="classroom_id" className="flex items-center gap-2 font-semibold">
+                                    <School className="h-4 w-4 text-primary" />
+                                    Target Rombel Kelas (Opsional)
+                                </Label>
+                                <select
+                                    id="classroom_id"
+                                    className="flex h-11 w-full rounded-md border border-zinc-200 bg-background/50 px-3 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-900"
+                                    value={data.classroom_id}
+                                    onChange={(e) => setData('classroom_id', e.target.value)}
+                                >
+                                    <option value="">-- Semua Kelas / Umum --</option>
+                                    {classrooms.map((c) => (
+                                        <option key={c.id} value={c.id}>
+                                            {c.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
 
                         {/* Deskripsi & Instruksi */}
                         <div className="grid gap-2">
@@ -253,7 +294,7 @@ return '';
 
                         <div className="flex items-center justify-end gap-3 pt-4 border-t">
                             <Button type="button" variant="outline" asChild>
-                                <Link href="/teacher/assignments">Batal</Link>
+                                <Link href={backUrl}>Batal</Link>
                             </Button>
                             <Button type="submit" disabled={processing} className="gap-2 shadow-lg shadow-primary/20">
                                 {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}

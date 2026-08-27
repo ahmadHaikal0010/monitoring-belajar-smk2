@@ -9,6 +9,7 @@ use App\Services\MaterialService;
 use App\Services\SubjectService;
 use App\Services\TeacherService;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -32,43 +33,11 @@ class MaterialController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource (Redirects to unified Subjects index).
      */
     public function index()
     {
-        $filters = request()->only(['search', 'sort', 'direction', 'subject_id']);
-
-        $user = auth()->user();
-        if ($user->role === 'guru') {
-            $teacher = $this->teacherService->getTeacherByUserId($user->id);
-            $filters['teacher_id'] = $teacher->id ?? null;
-        }
-
-        if (! empty($filters['subject_id'])) {
-            $selectedSubject = $this->subjectService->getSubjectById($filters['subject_id']);
-
-            if ($user->role === 'guru' && ($selectedSubject->teacher_id ?? null) !== ($filters['teacher_id'] ?? null)) {
-                return redirect()->route('teacher.materials.index')
-                    ->with('error', 'Anda tidak memiliki hak akses untuk mata pelajaran tersebut.');
-            }
-
-            $materials = $this->materialService->getPaginatedMaterials($filters);
-
-            return Inertia::render('Materials/index', [
-                'materials' => $materials,
-                'selectedSubject' => $selectedSubject,
-                'filters' => $filters,
-                'mode' => 'materials',
-            ]);
-        }
-
-        $subjects = $this->subjectService->getSubjectList($filters, 12);
-
-        return Inertia::render('Materials/index', [
-            'subjects' => $subjects,
-            'filters' => $filters,
-            'mode' => 'subjects',
-        ]);
+        return redirect()->route('teacher.subjects.index');
     }
 
     /**
@@ -77,6 +46,7 @@ class MaterialController extends Controller
     public function create()
     {
         $subjectId = request('subject_id');
+        $classroomId = request('classroom_id');
 
         if (! $subjectId) {
             return redirect()->route('teacher.materials.index')
@@ -86,14 +56,22 @@ class MaterialController extends Controller
         $subject = $this->subjectService->getSubjectById($subjectId);
         $teacher = $this->teacherService->getTeacherByUserId(auth()->id());
 
-        if ($subject->teacher_id !== $teacher->id) {
+        if (auth()->user()->role === 'guru' && $subject->teacher_id !== $teacher?->id) {
             return Inertia::render('unauthorized', [
                 'message' => 'Anda tidak memiliki wewenang untuk menambahkan materi pada mata pelajaran ini.',
             ]);
         }
 
+        $classrooms = DB::table('kelas_mata_pelajaran')
+            ->join('kelas', 'kelas_mata_pelajaran.id_kelas', '=', 'kelas.id')
+            ->where('kelas_mata_pelajaran.id_mata_pelajaran', $subjectId)
+            ->select(['kelas.id', 'kelas.nama_kelas as name'])
+            ->get();
+
         return Inertia::render('Materials/create', [
             'subject' => $subject,
+            'classrooms' => $classrooms,
+            'classroomId' => $classroomId,
         ]);
     }
 
@@ -107,19 +85,24 @@ class MaterialController extends Controller
         $subject = $this->subjectService->getSubjectById($data['subject_id']);
         $teacher = $this->teacherService->getTeacherByUserId(auth()->id());
 
-        if ($subject->teacher_id !== $teacher->id) {
+        if (auth()->user()->role === 'guru' && $subject->teacher_id !== $teacher?->id) {
             abort(403, 'Tindakan tidak diizinkan.');
         }
 
         try {
             $this->materialService->createMaterial($data);
 
-            return redirect()->route('teacher.materials.index', ['subject_id' => $data['subject_id']])
+            if (! empty($data['classroom_id'])) {
+                return redirect()->route('teacher.subjects.classrooms.materials', [$data['subject_id'], $data['classroom_id']])
+                    ->with('success', 'Materi pembelajaran baru telah berhasil diterbitkan.');
+            }
+
+            return redirect()->route('teacher.subjects.show', $data['subject_id'])
                 ->with('success', 'Materi pembelajaran baru telah berhasil diterbitkan.');
         } catch (Exception $e) {
             Log::error('Error creating material: '.$e->getMessage());
 
-            return redirect()->route('teacher.materials.index', ['subject_id' => $data['subject_id']])
+            return redirect()->back()
                 ->with('error', 'Terjadi kesalahan saat membuat materi pembelajaran. Silakan coba lagi.');
         }
     }
@@ -143,8 +126,15 @@ class MaterialController extends Controller
     {
         $material = $this->materialService->findMaterial($id);
 
+        $classrooms = DB::table('kelas_mata_pelajaran')
+            ->join('kelas', 'kelas_mata_pelajaran.id_kelas', '=', 'kelas.id')
+            ->where('kelas_mata_pelajaran.id_mata_pelajaran', $material->subject_id)
+            ->select(['kelas.id', 'kelas.nama_kelas as name'])
+            ->get();
+
         return Inertia::render('Materials/edit', [
             'material' => $material,
+            'classrooms' => $classrooms,
         ]);
     }
 
@@ -157,14 +147,19 @@ class MaterialController extends Controller
         $this->materialService->updateMaterial($material->id, $data);
 
         try {
-            $material = $this->materialService->findMaterial($material->id);
+            $updatedMaterial = $this->materialService->findMaterial($material->id);
 
-            return redirect()->route('teacher.materials.index', ['subject_id' => $material->subject_id])
+            if (! empty($updatedMaterial->classroom_id)) {
+                return redirect()->route('teacher.subjects.classrooms.materials', [$updatedMaterial->subject_id, $updatedMaterial->classroom_id])
+                    ->with('success', 'Data materi pembelajaran telah berhasil diperbarui.');
+            }
+
+            return redirect()->route('teacher.subjects.show', $updatedMaterial->subject_id)
                 ->with('success', 'Data materi pembelajaran telah berhasil diperbarui.');
         } catch (Exception $e) {
             Log::error('Error updating material: '.$e->getMessage());
 
-            return redirect()->route('teacher.materials.index', ['subject_id' => $material->subject_id])
+            return redirect()->back()
                 ->with('error', 'Terjadi kesalahan saat memperbarui data materi pembelajaran. Silakan coba lagi.');
         }
     }
@@ -177,16 +172,22 @@ class MaterialController extends Controller
         Gate::authorize('delete', $material);
 
         $subjectId = $material->subject_id;
+        $classroomId = $material->classroom_id;
 
         try {
             $this->materialService->deleteMaterial($material->id);
 
-            return redirect()->route('teacher.materials.index', ['subject_id' => $subjectId])
+            if (! empty($classroomId)) {
+                return redirect()->route('teacher.subjects.classrooms.materials', [$subjectId, $classroomId])
+                    ->with('success', 'Materi pembelajaran telah berhasil dihapus.');
+            }
+
+            return redirect()->route('teacher.subjects.show', $subjectId)
                 ->with('success', 'Materi pembelajaran telah berhasil dihapus.');
         } catch (Exception $e) {
             Log::error('Error deleting material: '.$e->getMessage());
 
-            return redirect()->route('teacher.materials.index', ['subject_id' => $subjectId])
+            return redirect()->back()
                 ->with('error', 'Terjadi kesalahan saat menghapus materi pembelajaran. Silakan coba lagi.');
         }
     }

@@ -142,10 +142,97 @@ class SqlSubjectRepository implements SubjectRepositoryInterface
             ->select([
                 'id',
                 'id_mata_pelajaran as subject_id',
+                'id_kelas as classroom_id',
                 'judul as title',
                 'tipe_konten as content_type',
                 'isi_konten as content_body',
                 'deskripsi as description',
+                'created_at',
+            ])
+            ->orderBy('created_at', 'asc')
+            ->get();
+    }
+
+    public function syncClassrooms(string $subjectId, array $classroomIds)
+    {
+        DB::table('kelas_mata_pelajaran')
+            ->where('id_mata_pelajaran', $subjectId)
+            ->delete();
+
+        foreach ($classroomIds as $classId) {
+            DB::table('kelas_mata_pelajaran')->insert([
+                'id' => (string) Uuid::v7(),
+                'id_mata_pelajaran' => $subjectId,
+                'id_kelas' => $classId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+    }
+
+    public function getClassrooms(string $subjectId)
+    {
+        return DB::table('kelas_mata_pelajaran')
+            ->join('kelas', 'kelas_mata_pelajaran.id_kelas', '=', 'kelas.id')
+            ->join('jurusan', 'kelas.id_jurusan', '=', 'jurusan.id')
+            ->leftJoin('guru', 'kelas.id_wali_kelas', '=', 'guru.id')
+            ->leftJoin('pengguna', 'guru.id_pengguna', '=', 'pengguna.id')
+            ->where('kelas_mata_pelajaran.id_mata_pelajaran', $subjectId)
+            ->select([
+                'kelas.id',
+                'kelas.id_jurusan as major_id',
+                'kelas.tingkat as grade',
+                'kelas.rombel as section',
+                'kelas.nama_kelas as name',
+                'kelas.tahun_ajaran as academic_year',
+                'jurusan.kode_jurusan as major_code',
+                'jurusan.nama_jurusan as major_name',
+                'pengguna.nama as homeroom_teacher_name',
+            ])
+            ->addSelect([
+                'students_count' => DB::table('anggota_kelas')
+                    ->whereColumn('anggota_kelas.id_kelas', 'kelas.id')
+                    ->selectRaw('count(*)'),
+            ])
+            ->orderBy('kelas.tingkat', 'asc')
+            ->orderBy('kelas.nama_kelas', 'asc')
+            ->get();
+    }
+
+    public function getAssignments(string $subjectId)
+    {
+        return DB::table('tugas')
+            ->where('id_mata_pelajaran', $subjectId)
+            ->select([
+                'id',
+                'id_mata_pelajaran as subject_id',
+                'id_kelas as classroom_id',
+                'judul as title',
+                'deskripsi as description',
+                'tenggat_waktu as due_date',
+                'skor_maksimal as max_score',
+                'status',
+                'created_at',
+            ])
+            ->orderBy('created_at', 'asc')
+            ->get();
+    }
+
+    public function getExams(string $subjectId)
+    {
+        return DB::table('ujian')
+            ->where('id_mata_pelajaran', $subjectId)
+            ->select([
+                'id',
+                'id_mata_pelajaran as subject_id',
+                'id_kelas as classroom_id',
+                'judul as title',
+                'deskripsi as description',
+                'durasi as duration',
+                'nilai_kkm as pass_score',
+                'status',
+                'waktu_mulai as start_time',
+                'waktu_selesai as end_time',
                 'created_at',
             ])
             ->orderBy('created_at', 'asc')

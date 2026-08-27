@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 interface Material {
     id: string;
     subject_id: string;
+    classroom_id?: string;
     title: string;
     content_type: 'video' | 'document' | 'url';
     content_body: string;
@@ -54,11 +55,23 @@ const TypeBadge = ({ type }: { type: Material['content_type'] }) => {
 export default function ShowMaterial({ material }: Props) {
     const { auth } = usePage().props as any;
 
+    const backUrl = material?.classroom_id
+        ? `/teacher/subjects/${material?.subject_id}/classrooms/${material?.classroom_id}/materials`
+        : `/teacher/materials?subject_id=${material?.subject_id}`;
+
     setLayoutProps({
-        breadcrumbs: [
-            { title: 'Materi Pembelajaran', href: '/teacher/materials' },
-            { title: 'Detail Materi', href: `/teacher/materials/${material?.id}` },
-        ],
+        breadcrumbs: material?.classroom_id
+            ? [
+                  { title: 'Mata Pelajaran', href: '/teacher/subjects' },
+                  { title: material?.subject_title || 'Detail Mapel', href: `/teacher/subjects/${material?.subject_id}` },
+                  { title: 'Materi Kelas', href: backUrl },
+                  { title: material?.title || 'Detail Materi', href: '#' },
+              ]
+            : [
+                  { title: 'Materi Pembelajaran', href: '/teacher/materials' },
+                  { title: material?.subject_title || 'Mata Pelajaran', href: `/teacher/materials?subject_id=${material?.subject_id}` },
+                  { title: material?.title || 'Detail', href: '#' },
+              ],
     });
 
     const contentBody = material?.content_body || '';
@@ -74,7 +87,7 @@ export default function ShowMaterial({ material }: Props) {
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div className="flex items-center gap-4">
                         <Button variant="outline" size="icon" asChild className="shrink-0">
-                            <Link href={`/teacher/materials?subject_id=${material?.subject_id}`}><ArrowLeft className="h-4 w-4" /></Link>
+                            <Link href={backUrl}><ArrowLeft className="h-4 w-4" /></Link>
                         </Button>
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight">{material?.title}</h1>

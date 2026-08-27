@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('siswa', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignId('id_pengguna')->constrained('pengguna')->onDelete('cascade');
+            $table->foreignUuid('id_kelas')->nullable()->constrained('kelas')->onDelete('set null');
             $table->string('nisn', 10)->unique();
             $table->string('foto')->nullable();
             $table->text('alamat');
@@ -21,6 +22,7 @@ return new class extends Migration
 
             $table->index('id');
             $table->index('id_pengguna');
+            $table->index('id_kelas');
             $table->index('nisn');
         });
     }
