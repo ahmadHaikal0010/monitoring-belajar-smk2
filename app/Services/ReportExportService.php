@@ -45,21 +45,51 @@ class ReportExportService
         }
 
         // 2. Ambil seluruh siswa terdaftar pada mata pelajaran ini
-        $enrollments = DB::table('pendaftaran')
-            ->join('siswa', 'pendaftaran.id_siswa', '=', 'siswa.id')
-            ->join('pengguna', 'siswa.id_pengguna', '=', 'pengguna.id')
-            ->where('pendaftaran.id_mata_pelajaran', $subjectId)
-            ->select([
-                'pendaftaran.id as enrollment_id',
-                'pendaftaran.id_siswa as student_id',
-                'pendaftaran.status as enrollment_status',
-                'pengguna.nama as student_name',
-                'pengguna.email as student_email',
-                'siswa.nisn',
-                'siswa.alamat as address',
-            ])
-            ->orderBy('pengguna.nama', 'asc')
-            ->get();
+        $selectedClassroomIds = $options['classroom_ids'] ?? (! empty($options['classroom_id']) ? [$options['classroom_id']] : []);
+        $classroomNames = [];
+
+        if (! empty($selectedClassroomIds) && is_array($selectedClassroomIds)) {
+            $classroomNames = DB::table('kelas')
+                ->whereIn('id', $selectedClassroomIds)
+                ->pluck('nama_kelas')
+                ->toArray();
+
+            $enrollments = DB::table('anggota_kelas')
+                ->join('siswa', 'anggota_kelas.id_siswa', '=', 'siswa.id')
+                ->join('pengguna', 'siswa.id_pengguna', '=', 'pengguna.id')
+                ->leftJoin('pendaftaran', function ($join) use ($subjectId) {
+                    $join->on('siswa.id', '=', 'pendaftaran.id_siswa')
+                        ->where('pendaftaran.id_mata_pelajaran', '=', $subjectId);
+                })
+                ->whereIn('anggota_kelas.id_kelas', $selectedClassroomIds)
+                ->select([
+                    'pendaftaran.id as enrollment_id',
+                    'siswa.id as student_id',
+                    DB::raw("COALESCE(pendaftaran.status, 'aktif') as enrollment_status"),
+                    'pengguna.nama as student_name',
+                    'pengguna.email as student_email',
+                    'siswa.nisn',
+                    'siswa.alamat as address',
+                ])
+                ->orderBy('pengguna.nama', 'asc')
+                ->get();
+        } else {
+            $enrollments = DB::table('pendaftaran')
+                ->join('siswa', 'pendaftaran.id_siswa', '=', 'siswa.id')
+                ->join('pengguna', 'siswa.id_pengguna', '=', 'pengguna.id')
+                ->where('pendaftaran.id_mata_pelajaran', $subjectId)
+                ->select([
+                    'pendaftaran.id as enrollment_id',
+                    'pendaftaran.id_siswa as student_id',
+                    'pendaftaran.status as enrollment_status',
+                    'pengguna.nama as student_name',
+                    'pengguna.email as student_email',
+                    'siswa.nisn',
+                    'siswa.alamat as address',
+                ])
+                ->orderBy('pengguna.nama', 'asc')
+                ->get();
+        }
 
         // 3. Ambil data Materi (jika dicentang)
         $materials = collect();
@@ -188,7 +218,8 @@ class ReportExportService
             $includeMaterials,
             $includeExams,
             $includeAssignments,
-            $format
+            $format,
+            $classroomNames
         );
 
         $filename = 'Rekap_Pembelajaran_'.str_replace(' ', '_', $subject->code ?: $subject->title).'_'.date('Ymd_His');
@@ -223,7 +254,8 @@ class ReportExportService
         $includeMaterials,
         $includeExams,
         $includeAssignments,
-        $format
+        $format,
+        array $classroomNames = []
     ): string {
         $dateFormatted = date('d F Y, H:i').' WIB';
 
@@ -312,6 +344,7 @@ class ReportExportService
         <h2>LAPORAN REKAPITULASI PEMBELAJARAN SISWA</h2>
         <p><strong>SMK NEGERI 2 LUBUK BASUNG</strong></p>
         <p><strong>Mata Pelajaran:</strong> <?= htmlspecialchars($subject->title) ?> (<?= htmlspecialchars($subject->code ?: '-') ?>)</p>
+        <p><strong>Rombel Kelas:</strong> <?= ! empty($classroomNames) ? htmlspecialchars(implode(', ', $classroomNames)) : 'Semua Rombel Kelas' ?></p>
         <p><strong>Guru Pengampu:</strong> <?= htmlspecialchars($subject->teacher_name ?: '-') ?> <?= $subject->teacher_nip ? '(NIP. '.$subject->teacher_nip.')' : '' ?></p>
         <p><strong>Tanggal Ekspor:</strong> <?= $dateFormatted ?></p>
     </div>

@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Subject\StoreSubjectRequest;
 use App\Http\Requests\Subject\UpdateSubjectRequest;
 use App\Models\Subject;
+use App\Services\EnrollmentService;
 use App\Services\SubjectService;
 use App\Services\TeacherService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -17,10 +19,16 @@ class SubjectController extends Controller
 
     protected TeacherService $teacherService;
 
-    public function __construct(SubjectService $subjectService, TeacherService $teacherService)
-    {
+    protected EnrollmentService $enrollmentService;
+
+    public function __construct(
+        SubjectService $subjectService,
+        TeacherService $teacherService,
+        EnrollmentService $enrollmentService
+    ) {
         $this->subjectService = $subjectService;
         $this->teacherService = $teacherService;
+        $this->enrollmentService = $enrollmentService;
     }
 
     /**
@@ -50,18 +58,15 @@ class SubjectController extends Controller
     {
         Gate::authorize('create', Subject::class);
 
-        $teachers = [];
         if (auth()->user()->role === 'admin') {
-            $teachers = DB::table('guru')
-                ->join('pengguna', 'guru.id_pengguna', '=', 'pengguna.id')
-                ->select(['guru.id', 'pengguna.nama as name'])
-                ->orderBy('pengguna.nama')
-                ->get();
+            $teachers = $this->teacherService->getTeacherList([], 100);
+
+            return Inertia::render('Subjects/create', [
+                'teachers' => $teachers,
+            ]);
         }
 
-        return Inertia::render('Subjects/create', [
-            'teachers' => $teachers,
-        ]);
+        return Inertia::render('Subjects/create');
     }
 
     /**
@@ -97,10 +102,51 @@ class SubjectController extends Controller
     public function show(Subject $subject)
     {
         $subjectData = $this->subjectService->getSubjectById($subject->id);
+        $classrooms = $this->subjectService->getClassroomsBySubjectId($subject->id);
+        $materials = $this->subjectService->getMaterialsBySubjectId($subject->id);
+        $assignments = $this->subjectService->getAssignmentsBySubjectId($subject->id);
+        $exams = $this->subjectService->getExamsBySubjectId($subject->id);
+        $enrollments = $this->enrollmentService->getEnrollmentListWithProgress(['subject_id' => $subject->id], 100);
+
+        $availableClassrooms = DB::table('kelas')
+            ->join('jurusan', 'kelas.id_jurusan', '=', 'jurusan.id')
+            ->select([
+                'kelas.id',
+                'kelas.nama_kelas as name',
+                'kelas.tingkat as grade',
+                'kelas.rombel as section',
+                'kelas.tahun_ajaran as academic_year',
+                'jurusan.kode_jurusan as major_code',
+                'jurusan.nama_jurusan as major_name',
+            ])
+            ->orderBy('kelas.tingkat', 'asc')
+            ->orderBy('kelas.nama_kelas', 'asc')
+            ->get();
 
         return Inertia::render('Subjects/show', [
             'subject' => $subjectData,
+            'classrooms' => $classrooms,
+            'availableClassrooms' => $availableClassrooms,
+            'materials' => $materials,
+            'assignments' => $assignments,
+            'exams' => $exams,
+            'enrollments' => $enrollments,
         ]);
+    }
+
+    /**
+     * Sync assigned classrooms for a subject.
+     */
+    public function syncClassrooms(Request $request, Subject $subject)
+    {
+        $validated = $request->validate([
+            'classroom_ids' => 'present|array',
+            'classroom_ids.*' => 'exists:kelas,id',
+        ]);
+
+        $this->subjectService->syncSubjectClassrooms($subject->id, $validated['classroom_ids']);
+
+        return redirect()->back()->with('success', 'Daftar rombel kelas yang diajar berhasil diperbarui.');
     }
 
     /**

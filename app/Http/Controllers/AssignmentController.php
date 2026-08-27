@@ -10,6 +10,7 @@ use App\Models\AssignmentSubmission;
 use App\Services\AssignmentService;
 use App\Services\SubjectService;
 use App\Services\TeacherService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
@@ -23,22 +24,7 @@ class AssignmentController extends Controller
 
     public function index()
     {
-        if (auth()->user()->role !== 'guru') {
-            abort(403, 'Manajemen Tugas hanya dapat diakses oleh Guru.');
-        }
-
-        $filters = request()->only(['search', 'subject_id', 'status', 'sort', 'direction']);
-        $teacher = $this->teacherService->getTeacherByUserId(auth()->id());
-        $filters['teacher_id'] = $teacher?->id;
-
-        $assignments = $this->assignmentService->getAssignmentList($filters, 12);
-        $subjects = $this->subjectService->getSubjectList(['teacher_id' => $teacher?->id], 100);
-
-        return Inertia::render('Assignments/index', [
-            'assignments' => $assignments,
-            'subjects' => $subjects->items(),
-            'filters' => $filters,
-        ]);
+        return redirect()->route('teacher.subjects.index');
     }
 
     public function create()
@@ -52,8 +38,23 @@ class AssignmentController extends Controller
         $teacher = $this->teacherService->getTeacherByUserId(auth()->id());
         $subjects = $this->subjectService->getSubjectList(['teacher_id' => $teacher?->id], 100)->items();
 
+        $subjectId = request('subject_id');
+        $classroomId = request('classroom_id');
+
+        $classrooms = [];
+        if ($subjectId) {
+            $classrooms = DB::table('kelas_mata_pelajaran')
+                ->join('kelas', 'kelas_mata_pelajaran.id_kelas', '=', 'kelas.id')
+                ->where('kelas_mata_pelajaran.id_mata_pelajaran', $subjectId)
+                ->select(['kelas.id', 'kelas.nama_kelas as name'])
+                ->get();
+        }
+
         return Inertia::render('Assignments/create', [
             'subjects' => $subjects,
+            'subjectId' => $subjectId,
+            'classroomId' => $classroomId,
+            'classrooms' => $classrooms,
         ]);
     }
 
@@ -73,7 +74,12 @@ class AssignmentController extends Controller
         $data['teacher_id'] = $teacher->id;
         $this->assignmentService->createAssignment($data);
 
-        return redirect()->route('teacher.assignments.index')
+        if (! empty($data['classroom_id'])) {
+            return redirect()->route('teacher.subjects.classrooms.assignments', [$data['subject_id'], $data['classroom_id']])
+                ->with('success', 'Tugas baru berhasil dibuat.');
+        }
+
+        return redirect()->route('teacher.subjects.show', $data['subject_id'])
             ->with('success', 'Tugas baru berhasil dibuat.');
     }
 
@@ -106,9 +112,16 @@ class AssignmentController extends Controller
         $teacher = $this->teacherService->getTeacherByUserId(auth()->id());
         $subjects = $this->subjectService->getSubjectList(['teacher_id' => $teacher?->id], 100)->items();
 
+        $classrooms = DB::table('kelas_mata_pelajaran')
+            ->join('kelas', 'kelas_mata_pelajaran.id_kelas', '=', 'kelas.id')
+            ->where('kelas_mata_pelajaran.id_mata_pelajaran', $assignment->subject_id)
+            ->select(['kelas.id', 'kelas.nama_kelas as name'])
+            ->get();
+
         return Inertia::render('Assignments/edit', [
             'assignment' => $assignmentData,
             'subjects' => $subjects,
+            'classrooms' => $classrooms,
         ]);
     }
 
@@ -123,7 +136,13 @@ class AssignmentController extends Controller
 
         $this->assignmentService->updateAssignment($assignment->id, $data);
 
-        return redirect()->route('teacher.assignments.index')
+        $classroomId = $data['classroom_id'] ?? $assignment->classroom_id;
+        if (! empty($classroomId)) {
+            return redirect()->route('teacher.subjects.classrooms.assignments', [$assignment->subject_id, $classroomId])
+                ->with('success', 'Tugas berhasil diperbarui.');
+        }
+
+        return redirect()->route('teacher.subjects.show', $assignment->subject_id)
             ->with('success', 'Tugas berhasil diperbarui.');
     }
 
@@ -135,9 +154,17 @@ class AssignmentController extends Controller
 
         Gate::authorize('delete', $assignment);
 
+        $subjectId = $assignment->subject_id;
+        $classroomId = $assignment->classroom_id;
+
         $this->assignmentService->deleteAssignment($assignment->id);
 
-        return redirect()->route('teacher.assignments.index')
+        if (! empty($classroomId)) {
+            return redirect()->route('teacher.subjects.classrooms.assignments', [$subjectId, $classroomId])
+                ->with('success', 'Tugas berhasil dihapus.');
+        }
+
+        return redirect()->route('teacher.subjects.show', $subjectId)
             ->with('success', 'Tugas berhasil dihapus.');
     }
 

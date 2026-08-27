@@ -40,7 +40,7 @@ class SqlAssignmentRepository implements AssignmentRepositoryInterface
         }
 
         $sort = $filters['sort'] ?? 'created_at';
-        $direction = strtolower($filters['direction'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
+        $direction = strtolower($filters['direction'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
 
         return $query->orderBy($sort, $direction)->paginate($perPage)->withQueryString();
     }

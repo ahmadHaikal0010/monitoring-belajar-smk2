@@ -16,6 +16,7 @@ use Illuminate\Support\Carbon;
 
 #[Fillable([
     'id_mata_pelajaran',
+    'id_kelas',
     'id_guru',
     'judul',
     'deskripsi',
@@ -24,6 +25,7 @@ use Illuminate\Support\Carbon;
     'tipe_berkas_diizinkan',
     'status',
     'subject_id',
+    'classroom_id',
     'teacher_id',
     'title',
     'description',
@@ -41,6 +43,7 @@ class Assignment extends Model
 
     protected $fillable = [
         'id_mata_pelajaran',
+        'id_kelas',
         'id_guru',
         'judul',
         'deskripsi',
@@ -49,6 +52,7 @@ class Assignment extends Model
         'tipe_berkas_diizinkan',
         'status',
         'subject_id',
+        'classroom_id',
         'teacher_id',
         'title',
         'description',
@@ -59,6 +63,7 @@ class Assignment extends Model
 
     protected $appends = [
         'subject_id',
+        'classroom_id',
         'teacher_id',
         'title',
         'description',
@@ -76,6 +81,16 @@ class Assignment extends Model
     public function setSubjectIdAttribute($value): void
     {
         $this->attributes['id_mata_pelajaran'] = $value;
+    }
+
+    public function getClassroomIdAttribute(): ?string
+    {
+        return $this->attributes['id_kelas'] ?? null;
+    }
+
+    public function setClassroomIdAttribute($value): void
+    {
+        $this->attributes['id_kelas'] = $value;
     }
 
     public function getTeacherIdAttribute(): ?string
@@ -162,6 +177,11 @@ class Assignment extends Model
     public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class, 'id_mata_pelajaran');
+    }
+
+    public function classroom(): BelongsTo
+    {
+        return $this->belongsTo(Classroom::class, 'id_kelas');
     }
 
     public function teacher(): BelongsTo

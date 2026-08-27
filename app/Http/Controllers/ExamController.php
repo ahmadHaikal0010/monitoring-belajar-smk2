@@ -30,38 +30,7 @@ class ExamController extends Controller
 
     public function index()
     {
-        $this->authorizeGuru();
-
-        $filters = request()->only(['search', 'sort', 'direction', 'subject_id', 'status']);
-        $user = auth()->user();
-        $teacher = $this->teacherService->getTeacherByUserId($user->id);
-        $filters['teacher_id'] = $teacher->id ?? null;
-
-        if (! empty($filters['subject_id'])) {
-            $selectedSubject = $this->subjectService->getSubjectById($filters['subject_id']);
-
-            if (($selectedSubject->teacher_id ?? null) !== ($filters['teacher_id'] ?? null)) {
-                return redirect()->route('teacher.exams.index')
-                    ->with('error', 'Anda tidak memiliki hak akses untuk mata pelajaran tersebut.');
-            }
-
-            $exams = $this->examService->getPaginatedExams($filters);
-
-            return Inertia::render('Exams/index', [
-                'exams' => $exams,
-                'selectedSubject' => $selectedSubject,
-                'filters' => $filters,
-                'mode' => 'exams',
-            ]);
-        }
-
-        $subjects = $this->subjectService->getSubjectList($filters, 12);
-
-        return Inertia::render('Exams/index', [
-            'subjects' => $subjects,
-            'filters' => $filters,
-            'mode' => 'subjects',
-        ]);
+        return redirect()->route('teacher.subjects.index');
     }
 
     public function create()
@@ -69,6 +38,7 @@ class ExamController extends Controller
         $this->authorizeGuru();
 
         $subjectId = request('subject_id');
+        $classroomId = request('classroom_id');
 
         if (! $subjectId) {
             return redirect()->route('teacher.exams.index')
@@ -84,8 +54,16 @@ class ExamController extends Controller
             ]);
         }
 
+        $classrooms = DB::table('kelas_mata_pelajaran')
+            ->join('kelas', 'kelas_mata_pelajaran.id_kelas', '=', 'kelas.id')
+            ->where('kelas_mata_pelajaran.id_mata_pelajaran', $subjectId)
+            ->select(['kelas.id', 'kelas.nama_kelas as name'])
+            ->get();
+
         return Inertia::render('Exams/create', [
             'subject' => $subject,
+            'classrooms' => $classrooms,
+            'classroomId' => $classroomId,
         ]);
     }
 
@@ -103,14 +81,24 @@ class ExamController extends Controller
         $data['teacher_id'] = $teacher->id;
 
         try {
-            $this->examService->createExam($data);
+            $examId = $this->examService->createExam($data);
 
-            return redirect()->route('teacher.exams.index', ['subject_id' => $data['subject_id']])
+            if (! empty($data['classroom_id'])) {
+                return redirect()->route('teacher.subjects.classrooms.exams', [$data['subject_id'], $data['classroom_id']])
+                    ->with('success', 'Ujian baru berhasil dibuat.');
+            }
+
+            return redirect()->route('teacher.subjects.show', $data['subject_id'])
                 ->with('success', 'Ujian baru berhasil dibuat.');
         } catch (Exception $e) {
             Log::error('Error creating exam: '.$e->getMessage());
 
-            return redirect()->route('teacher.exams.index', ['subject_id' => $data['subject_id']])
+            if (! empty($data['classroom_id'])) {
+                return redirect()->route('teacher.subjects.classrooms.exams', [$data['subject_id'], $data['classroom_id']])
+                    ->with('error', 'Terjadi kesalahan saat membuat ujian. Silakan coba lagi.');
+            }
+
+            return redirect()->route('teacher.subjects.show', $data['subject_id'])
                 ->with('error', 'Terjadi kesalahan saat membuat ujian. Silakan coba lagi.');
         }
     }
@@ -151,9 +139,16 @@ class ExamController extends Controller
 
         $subject = $this->subjectService->getSubjectById($exam->subject_id);
 
+        $classrooms = DB::table('kelas_mata_pelajaran')
+            ->join('kelas', 'kelas_mata_pelajaran.id_kelas', '=', 'kelas.id')
+            ->where('kelas_mata_pelajaran.id_mata_pelajaran', $exam->subject_id)
+            ->select(['kelas.id', 'kelas.nama_kelas as name'])
+            ->get();
+
         return Inertia::render('Exams/edit', [
             'exam' => $exam,
             'subject' => $subject,
+            'classrooms' => $classrooms,
         ]);
     }
 
@@ -275,16 +270,27 @@ class ExamController extends Controller
 
         $exam = $this->examService->findExam($id);
         $subjectId = $exam->subject_id ?? null;
+        $classroomId = $exam->classroom_id ?? null;
 
         try {
             $this->examService->deleteExam($id);
 
-            return redirect()->route('teacher.exams.index', ['subject_id' => $subjectId])
+            if (! empty($classroomId)) {
+                return redirect()->route('teacher.subjects.classrooms.exams', [$subjectId, $classroomId])
+                    ->with('success', 'Ujian telah berhasil dihapus.');
+            }
+
+            return redirect()->route('teacher.subjects.show', $subjectId)
                 ->with('success', 'Ujian telah berhasil dihapus.');
         } catch (Exception $e) {
             Log::error('Error deleting exam: '.$e->getMessage());
 
-            return redirect()->route('teacher.exams.index', ['subject_id' => $subjectId])
+            if (! empty($classroomId)) {
+                return redirect()->route('teacher.subjects.classrooms.exams', [$subjectId, $classroomId])
+                    ->with('error', 'Terjadi kesalahan saat menghapus ujian.');
+            }
+
+            return redirect()->route('teacher.subjects.show', $subjectId)
                 ->with('error', 'Terjadi kesalahan saat menghapus ujian.');
         }
     }

@@ -10,7 +10,8 @@ import {
     Settings2,
     X,
     AlertCircle,
-    CheckCircle2
+    CheckCircle2,
+    School
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import InputError from '@/components/input-error';
@@ -26,16 +27,24 @@ interface Subject {
     title: string;
 }
 
-interface Props {
-    subject: Subject;
+interface ClassroomOption {
+    id: string;
+    name: string;
 }
 
-export default function CreateMaterial({ subject }: Props) {
+interface Props {
+    subject: Subject;
+    classrooms?: ClassroomOption[];
+    classroomId?: string;
+}
+
+export default function CreateMaterial({ subject, classrooms, classroomId }: Props) {
     const { flash } = usePage().props as any;
     const [showFlash, setShowFlash] = useState(false);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         subject_id: subject?.id,
+        classroom_id: classroomId || '',
         title: '',
         content_type: 'video',
         content_body_text: '',
@@ -55,11 +64,15 @@ export default function CreateMaterial({ subject }: Props) {
         }
     }, [flash?.success, flash?.error]);
 
+    const backUrl = classroomId
+        ? `/teacher/subjects/${subject?.id}/classrooms/${classroomId}/materials`
+        : `/teacher/materials?subject_id=${subject?.id}`;
+
     setLayoutProps({
         breadcrumbs: [
-            { title: 'Materi Pembelajaran', href: '/teacher/materials' },
-            { title: subject?.title || 'Detail', href: `/teacher/materials?subject_id=${subject?.id}` },
-            { title: 'Tambah Materi', href: `/teacher/materials/create?subject_id=${subject?.id}` },
+            { title: 'Mata Pelajaran', href: '/teacher/subjects' },
+            { title: subject?.title || 'Detail', href: `/teacher/subjects/${subject?.id}` },
+            { title: 'Tambah Materi', href: '#' },
         ],
     });
 
@@ -76,7 +89,6 @@ export default function CreateMaterial({ subject }: Props) {
             <Head title="Tambah Materi Baru" />
 
             <div className="mx-auto flex max-w-6xl w-full flex-col gap-6 p-6">
-
                 <AnimatePresence>
                     {showFlash && (flash?.success || flash?.error) && (
                         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full">
@@ -93,7 +105,7 @@ export default function CreateMaterial({ subject }: Props) {
 
                 <div className="flex items-center gap-4 w-full">
                     <Button variant="outline" size="icon" asChild className="shrink-0">
-                        <Link href={`/teacher/materials?subject_id=${subject?.id}`}><ArrowLeft className="h-4 w-4" /></Link>
+                        <Link href={backUrl}><ArrowLeft className="h-4 w-4" /></Link>
                     </Button>
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Tambah Materi</h1>
@@ -119,6 +131,28 @@ export default function CreateMaterial({ subject }: Props) {
                                 />
                                 <InputError message={errors.title} />
                             </div>
+
+                            {classrooms && classrooms.length > 0 && (
+                                <div className="grid gap-2">
+                                    <Label htmlFor="classroom_id" className="flex items-center gap-2 text-sm font-semibold">
+                                        <School className="h-4 w-4 text-primary" /> Target Rombel Kelas
+                                    </Label>
+                                    <select
+                                        id="classroom_id"
+                                        className="h-11 w-full rounded-md border border-zinc-200 bg-background/50 px-3 text-sm dark:border-zinc-800"
+                                        value={data.classroom_id}
+                                        onChange={(e) => setData('classroom_id', e.target.value)}
+                                    >
+                                        <option value="">-- Semua Kelas / Umum --</option>
+                                        {classrooms.map((c) => (
+                                            <option key={c.id} value={c.id}>
+                                                {c.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <InputError message={errors.classroom_id} />
+                                </div>
+                            )}
 
                             <div className="grid gap-2">
                                 <Label className="flex items-center gap-2 text-sm font-semibold">
@@ -167,7 +201,7 @@ export default function CreateMaterial({ subject }: Props) {
 
                     <div className="flex justify-end gap-3 w-full">
                         <Button variant="ghost" asChild disabled={processing}>
-                            <Link href={`/teacher/materials?subject_id=${subject?.id}`}>Batal</Link>
+                            <Link href={backUrl}>Batal</Link>
                         </Button>
                         <Button className="gap-2 px-8 shadow-lg shadow-primary/20" disabled={processing}>
                             {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Simpan Materi

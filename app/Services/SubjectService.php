@@ -47,4 +47,24 @@ class SubjectService
     {
         $this->subjectRepository->delete($id);
     }
+
+    public function syncSubjectClassrooms(string $subjectId, array $classroomIds)
+    {
+        $this->subjectRepository->syncClassrooms($subjectId, $classroomIds);
+    }
+
+    public function getClassroomsBySubjectId(string $id)
+    {
+        return $this->subjectRepository->getClassrooms($id);
+    }
+
+    public function getAssignmentsBySubjectId(string $id)
+    {
+        return $this->subjectRepository->getAssignments($id);
+    }
+
+    public function getExamsBySubjectId(string $id)
+    {
+        return $this->subjectRepository->getExams($id);
+    }
 }

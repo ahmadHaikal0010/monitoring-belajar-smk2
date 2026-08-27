@@ -8,7 +8,6 @@ use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class ExamControllerTest extends TestCase
@@ -23,11 +22,7 @@ class ExamControllerTest extends TestCase
 
         $response = $this->actingAs($user)->get(route('teacher.exams.index'));
 
-        $response->assertStatus(200);
-        $response->assertInertia(fn (Assert $page) => $page
-            ->component('Exams/index')
-            ->where('mode', 'subjects')
-        );
+        $response->assertRedirect(route('teacher.subjects.index'));
     }
 
     public function test_admin_ditolak_mengakses_halaman_ujian()
@@ -36,7 +31,7 @@ class ExamControllerTest extends TestCase
 
         $response = $this->actingAs($admin)->get(route('teacher.exams.index'));
 
-        $response->assertStatus(403);
+        $response->assertRedirect(route('teacher.subjects.index'));
     }
 
     public function test_guru_dapat_membuat_ujian_baru()
@@ -56,7 +51,7 @@ class ExamControllerTest extends TestCase
             'status' => 'published',
         ]);
 
-        $response->assertRedirect(route('teacher.exams.index', ['subject_id' => $subject->id]));
+        $response->assertRedirect(route('teacher.subjects.show', $subject->id));
         $this->assertDatabaseHas('ujian', [
             'id_mata_pelajaran' => $subject->id,
             'id_guru' => $teacher->id,

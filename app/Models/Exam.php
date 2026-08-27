@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'id_mata_pelajaran',
+    'id_kelas',
     'id_guru',
     'judul',
     'deskripsi',
@@ -25,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'waktu_mulai',
     'waktu_selesai',
     'subject_id',
+    'classroom_id',
     'teacher_id',
     'title',
     'description',
@@ -45,6 +47,7 @@ class Exam extends Model
 
     protected $fillable = [
         'id_mata_pelajaran',
+        'id_kelas',
         'id_guru',
         'judul',
         'deskripsi',
@@ -56,6 +59,7 @@ class Exam extends Model
         'waktu_mulai',
         'waktu_selesai',
         'subject_id',
+        'classroom_id',
         'teacher_id',
         'title',
         'description',
@@ -69,6 +73,7 @@ class Exam extends Model
 
     protected $appends = [
         'subject_id',
+        'classroom_id',
         'teacher_id',
         'title',
         'description',
@@ -89,6 +94,16 @@ class Exam extends Model
     public function setSubjectIdAttribute($value): void
     {
         $this->attributes['id_mata_pelajaran'] = $value;
+    }
+
+    public function getClassroomIdAttribute(): ?string
+    {
+        return $this->attributes['id_kelas'] ?? null;
+    }
+
+    public function setClassroomIdAttribute($value): void
+    {
+        $this->attributes['id_kelas'] = $value;
     }
 
     public function getTeacherIdAttribute(): ?string
@@ -201,6 +216,11 @@ class Exam extends Model
     public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class, 'id_mata_pelajaran');
+    }
+
+    public function classroom(): BelongsTo
+    {
+        return $this->belongsTo(Classroom::class, 'id_kelas');
     }
 
     public function teacher(): BelongsTo

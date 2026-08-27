@@ -14,6 +14,7 @@ class UpdateExamRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'classroom_id' => ['nullable', 'exists:kelas,id'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'duration' => ['required', 'integer', 'min:1', 'max:300'],

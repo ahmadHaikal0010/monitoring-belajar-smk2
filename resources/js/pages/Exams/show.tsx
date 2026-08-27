@@ -67,6 +67,7 @@ interface ExamSession {
 interface ExamDetails {
     id: string;
     subject_id: string;
+    classroom_id?: string;
     subject_title: string;
     title: string;
     description?: string;
@@ -120,12 +121,23 @@ export default function ExamShow({ exam, materials = [] }: Props) {
         ],
     });
 
+    const backUrl = exam.classroom_id
+        ? `/teacher/subjects/${exam.subject_id}/classrooms/${exam.classroom_id}/exams`
+        : `/teacher/exams?subject_id=${exam.subject_id}`;
+
     setLayoutProps({
-        breadcrumbs: [
-            { title: 'Manajemen Ujian', href: '/teacher/exams' },
-            { title: exam.subject_title, href: `/teacher/exams?subject_id=${exam.subject_id}` },
-            { title: exam.title, href: `/teacher/exams/${exam.id}` },
-        ],
+        breadcrumbs: exam.classroom_id
+            ? [
+                  { title: 'Mata Pelajaran', href: '/teacher/subjects' },
+                  { title: exam.subject_title, href: `/teacher/subjects/${exam.subject_id}` },
+                  { title: 'Ujian Kelas', href: backUrl },
+                  { title: exam.title, href: '#' },
+              ]
+            : [
+                  { title: 'Manajemen Ujian', href: '/teacher/exams' },
+                  { title: exam.subject_title, href: `/teacher/exams?subject_id=${exam.subject_id}` },
+                  { title: exam.title, href: '#' },
+              ],
     });
 
     const formatDate = (dateStr?: string) => {
@@ -275,7 +287,7 @@ return null;
             <div className="flex flex-col gap-6 p-6 max-w-6xl mx-auto">
                 <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                     <div className="flex items-center gap-4">
-                        <Button variant="outline" size="icon" className="h-10 w-10" onClick={() => router.get(`/teacher/exams?subject_id=${exam.subject_id}`)}>
+                        <Button variant="outline" size="icon" className="h-10 w-10" onClick={() => router.get(backUrl)}>
                             <ArrowLeft className="h-5 w-5" />
                         </Button>
                         <div>

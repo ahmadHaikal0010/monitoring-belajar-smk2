@@ -1,10 +1,14 @@
 <?php
 
+use App\Http\Controllers\Admin\ClassEnrollmentController as AdminClassEnrollmentController;
+use App\Http\Controllers\Admin\ClassroomController as AdminClassroomController;
 use App\Http\Controllers\Admin\EnrollmentController;
+use App\Http\Controllers\Admin\MajorController as AdminMajorController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Admin\TeacherController as AdminTeacherController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AssignmentController;
+use App\Http\Controllers\ClassroomContentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\MaterialController;
@@ -43,6 +47,16 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
             Route::match(['put', 'post'], '/update/{teacher}', [TeacherController::class, 'update'])->name('update');
 
             Route::resource('subjects', SubjectController::class);
+            Route::post('subjects/{subject}/classrooms', [SubjectController::class, 'syncClassrooms'])->name('subjects.classrooms.sync');
+
+            // Classroom Content Management Routes (Materials, Assignments, Exams per Class)
+            Route::get('subjects/{subject}/classrooms/{classroom}/materials', [ClassroomContentController::class, 'materials'])->name('subjects.classrooms.materials');
+            Route::post('subjects/{subject}/classrooms/{classroom}/materials/copy', [ClassroomContentController::class, 'copyMaterials'])->name('subjects.classrooms.materials.copy');
+            Route::get('subjects/{subject}/classrooms/{classroom}/assignments', [ClassroomContentController::class, 'assignments'])->name('subjects.classrooms.assignments');
+            Route::post('subjects/{subject}/classrooms/{classroom}/assignments/copy', [ClassroomContentController::class, 'copyAssignments'])->name('subjects.classrooms.assignments.copy');
+            Route::get('subjects/{subject}/classrooms/{classroom}/exams', [ClassroomContentController::class, 'exams'])->name('subjects.classrooms.exams');
+            Route::post('subjects/{subject}/classrooms/{classroom}/exams/copy', [ClassroomContentController::class, 'copyExams'])->name('subjects.classrooms.exams.copy');
+            Route::get('subjects/{subject}/classrooms/{classroom}/progress', [ClassroomContentController::class, 'progress'])->name('subjects.classrooms.progress');
             Route::resource('materials', MaterialController::class);
             Route::resource('exams', ExamController::class);
             Route::patch('exams/{exam}/publish', [ExamController::class, 'publish'])->name('exams.publish');
@@ -74,6 +88,12 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
         Route::resource('teachers', AdminTeacherController::class);
         Route::resource('users', AdminUserController::class);
         Route::resource('students', AdminStudentController::class);
+        Route::resource('majors', AdminMajorController::class);
+        Route::resource('classrooms', AdminClassroomController::class);
+        Route::get('classrooms/{classroom}/students', [AdminClassEnrollmentController::class, 'index'])->name('classrooms.students.index');
+        Route::post('classrooms/{classroom}/students', [AdminClassEnrollmentController::class, 'store'])->name('classrooms.students.store');
+        Route::put('classrooms/{classroom}/students/{student}', [AdminClassEnrollmentController::class, 'updateStatus'])->name('classrooms.students.update-status');
+        Route::delete('classrooms/{classroom}/students/{student}', [AdminClassEnrollmentController::class, 'destroy'])->name('classrooms.students.destroy');
         Route::get('/approval', [AdminUserController::class, 'approval'])->name('users.approval');
         Route::put('/users/{id}/approve', [AdminUserController::class, 'approve'])->name('users.approve');
     });

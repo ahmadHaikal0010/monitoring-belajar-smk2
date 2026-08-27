@@ -15,6 +15,7 @@ class StoreExamRequest extends FormRequest
     {
         return [
             'subject_id' => ['required', 'exists:mata_pelajaran,id'],
+            'classroom_id' => ['nullable', 'exists:kelas,id'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'duration' => ['required', 'integer', 'min:1', 'max:300'],

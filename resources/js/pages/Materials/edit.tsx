@@ -10,7 +10,8 @@ import {
     Settings2,
     X,
     AlertCircle,
-    CheckCircle2
+    CheckCircle2,
+    School
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import InputError from '@/components/input-error';
@@ -24,6 +25,7 @@ import { cn } from '@/lib/utils';
 interface Material {
     id: string;
     subject_id: string;
+    classroom_id?: string;
     title: string;
     content_type: 'video' | 'document' | 'url';
     content_body: string;
@@ -31,16 +33,23 @@ interface Material {
     subject_title: string;
 }
 
-interface Props {
-    material: Material;
+interface ClassroomOption {
+    id: string;
+    name: string;
 }
 
-export default function EditMaterial({ material }: Props) {
+interface Props {
+    material: Material;
+    classrooms?: ClassroomOption[];
+}
+
+export default function EditMaterial({ material, classrooms }: Props) {
     const { flash } = usePage().props as any;
     const [showFlash, setShowFlash] = useState(false);
 
     const { data, setData, post, processing, errors } = useForm({
         _method: 'patch',
+        classroom_id: material?.classroom_id || '',
         title: material?.title || '',
         content_type: material?.content_type || 'video',
         content_body_text: material?.content_type === 'url' ? material.content_body : '',
@@ -60,11 +69,15 @@ export default function EditMaterial({ material }: Props) {
         }
     }, [flash?.success, flash?.error]);
 
+    const backUrl = material?.classroom_id
+        ? `/teacher/subjects/${material?.subject_id}/classrooms/${material?.classroom_id}/materials`
+        : `/teacher/materials?subject_id=${material?.subject_id}`;
+
     setLayoutProps({
         breadcrumbs: [
-            { title: 'Materi Pembelajaran', href: '/teacher/materials' },
-            { title: material?.subject_title || 'Detail', href: `/teacher/materials?subject_id=${material?.subject_id}` },
-            { title: 'Edit Materi', href: `/teacher/materials/${material?.id}/edit` },
+            { title: 'Mata Pelajaran', href: '/teacher/subjects' },
+            { title: material?.subject_title || 'Detail', href: `/teacher/subjects/${material?.subject_id}` },
+            { title: 'Edit Materi', href: '#' },
         ],
     });
 
@@ -96,7 +109,7 @@ export default function EditMaterial({ material }: Props) {
 
                 <div className="flex items-center gap-4 w-full">
                     <Button variant="outline" size="icon" asChild className="shrink-0">
-                        <Link href={`/teacher/materials?subject_id=${material?.subject_id}`}><ArrowLeft className="h-4 w-4" /></Link>
+                        <Link href={backUrl}><ArrowLeft className="h-4 w-4" /></Link>
                     </Button>
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Edit Materi</h1>
@@ -120,6 +133,28 @@ export default function EditMaterial({ material }: Props) {
                                 />
                                 <InputError message={errors.title} />
                             </div>
+
+                            {classrooms && classrooms.length > 0 && (
+                                <div className="grid gap-2">
+                                    <Label htmlFor="classroom_id" className="flex items-center gap-2 text-sm font-semibold">
+                                        <School className="h-4 w-4 text-primary" /> Target Rombel Kelas
+                                    </Label>
+                                    <select
+                                        id="classroom_id"
+                                        className="h-11 w-full rounded-md border border-zinc-200 bg-background/50 px-3 text-sm dark:border-zinc-800"
+                                        value={data.classroom_id}
+                                        onChange={(e) => setData('classroom_id', e.target.value)}
+                                    >
+                                        <option value="">-- Semua Kelas / Umum --</option>
+                                        {classrooms.map((c) => (
+                                            <option key={c.id} value={c.id}>
+                                                {c.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <InputError message={errors.classroom_id} />
+                                </div>
+                            )}
 
                             <div className="grid gap-2">
                                 <Label className="flex items-center gap-2 text-sm font-semibold">
@@ -171,7 +206,7 @@ export default function EditMaterial({ material }: Props) {
 
                     <div className="flex justify-end gap-3 w-full">
                         <Button variant="ghost" asChild disabled={processing}>
-                            <Link href={`/teacher/materials?subject_id=${material?.subject_id}`}>Batal</Link>
+                            <Link href={backUrl}>Batal</Link>
                         </Button>
                         <Button className="gap-2 px-8 shadow-lg shadow-primary/20" disabled={processing}>
                             {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Simpan Perubahan

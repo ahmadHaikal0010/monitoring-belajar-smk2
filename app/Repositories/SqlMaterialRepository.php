@@ -19,6 +19,7 @@ class SqlMaterialRepository implements MaterialRepositoryInterface
             ->select([
                 'materi.id',
                 'materi.id_mata_pelajaran as subject_id',
+                'materi.id_kelas as classroom_id',
                 'materi.judul as title',
                 'materi.tipe_konten as content_type',
                 'materi.isi_konten as content_body',
@@ -60,7 +61,7 @@ class SqlMaterialRepository implements MaterialRepositoryInterface
         if (array_key_exists($sortField, $allowedSorts)) {
             $query->orderBy($allowedSorts[$sortField], $sortDirection);
         } else {
-            $query->orderBy('materi.created_at', 'desc');
+            $query->orderBy('materi.created_at', 'asc');
         }
 
         return $query
@@ -85,6 +86,7 @@ class SqlMaterialRepository implements MaterialRepositoryInterface
             ->select([
                 'materi.id',
                 'materi.id_mata_pelajaran as subject_id',
+                'materi.id_kelas as classroom_id',
                 'materi.judul as title',
                 'materi.tipe_konten as content_type',
                 'materi.isi_konten as content_body',
@@ -128,10 +130,11 @@ class SqlMaterialRepository implements MaterialRepositoryInterface
         DB::table('materi')->insert([
             'id' => (string) Uuid::v7(),
             'id_mata_pelajaran' => $data['subject_id'],
+            'id_kelas' => $data['classroom_id'] ?? null,
             'judul' => $data['title'],
             'tipe_konten' => $data['content_type'],
             'isi_konten' => $data['content_body'],
-            'deskripsi' => $data['description'],
+            'deskripsi' => $data['description'] ?? null,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -139,15 +142,21 @@ class SqlMaterialRepository implements MaterialRepositoryInterface
 
     public function update(string $id, array $data)
     {
+        $updateData = [
+            'judul' => $data['title'],
+            'tipe_konten' => $data['content_type'],
+            'isi_konten' => $data['content_body'],
+            'deskripsi' => $data['description'] ?? null,
+            'updated_at' => now(),
+        ];
+
+        if (array_key_exists('classroom_id', $data)) {
+            $updateData['id_kelas'] = $data['classroom_id'];
+        }
+
         DB::table('materi')
             ->where('id', $id)
-            ->update([
-                'judul' => $data['title'],
-                'tipe_konten' => $data['content_type'],
-                'isi_konten' => $data['content_body'],
-                'deskripsi' => $data['description'] ?? null,
-                'updated_at' => now(),
-            ]);
+            ->update($updateData);
     }
 
     public function delete(string $id)
