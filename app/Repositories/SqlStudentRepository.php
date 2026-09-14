@@ -148,15 +148,15 @@ class SqlStudentRepository implements StudentRepositoryInterface
     {
         $updateData = [];
 
-        if (isset($data['nisn'])) {
+        if (array_key_exists('nisn', $data)) {
             $updateData['nisn'] = $data['nisn'];
         }
 
-        if (isset($data['address'])) {
+        if (array_key_exists('address', $data)) {
             $updateData['alamat'] = $data['address'];
         }
 
-        if (isset($data['photo'])) {
+        if (array_key_exists('photo', $data)) {
             $updateData['foto'] = $data['photo'];
         }
 

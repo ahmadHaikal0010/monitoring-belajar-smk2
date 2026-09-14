@@ -39,6 +39,27 @@ export function AppSidebar() {
         },
     ];
 
+    // Menu Siswa
+    if (auth?.user?.role === 'siswa') {
+        mainNavItems.push({
+            title: 'Mata Pelajaran',
+            href: '/student/subjects',
+            icon: Library,
+        });
+
+        // mainNavItems.push({
+        //     title: 'Tugas Saya',
+        //     href: '/student/assignments',
+        //     icon: FileCheck2,
+        // });
+
+        // mainNavItems.push({
+        //     title: 'Ujian Online',
+        //     href: '/student/exams',
+        //     icon: FileSpreadsheet,
+        // });
+    }
+
     // Tambahkan menu Admin/Guru jika role sesuai
     if (auth?.user?.role === 'admin' || auth?.user?.role === 'guru') {
         mainNavItems.push({

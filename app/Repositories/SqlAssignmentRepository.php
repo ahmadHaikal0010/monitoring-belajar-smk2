@@ -162,43 +162,57 @@ class SqlAssignmentRepository implements AssignmentRepositoryInterface
                 ->where('id_siswa', $studentId)
                 ->first();
 
-            $dueDate = $assignment->due_date;
+            // Mengambil due_date (mengakomodasi accessor atau nama kolom DB asli 'batas_waktu')
+            $dueDate = $assignment->due_date ?? $assignment->batas_waktu ?? null;
             $dueDateIso = null;
             if ($dueDate) {
                 $dueDateIso = $dueDate instanceof CarbonInterface ? $dueDate->toIso8601String() : Carbon::parse($dueDate)->toIso8601String();
             }
 
             $submissionData = null;
+            $submissionStatus = null;
+            $isSubmitted = false;
+
             if ($submission) {
-                $submittedAt = $submission->submitted_at;
+                // Mengambil nilai berdasarkan nama kolom asli DB / accessor Eloquent
+                $submittedAt = $submission->submitted_at ?? $submission->dikumpulkan_pada ?? null;
                 $submittedAtIso = null;
                 if ($submittedAt) {
                     $submittedAtIso = $submittedAt instanceof CarbonInterface ? $submittedAt->toIso8601String() : Carbon::parse($submittedAt)->toIso8601String();
                 }
 
+                $submissionStatus = $submission->status; // 'submitted', 'graded', 'late', dll.
+                $isSubmitted = ! empty($submissionStatus);
+
                 $submissionData = [
                     'id' => $submission->id,
                     'submitted_at' => $submittedAtIso,
-                    'notes' => $submission->notes,
-                    'score' => $submission->score,
-                    'feedback' => $submission->feedback,
-                    'status' => $submission->status,
+                    'notes' => $submission->notes ?? $submission->catatan ?? null,
+                    'score' => $submission->score ?? $submission->skor ?? null,
+                    'feedback' => $submission->feedback ?? $submission->umpan_balik ?? null,
+                    'status' => $submissionStatus,
                     'files' => $submission->files->map(fn ($f) => [
                         'id' => $f->id,
-                        'file_path' => asset('storage/'.$f->file_path),
-                        'file_name' => $f->file_name,
-                        'file_type' => $f->file_type,
-                    ]),
+                        'file_path' => asset('storage/'.($f->file_path ?? $f->jalur_berkas)),
+                        'file_name' => $f->file_name ?? $f->nama_berkas,
+                        'file_type' => $f->file_type ?? $f->tipe_berkas,
+                    ])->toArray(),
                 ];
             }
 
             return [
                 'id' => $assignment->id,
-                'title' => $assignment->title,
-                'description' => $assignment->description,
+                'title' => $assignment->title ?? $assignment->judul ?? '',
+                'description' => $assignment->description ?? $assignment->deskripsi ?? '',
                 'due_date' => $dueDateIso,
-                'max_score' => $assignment->max_score,
-                'allowed_file_types' => $assignment->allowed_file_types,
+                'max_score' => $assignment->max_score ?? $assignment->skor_maksimal ?? 100,
+                'allowed_file_types' => $assignment->allowed_file_types ?? $assignment->tipe_berkas_diizinkan ?? null,
+
+                // Tambahan flag/status top-level untuk kompatibilitas penuh dengan Frontend React
+                'is_submitted' => $isSubmitted,
+                'submission_status' => $submissionStatus,
+                'status' => $submissionStatus ?? 'pending',
+
                 'submission' => $submissionData,
             ];
         })->toArray();

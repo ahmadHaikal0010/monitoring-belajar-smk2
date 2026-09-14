@@ -293,33 +293,30 @@ export default function SubjectShow({
                     )}
                 </AnimatePresence>
 
-                {/* Back Button Positioned on LEFT */}
-                <div>
-                    <Button variant="outline" size="sm" asChild className="h-9 gap-1.5 text-xs">
-                        <Link href="/teacher/subjects">
-                            <ArrowLeft className="h-3.5 w-3.5" />
-                            <span>Kembali ke Daftar Mapel</span>
-                        </Link>
-                    </Button>
-                </div>
-
                 {/* Header Section */}
                 <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-                    <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <Badge className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 font-mono font-bold px-2.5 py-1 border border-emerald-200 dark:border-emerald-800">
-                                Kode: {subject.code}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                                Pengampu: {subject.teacher_name}
-                            </span>
+                    <div className="flex items-center gap-4">
+                        <Button variant="outline" size="icon" asChild>
+                            <Link href="/teacher/subjects">
+                                <ArrowLeft className="h-4 w-4" />
+                            </Link>
+                        </Button>
+                        <div>
+                            <div className="flex items-center gap-2 mb-1">
+                                <Badge className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 font-mono font-bold px-2.5 py-1 border border-emerald-200 dark:border-emerald-800">
+                                    Kode: {subject.code}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">
+                                    Pengampu: {subject.teacher_name}
+                                </span>
+                            </div>
+                            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+                                {subject.title}
+                            </h1>
+                            <p className="text-muted-foreground mt-1 max-w-2xl text-sm">
+                                {subject.description || 'Tidak ada deskripsi tambahan.'}
+                            </p>
                         </div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            {subject.title}
-                        </h1>
-                        <p className="text-muted-foreground mt-1 max-w-2xl text-sm">
-                            {subject.description || 'Tidak ada deskripsi yang tersedia untuk mata pelajaran ini.'}
-                        </p>
                     </div>
 
                     <div className="flex items-center gap-3">

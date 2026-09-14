@@ -43,4 +43,9 @@ interface ExamRepositoryInterface
     public function submitExamSession(string $sessionId);
 
     public function getExamResultDetails(string $sessionId);
+
+    /**
+     * Get all published exams for a subject with student session status.
+     */
+    public function getStudentExamsForSubject(string $subjectId, string $studentId): array;
 }

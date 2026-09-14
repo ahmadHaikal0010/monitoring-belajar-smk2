@@ -19,6 +19,11 @@ class MaterialService
         return $this->materialRepository->getPaginated($filters, $perPage);
     }
 
+    public function getMaterialsBySubjectId(string $subjectId)
+    {
+        return $this->materialRepository->getBySubjectId($subjectId);
+    }
+
     public function findMaterial(string $id)
     {
         return $this->materialRepository->find($id);

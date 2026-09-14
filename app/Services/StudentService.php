@@ -115,4 +115,48 @@ class StudentService
     {
         return $this->imageConverter->convertAndStore($file, 'student-photos', 'public', 80);
     }
+
+    /**
+     * Update student profile from Student Web Controller
+     */
+    public function updateStudent(string $studentId, array $data)
+    {
+        $student = $this->findStudent($studentId);
+
+        if (! $student) {
+            abort(404, 'Data siswa tidak ditemukan.');
+        }
+
+        DB::transaction(function () use ($student, $data) {
+            // 1. Update nama pada tabel pengguna jika ada
+            if (! empty($data['name'])) {
+                $userId = $student->user_id ?? $student->id_pengguna;
+
+                $this->userRepository->update($userId, [
+                    'nama' => $data['name'],
+                    'name' => $data['name'],
+                ]);
+            }
+
+            // 2. Siapkan array update untuk tabel siswa
+            $updateFields = [
+                'nisn' => $data['nisn'] ?? $student->nisn,
+                'address' => $data['address'] ?? $student->address,
+            ];
+
+            // 3. Olah upload foto baru jika dikirim dari controller
+            if (! empty($data['photo']) && $data['photo'] instanceof UploadedFile) {
+                // Hapus foto lama di storage jika ada
+                if ($student->photo && Storage::disk('public')->exists($student->photo)) {
+                    Storage::disk('public')->delete($student->photo);
+                }
+
+                // Simpan foto baru dan tambahkan path ke array update
+                $updateFields['photo'] = $this->storePhoto($data['photo']);
+            }
+
+            // 4. Update tabel siswa via repository
+            $this->studentRepository->update($student->id, $updateFields);
+        });
+    }
 }

@@ -135,34 +135,31 @@ return students;
                     )}
                 </AnimatePresence>
 
-                {/* Back Button Positioned on LEFT with Tab Memory */}
-                <div>
-                    <Button variant="outline" size="sm" asChild className="h-9 gap-1.5 text-xs">
-                        <Link href={`/teacher/subjects/${subject.id}?tab=progress`}>
-                            <ArrowLeft className="h-3.5 w-3.5" />
-                            <span>Kembali ke Detail Mapel</span>
-                        </Link>
-                    </Button>
-                </div>
-
                 {/* Page Header */}
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                    <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <Badge className="bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 font-bold border-blue-200">
-                                <School className="h-3 w-3 mr-1" />
-                                Rombel: {classroom.name}
-                            </Badge>
-                            <Badge variant="outline" className="font-mono">
-                                Mapel: {subject.code}
-                            </Badge>
+                    <div className="flex items-center gap-4">
+                        <Button variant="outline" size="icon" asChild>
+                            <Link href={`/teacher/subjects/${subject.id}?tab=progress`}>
+                                <ArrowLeft className="h-4 w-4" />
+                            </Link>
+                        </Button>
+                        <div>
+                            <div className="flex items-center gap-2 mb-1">
+                                <Badge className="bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 font-bold border-blue-200">
+                                    <School className="h-3 w-3 mr-1" />
+                                    Rombel: {classroom.name}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground font-mono font-bold">
+                                    {subject.code}
+                                </span>
+                            </div>
+                            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+                                Progress Belajar Siswa - {classroom.name}
+                            </h1>
+                            <p className="text-xs text-muted-foreground sm:text-sm">
+                                Pantau aktivitas modul materi dan penyelesaian tugas untuk kelas {classroom.name} ({subject.title}).
+                            </p>
                         </div>
-                        <h1 className="text-2xl font-bold tracking-tight">
-                            Progress Siswa - {classroom.name}
-                        </h1>
-                        <p className="text-muted-foreground text-xs mt-0.5">
-                            Pantau tingkat keaktifan dan penyelesaian materi siswa khusus kelas {classroom.name} (T.A {classroom.academic_year}).
-                        </p>
                     </div>
 
                     <div className="flex items-center gap-2">

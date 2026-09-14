@@ -65,6 +65,21 @@ class EnrollmentService
         return $this->enrollmentRepository->enroll($studentId, $subject->id);
     }
 
+    public function enrollStudent(string $studentId, string $subjectId)
+    {
+        if (! $this->enrollmentRepository->isEnrolled($studentId, $subjectId)) {
+            return $this->enrollmentRepository->enroll($studentId, $subjectId);
+        }
+    }
+
+    public function unenrollStudent(string $studentId, string $subjectId)
+    {
+        $enrollment = $this->enrollmentRepository->getByStudentAndSubject($studentId, $subjectId);
+        if ($enrollment) {
+            return $this->enrollmentRepository->delete($enrollment->id);
+        }
+    }
+
     public function getStudentSubjects(string $studentId)
     {
         return $this->enrollmentRepository->getStudentEnrollments($studentId);

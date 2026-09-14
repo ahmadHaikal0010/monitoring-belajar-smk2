@@ -74,6 +74,42 @@ class ExamService
         return $this->examRepository->deleteQuestion($questionId);
     }
 
+    /**
+     * Get all published exams for a subject with student session status.
+     */
+    public function getStudentExamsForSubject(string $subjectId, string $studentId)
+    {
+        $exams = \DB::table('ujian')
+            ->where('id_mata_pelajaran', $subjectId)
+            ->where('status', 'published')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return $exams->map(function ($exam) use ($studentId) {
+            $session = \DB::table('sesi_ujian')
+                ->where('id_ujian', $exam->id)
+                ->where('id_siswa', $studentId)
+                ->first();
+            $totalQuestions = \DB::table('soal')->where('id_ujian', $exam->id)->count();
+
+            return [
+                'id' => $exam->id,
+                'title' => $exam->judul,
+                'description' => $exam->deskripsi,
+                'duration' => $exam->durasi,
+                'pass_score' => $exam->nilai_kkm,
+                'start_time' => $exam->waktu_mulai,
+                'end_time' => $exam->waktu_selesai,
+                'total_questions' => $totalQuestions,
+                'student_session' => $session ? [
+                    'id' => $session->id,
+                    'status' => $session->status,
+                    'total_score' => $session->total_skor,
+                ] : null,
+            ];
+        });
+    }
+
     public function getPublishedExamsBySubject(string $subjectId)
     {
         return $this->examRepository->getPublishedExamsBySubject($subjectId);
