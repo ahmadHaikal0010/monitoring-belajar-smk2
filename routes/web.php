@@ -13,6 +13,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\ReportExportController;
+use App\Http\Controllers\StudentWebController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Middleware\AdminAccess;
@@ -96,6 +97,31 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
         Route::delete('classrooms/{classroom}/students/{student}', [AdminClassEnrollmentController::class, 'destroy'])->name('classrooms.students.destroy');
         Route::get('/approval', [AdminUserController::class, 'approval'])->name('users.approval');
         Route::put('/users/{id}/approve', [AdminUserController::class, 'approve'])->name('users.approve');
+    });
+
+    // * Student Web Portal Routes
+    Route::prefix('student')->name('student.')->group(function () {
+        Route::get('/subjects', [StudentWebController::class, 'subjects'])->name('subjects.index');
+        Route::get('/subjects/{subject}', [StudentWebController::class, 'showSubject'])->name('subjects.show');
+        Route::post('/subjects/{subject}/toggle-enroll', [StudentWebController::class, 'toggleEnroll'])->name('subjects.toggle-enroll');
+        Route::get('/subjects/{subject}/materials', [StudentWebController::class, 'materials'])->name('subjects.materials');
+        Route::get('/materials/{material}', [StudentWebController::class, 'showMaterial'])->name('materials.show');
+        Route::post('/materials/{material}/complete', [StudentWebController::class, 'completeMaterial'])->name('materials.complete');
+
+        Route::get('/assignments', [StudentWebController::class, 'assignments'])->name('assignments.index');
+        Route::get('/assignments/{assignment}', [StudentWebController::class, 'showAssignment'])->name('assignments.show');
+        Route::post('/assignments/{assignment}/submit', [StudentWebController::class, 'submitAssignment'])->name('assignments.submit');
+
+        Route::get('/profile', [StudentWebController::class, 'profile'])->name('profile');
+        Route::post('/profile/update', [StudentWebController::class, 'updateProfile'])->name('profile.update');
+
+        Route::get('/exams', [StudentWebController::class, 'exams'])->name('exams.index');
+        Route::get('/exams/{exam}', [StudentWebController::class, 'showExam'])->name('exams.show');
+        Route::post('/exams/{exam}/start', [StudentWebController::class, 'startExam'])->name('exams.start');
+        Route::get('/exams/sessions/{session}', [StudentWebController::class, 'showExamSession'])->name('exams.session');
+        Route::post('/exams/sessions/{session}/answer', [StudentWebController::class, 'saveExamAnswer'])->name('exams.session.answer');
+        Route::post('/exams/sessions/{session}/submit', [StudentWebController::class, 'submitExamSession'])->name('exams.session.submit');
+        Route::get('/exams/sessions/{session}/result', [StudentWebController::class, 'showExamResult'])->name('exams.result');
     });
 });
 

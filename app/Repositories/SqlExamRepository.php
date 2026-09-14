@@ -398,6 +398,40 @@ class SqlExamRepository implements ExamRepositoryInterface
             });
     }
 
+    public function getStudentExamsForSubject(string $subjectId, string $studentId): array
+    {
+        $exams = DB::table('ujian')
+            ->where('id_mata_pelajaran', $subjectId)
+            ->where('status', 'published')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return $exams->map(function ($exam) use ($studentId) {
+            $session = DB::table('sesi_ujian')
+                ->where('id_ujian', $exam->id)
+                ->where('id_siswa', $studentId)
+                ->first();
+
+            $totalQuestions = DB::table('soal')->where('id_ujian', $exam->id)->count();
+
+            return [
+                'id' => $exam->id,
+                'title' => $exam->judul,
+                'description' => $exam->deskripsi,
+                'duration' => $exam->durasi,
+                'pass_score' => $exam->nilai_kkm,
+                'start_time' => $exam->waktu_mulai,
+                'end_time' => $exam->waktu_selesai,
+                'total_questions' => $totalQuestions,
+                'student_session' => $session ? [
+                    'id' => $session->id,
+                    'status' => $session->status,
+                    'total_score' => $session->total_skor,
+                ] : null,
+            ];
+        })->all();
+    }
+
     public function getStudentExamSession(string $examId, string $studentId)
     {
         return DB::table('sesi_ujian')
@@ -622,11 +656,13 @@ class SqlExamRepository implements ExamRepositoryInterface
 
     public function getExamResultDetails(string $sessionId)
     {
+        // 1. Ambil data Sesi & Ujian
         $session = DB::table('sesi_ujian')
             ->join('ujian', 'sesi_ujian.id_ujian', '=', 'ujian.id')
+            ->leftJoin('mata_pelajaran', 'ujian.id_mata_pelajaran', '=', 'mata_pelajaran.id')
             ->where('sesi_ujian.id', $sessionId)
             ->select([
-                'sesi_ujian.id',
+                'sesi_ujian.id as id',
                 'sesi_ujian.id_ujian as exam_id',
                 'sesi_ujian.id_siswa as student_id',
                 'sesi_ujian.dimulai_pada as started_at',
@@ -636,6 +672,7 @@ class SqlExamRepository implements ExamRepositoryInterface
                 'ujian.judul as exam_title',
                 'ujian.nilai_kkm as pass_score',
                 'ujian.durasi as duration',
+                'ujian.id_mata_pelajaran as subject_id',
             ])
             ->first();
 
@@ -649,22 +686,26 @@ class SqlExamRepository implements ExamRepositoryInterface
         $session->submitted_at_iso = $session->submitted_at ? Carbon::parse($session->submitted_at, $tzName)->toIso8601String() : null;
         $session->server_time_iso = $now->toIso8601String();
         $session->timezone_offset = $now->format('P');
-        $session->timezone_name = config('app.timezone', 'Asia/Jakarta');
-
+        $session->timezone_name = $tzName;
         $session->is_passed = ($session->total_score ?? 0) >= $session->pass_score;
 
-        $answers = DB::table('jawaban_siswa')
-            ->join('soal', 'jawaban_siswa.id_soal', '=', 'soal.id')
+        // 2. QUERY UTAMA: Mulai dari SOAL, baru LEFT JOIN ke JAWABAN SISWA
+        $answers = DB::table('soal')
+            ->leftJoin('jawaban_siswa', function ($join) use ($sessionId) {
+                $join->on('soal.id', '=', 'jawaban_siswa.id_soal')
+                    ->where('jawaban_siswa.id_sesi_ujian', '=', $sessionId);
+            })
             ->leftJoin('materi', 'soal.id_materi', '=', 'materi.id')
             ->leftJoin('opsi_jawaban', 'jawaban_siswa.id_opsi_dipilih', '=', 'opsi_jawaban.id')
-            ->where('jawaban_siswa.id_sesi_ujian', $sessionId)
+            ->where('soal.id_ujian', $session->exam_id) // Ambil SEMUA soal di ujian ini
             ->select([
-                'jawaban_siswa.id',
-                'jawaban_siswa.id_soal as question_id',
+                'jawaban_siswa.id as id',
+                'soal.id as question_id',
                 'jawaban_siswa.id_opsi_dipilih as selected_option_id',
                 'jawaban_siswa.jawaban_esai as essay_answer',
-                'jawaban_siswa.benar as is_correct',
-                'jawaban_siswa.skor_diperoleh as score_earned',
+                // Jika tidak ada jawaban_siswa (null), otomatis dianggap SALAH (0)
+                DB::raw('COALESCE(jawaban_siswa.benar, false) as is_correct'),
+                DB::raw('COALESCE(jawaban_siswa.skor_diperoleh, 0) as score_earned'),
                 'soal.teks_soal as question_text',
                 'soal.tipe_soal as question_type',
                 'soal.bobot_skor as max_score',

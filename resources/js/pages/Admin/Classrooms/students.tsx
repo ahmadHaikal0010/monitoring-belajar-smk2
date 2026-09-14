@@ -8,11 +8,20 @@ import {
     UserMinus,
     Search,
     Users,
+    AlertCircle,
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 
 interface Classroom {
@@ -169,15 +178,20 @@ return;
         );
     };
 
-    const handleRemoveStudent = (studentId: string) => {
-        if (!confirm('Apakah Anda yakin ingin mengeluarkan siswa dari kelas ini?')) {
+    const [studentToRemove, setStudentToRemove] = useState<EnrolledStudent | null>(null);
+
+    const handleConfirmRemoveStudent = () => {
+        if (!studentToRemove) {
 return;
 }
 
         setIsSubmitting(true);
 
-        router.delete(`/admin/classrooms/${classroom.id}/students/${studentId}`, {
-            onSuccess: () => setIsSubmitting(false),
+        router.delete(`/admin/classrooms/${classroom.id}/students/${studentToRemove.student_id}`, {
+            onSuccess: () => {
+                setIsSubmitting(false);
+                setStudentToRemove(null);
+            },
             onError: () => setIsSubmitting(false),
         });
     };
@@ -195,7 +209,12 @@ return;
             <Head title={`Kelola Siswa - ${classroom.name}`} />
 
             <div className="flex flex-col gap-6 p-6">
-                <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+                <div className="flex items-center gap-4">
+                    <Button variant="outline" size="icon" asChild>
+                        <Link href="/admin/majors">
+                            <ArrowLeft className="h-4 w-4" />
+                        </Link>
+                    </Button>
                     <div>
                         <div className="flex items-center gap-2 mb-1">
                             <Badge className="bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 font-mono font-bold px-2.5 py-1 border border-blue-200 dark:border-blue-800 text-xs">
@@ -205,20 +224,13 @@ return;
                                 T.A {classroom.academic_year}
                             </span>
                         </div>
-                        <h1 className="text-3xl font-bold tracking-tight">
+                        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
                             Kelola Anggota Kelas {classroom.name}
                         </h1>
-                        <p className="text-muted-foreground">
+                        <p className="text-xs text-muted-foreground sm:text-sm">
                             Wali Kelas: <strong className="text-foreground">{classroom.homeroom_teacher_name || 'Belum ditentukan'}</strong>
                         </p>
                     </div>
-
-                    <Button variant="outline" asChild className="gap-2">
-                        <Link href="/admin/majors">
-                            <ArrowLeft className="h-4 w-4" />
-                            <span>Kembali</span>
-                        </Link>
-                    </Button>
                 </div>
 
                 {/* Tab Header Buttons */}
@@ -321,7 +333,7 @@ return;
                                                             variant="ghost"
                                                             size="sm"
                                                             onClick={() =>
-                                                                handleRemoveStudent(student.student_id)
+                                                                setStudentToRemove(student)
                                                             }
                                                             className="h-8 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:hover:bg-rose-950/50 text-xs gap-1"
                                                         >
@@ -488,6 +500,48 @@ return;
                     </div>
                 )}
             </div>
+
+            {/* Remove Student Confirmation Dialog */}
+            <Dialog open={!!studentToRemove} onOpenChange={(open) => !open && setStudentToRemove(null)}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader className="text-center sm:text-center">
+                        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                            <AlertCircle className="h-6 w-6" />
+                        </div>
+                        <DialogTitle className="text-xl font-bold">
+                            Keluarkan Siswa dari Kelas
+                        </DialogTitle>
+                        <DialogDescription className="text-sm pt-2">
+                            Apakah Anda yakin ingin mengeluarkan{' '}
+                            <strong className="text-foreground font-semibold">
+                                {studentToRemove?.student_name}
+                            </strong>{' '}
+                            dari kelas{' '}
+                            <strong className="text-foreground font-semibold">
+                                {classroom.name}
+                            </strong>? Status keanggotaan siswa akan dilepas dari rombel ini.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                        <Button
+                            variant="ghost"
+                            onClick={() => setStudentToRemove(null)}
+                            disabled={isSubmitting}
+                        >
+                            Batal
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={handleConfirmRemoveStudent}
+                            disabled={isSubmitting}
+                            className="gap-2"
+                        >
+                            <UserMinus className="h-4 w-4" />
+                            <span>Keluarkan Siswa</span>
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

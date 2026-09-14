@@ -82,23 +82,21 @@ export default function CreateClassroom({ majors, teachers }: Props) {
         <>
             <Head title="Tambah Rombel Kelas Baru" />
 
-            <div className="flex flex-col gap-6 p-6 max-w-4xl">
-                <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+            <div className="flex flex-col gap-6 p-6 mx-auto max-w-xl">
+                <div className="flex items-center gap-4">
+                    <Button variant="outline" size="icon" asChild>
+                        <Link href="/admin/majors">
+                            <ArrowLeft className="h-4 w-4" />
+                        </Link>
+                    </Button>
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
+                        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
                             Tambah Rombel Kelas Baru
                         </h1>
-                        <p className="text-muted-foreground">
+                        <p className="text-xs text-muted-foreground sm:text-sm">
                             Tentukan jurusan, tingkat, rombel, dan penetapan wali kelas.
                         </p>
                     </div>
-
-                    <Button variant="outline" asChild className="gap-2">
-                        <Link href="/admin/majors">
-                            <ArrowLeft className="h-4 w-4" />
-                            <span>Kembali</span>
-                        </Link>
-                    </Button>
                 </div>
 
                 <Card className="border-none bg-card/50 p-6 shadow-xl backdrop-blur-sm">

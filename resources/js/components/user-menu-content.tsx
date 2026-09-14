@@ -47,6 +47,19 @@ export function UserMenuContent({ user }: Props) {
                         </Link>
                     </DropdownMenuItem>
                 )}
+                {user.role === 'siswa' && (
+                    <DropdownMenuItem asChild>
+                        <Link
+                            className="block w-full cursor-pointer"
+                            href="/student/profile"
+                            prefetch
+                            onClick={cleanup}
+                        >
+                            <UserIcon className="mr-2" />
+                            Data Diri
+                        </Link>
+                    </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
                     <Link
                         className="block w-full cursor-pointer"

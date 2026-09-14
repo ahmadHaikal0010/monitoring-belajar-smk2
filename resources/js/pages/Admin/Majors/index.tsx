@@ -118,9 +118,35 @@ clearTimeout(hideTimer);
         ],
     });
 
-    const [activeTab, setActiveTab] = useState<'majors' | 'classrooms'>(
-        filters.major_id || filters.grade ? 'classrooms' : 'majors'
-    );
+    const [activeTab, setActiveTab] = useState<'majors' | 'classrooms'>(() => {
+        if (typeof window !== 'undefined') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tabParam = urlParams.get('tab');
+
+            if (tabParam === 'majors' || tabParam === 'classrooms') {
+                return tabParam;
+            }
+
+            const saved = localStorage.getItem('active_admin_majors_tab');
+
+            if (saved === 'majors' || saved === 'classrooms') {
+                return saved;
+            }
+        }
+
+        return filters.major_id || filters.grade ? 'classrooms' : 'majors';
+    });
+
+    const handleTabChange = (tab: 'majors' | 'classrooms') => {
+        setActiveTab(tab);
+
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('active_admin_majors_tab', tab);
+            const url = new URL(window.location.href);
+            url.searchParams.set('tab', tab);
+            window.history.replaceState({}, '', url.toString());
+        }
+    };
 
     const [search, setSearch] = useState(filters.search || '');
     const [selectedMajor, setSelectedMajor] = useState(filters.major_id || '');
@@ -249,7 +275,7 @@ return;
 
     const filterByMajorId = (majorId: string) => {
         setSelectedMajor(majorId);
-        setActiveTab('classrooms');
+        handleTabChange('classrooms');
         handleFilter({ major_id: majorId });
     };
 
@@ -321,7 +347,7 @@ return;
                 {/* Segmented Tab Navigation Bar */}
                 <div className="flex items-center gap-2 border-b border-zinc-200 pb-1 dark:border-zinc-800">
                     <button
-                        onClick={() => setActiveTab('majors')}
+                        onClick={() => handleTabChange('majors')}
                         className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-semibold transition-all ${
                             activeTab === 'majors'
                                 ? 'border-primary text-primary font-bold'
@@ -332,7 +358,7 @@ return;
                         Program Keahlian / Jurusan ({majors.total})
                     </button>
                     <button
-                        onClick={() => setActiveTab('classrooms')}
+                        onClick={() => handleTabChange('classrooms')}
                         className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-semibold transition-all ${
                             activeTab === 'classrooms'
                                 ? 'border-primary text-primary font-bold'

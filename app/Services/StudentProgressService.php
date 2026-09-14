@@ -101,4 +101,18 @@ class StudentProgressService
             ],
         ];
     }
+
+    /**
+     * Get completed material IDs for a student in a specific subject.
+     */
+    public function getCompletedMaterialIds(string $studentId, string $subjectId): array
+    {
+        $progress = $this->getSubjectProgress($studentId, $subjectId);
+
+        if (! $progress['success']) {
+            return [];
+        }
+
+        return $progress['data']['completed_material_ids'] ?? [];
+    }
 }
