@@ -58,11 +58,17 @@ class SubjectController extends Controller
     {
         Gate::authorize('create', Subject::class);
 
-        if (auth()->user()->role === 'admin') {
-            $teachers = $this->teacherService->getTeacherList([], 100);
+        $role = auth()->user()->role;
+
+        if ($role === 'admin') {
+            $filters = request()->only(['search']);
+
+            $teachers = $this->teacherService->getTeacherList($filters, 20);
 
             return Inertia::render('Subjects/create', [
                 'teachers' => $teachers,
+                'filters' => $filters,
+                'role' => $role,
             ]);
         }
 

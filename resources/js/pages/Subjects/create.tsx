@@ -1,4 +1,4 @@
-import { Head, Link, useForm, setLayoutProps, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, setLayoutProps, usePage, router } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ArrowLeft,
@@ -8,30 +8,129 @@ import {
     AlertCircle,
     Loader2,
     X,
+    Search,
+    User,
+    Check,
+    ChevronsUpDown,
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import InputError from '@/components/input-error';
-import type { TeacherItem } from '@/components/SearchableTeacherSelect';
-import { SearchableTeacherSelect } from '@/components/SearchableTeacherSelect';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
-interface CreateSubjectProps {
-    teachers?: TeacherItem[];
+interface Teacher {
+    id: number;
+    nip: string | null;
+    specialization: string | null;
+    photo?: string | null;
+    user_name: string;
+    user_email: string;
 }
 
-export default function CreateSubject({ teachers = [] }: CreateSubjectProps) {
+interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
+interface PaginatedData<T> {
+    data: T[];
+    links: PaginationLink[];
+    current_page: number;
+    last_page: number;
+    total: number;
+}
+
+interface CreateSubjectProps {
+    teachers?: PaginatedData<Teacher>;
+    filters?: {
+        search?: string;
+    };
+    role?: string;
+}
+
+export default function CreateSubject({
+    teachers,
+    filters = {},
+    role,
+}: CreateSubjectProps) {
     const { flash } = usePage().props as any;
     const [showError, setShowError] = useState(false);
+    const [searchTerm, setSearchTerm] = useState(filters.search || '');
+    const [isOpen, setIsOpen] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
+    const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const { data, setData, post, processing, errors } = useForm({
         title: '',
         description: '',
         teacher_id: '',
     });
+
+    useEffect(() => {
+        setLayoutProps({
+            breadcrumbs: [
+                {
+                    title: 'Mata Pelajaran',
+                    href: '/teacher/subjects',
+                },
+                {
+                    title: 'Tambah Mapel',
+                    href: '/teacher/subjects/create',
+                },
+            ],
+        });
+    }, []);
+
+    useEffect(() => {
+        if (isOpen) {
+            const timer = setTimeout(() => {
+                inputRef.current?.focus();
+            }, 50);
+
+            return () => clearTimeout(timer);
+        }
+    }, [isOpen]);
+
+    const handleSearch = useCallback((value: string) => {
+        setIsSearching(true);
+        router.get(
+            '/teacher/subjects/create',
+            { search: value },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                only: ['teachers', 'filters'],
+                onFinish: () => setIsSearching(false),
+            },
+        );
+    }, []);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (searchTerm !== (filters.search || '')) {
+                handleSearch(searchTerm);
+            }
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [searchTerm, handleSearch, filters.search]);
+
+    const handleSelectTeacher = (teacher: Teacher) => {
+        setSelectedTeacher(teacher);
+        setData('teacher_id', teacher.id.toString());
+        setIsOpen(false);
+    };
 
     useEffect(() => {
         if (flash?.error) {
@@ -44,19 +143,6 @@ export default function CreateSubject({ teachers = [] }: CreateSubjectProps) {
             };
         }
     }, [flash?.error]);
-
-    setLayoutProps({
-        breadcrumbs: [
-            {
-                title: 'Mata Pelajaran',
-                href: '/teacher/subjects',
-            },
-            {
-                title: 'Tambah Mapel',
-                href: '/teacher/subjects/create',
-            },
-        ],
-    });
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -135,13 +221,114 @@ export default function CreateSubject({ teachers = [] }: CreateSubjectProps) {
                                 <InputError message={errors.title} />
                             </div>
 
-                            {teachers.length > 0 && (
-                                <SearchableTeacherSelect
-                                    teachers={teachers}
-                                    value={data.teacher_id}
-                                    onChange={(val) => setData('teacher_id', val)}
-                                    error={errors.teacher_id}
-                                />
+                            {role === 'admin' && teachers && (
+                                <div className="grid gap-2">
+                                    <Label
+                                        htmlFor="teacher_id"
+                                        className="flex items-center gap-2 text-sm font-semibold"
+                                    >
+                                        <User className="h-4 w-4 text-primary" />
+                                        Pilih Guru Pengampu
+                                    </Label>
+                                    <DropdownMenu
+                                        open={isOpen}
+                                        onOpenChange={setIsOpen}
+                                    >
+                                        <DropdownMenuTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                role="combobox"
+                                                aria-expanded={isOpen}
+                                                className="h-12 w-full justify-between border-zinc-200 bg-background/50 dark:border-zinc-800"
+                                            >
+                                                {selectedTeacher ? (
+                                                    <div className="flex items-center gap-2 overflow-hidden">
+                                                        <User className="h-4 w-4 shrink-0 text-primary" />
+                                                        <div className="flex flex-col items-start text-left">
+                                                            <span className="truncate font-medium">
+                                                                {selectedTeacher.user_name}
+                                                            </span>
+                                                            <span className="truncate text-[10px] text-muted-foreground">
+                                                                {selectedTeacher.nip ? `NIP: ${selectedTeacher.nip} • ` : ''}
+                                                                {selectedTeacher.user_email}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-muted-foreground">
+                                                        Cari guru berdasarkan nama, NIP, spesialisasi, atau email...
+                                                    </span>
+                                                )}
+                                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent
+                                            className="w-[calc(100vw-3rem)] p-0 md:w-[600px]"
+                                            align="start"
+                                            onCloseAutoFocus={(e) =>
+                                                e.preventDefault()
+                                            }
+                                        >
+                                            <div className="flex items-center border-b p-2">
+                                                <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                                                <Input
+                                                    ref={inputRef}
+                                                    placeholder="Ketik untuk mencari guru..."
+                                                    className="h-9 border-none bg-transparent focus-visible:ring-0"
+                                                    value={searchTerm}
+                                                    onChange={(e) =>
+                                                        setSearchTerm(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    onKeyDown={(e) =>
+                                                        e.stopPropagation()
+                                                    }
+                                                />
+                                                {isSearching && (
+                                                    <Loader2 className="ml-2 h-4 w-4 animate-spin text-muted-foreground" />
+                                                )}
+                                            </div>
+                                            <div className="max-h-[300px] overflow-y-auto p-1">
+                                                {teachers.data && teachers.data.length > 0 ? (
+                                                    teachers.data.map(
+                                                        (teacher) => (
+                                                            <DropdownMenuItem
+                                                                key={teacher.id}
+                                                                onSelect={() =>
+                                                                    handleSelectTeacher(
+                                                                        teacher,
+                                                                    )
+                                                                }
+                                                                className="flex cursor-pointer items-center justify-between p-3 transition-colors focus:bg-zinc-100 focus:text-foreground dark:focus:bg-zinc-800"
+                                                            >
+                                                                <div className="flex flex-col">
+                                                                    <span className="font-semibold">
+                                                                        {teacher.user_name}
+                                                                    </span>
+                                                                    <span className="text-xs text-muted-foreground">
+                                                                        {teacher.nip ? `NIP: ${teacher.nip} • ` : ''}
+                                                                        {teacher.user_email}
+                                                                        {teacher.specialization ? ` • ${teacher.specialization}` : ''}
+                                                                    </span>
+                                                                </div>
+                                                                {selectedTeacher?.id ===
+                                                                    teacher.id && (
+                                                                    <Check className="h-4 w-4 text-primary" />
+                                                                )}
+                                                            </DropdownMenuItem>
+                                                        ),
+                                                    )
+                                                ) : (
+                                                    <div className="p-4 text-center text-sm text-muted-foreground">
+                                                        Guru tidak ditemukan.
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                    <InputError message={errors.teacher_id} />
+                                </div>
                             )}
 
                             <div className="grid gap-2">
