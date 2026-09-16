@@ -107,7 +107,8 @@ export default function ClassroomExams({
     exams,
     otherClassroomExams,
 }: Props) {
-    const { flash } = usePage().props as any;
+    const { flash, auth } = usePage().props as any;
+    const isAdmin = auth?.user?.role === 'admin';
     const [dismissedFlash, setDismissedFlash] = useState<string | null>(null);
     const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
     const [selectedCopyIds, setSelectedCopyIds] = useState<string[]>([]);
@@ -197,8 +198,8 @@ export default function ClassroomExams({
         e.preventDefault();
 
         if (selectedCopyIds.length === 0) {
-return;
-}
+            return;
+        }
 
         setIsSubmittingCopy(true);
         router.post(
@@ -219,8 +220,8 @@ return;
 
     const handleDeleteExam = () => {
         if (!examToDelete) {
-return;
-}
+            return;
+        }
 
         setIsDeleting(true);
 
@@ -292,30 +293,32 @@ return;
                                 Ujian & Evaluasi - {classroom.name}
                             </h1>
                             <p className="text-xs text-muted-foreground sm:text-sm">
-                                Kelola ujian khusus untuk kelas {classroom.name} ({subject.title}).
+                                Pengelolaan paket ujian dan evaluasi khusus kelas {classroom.name} ({subject.title}).
                             </p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        {otherClassroomExams.length > 0 && (
-                            <Button
-                                variant="outline"
-                                onClick={() => setIsCopyModalOpen(true)}
-                                className="h-9 gap-1.5 text-xs"
-                            >
-                                <Copy className="h-3.5 w-3.5 text-primary" />
-                                <span>Salin dari Kelas Lain</span>
-                            </Button>
-                        )}
+                    {!isAdmin && (
+                        <div className="flex items-center gap-2">
+                            {otherClassroomExams.length > 0 && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setIsCopyModalOpen(true)}
+                                    className="h-9 gap-1.5 text-xs"
+                                >
+                                    <Copy className="h-3.5 w-3.5 text-primary" />
+                                    <span>Salin dari Kelas Lain</span>
+                                </Button>
+                            )}
 
-                        <Button size="sm" className="h-9 gap-1.5 shadow-md shadow-primary/20 text-xs" asChild>
-                            <Link href={`/teacher/exams/create?subject_id=${subject.id}&classroom_id=${classroom.id}`}>
-                                <Plus className="h-4 w-4" />
-                                <span>Buat Ujian Baru</span>
-                            </Link>
-                        </Button>
-                    </div>
+                            <Button size="sm" className="h-9 gap-1.5 shadow-md shadow-primary/20 text-xs" asChild>
+                                <Link href={`/teacher/exams/create?subject_id=${subject.id}&classroom_id=${classroom.id}`}>
+                                    <Plus className="h-4 w-4" />
+                                    <span>Buat Ujian Baru</span>
+                                </Link>
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Search, Filter, & Sort Controls */}
@@ -378,9 +381,11 @@ return;
                                     <th className="p-4 font-bold text-muted-foreground uppercase tracking-wider">
                                         Jumlah Soal
                                     </th>
-                                    <th className="p-4 text-right font-bold text-muted-foreground uppercase tracking-wider">
-                                        Aksi
-                                    </th>
+                                    {!isAdmin && (
+                                        <th className="p-4 text-right font-bold text-muted-foreground uppercase tracking-wider">
+                                            Aksi
+                                        </th>
+                                    )}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -429,40 +434,42 @@ return;
                                                     <span className="font-medium">{exam.questions_count ?? 0} Soal</span>
                                                 </div>
                                             </td>
-                                            <td className="p-4 text-right">
-                                                <div onClick={(e) => e.stopPropagation()}>
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                                <MoreVertical className="h-4 w-4" />
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end" className="w-44">
-                                                            <DropdownMenuItem asChild>
-                                                                <Link href={`/teacher/exams/${exam.id}`}>
-                                                                    <Eye className="mr-2 h-4 w-4 text-primary" /> Bank Soal & Detail
-                                                                </Link>
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem asChild>
-                                                                <Link href={`/teacher/exams/${exam.id}/edit`}>
-                                                                    <Pencil className="mr-2 h-4 w-4 text-primary" /> Edit Ujian
-                                                                </Link>
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem
-                                                                className="text-destructive focus:text-destructive"
-                                                                onSelect={() => setExamToDelete(exam)}
-                                                            >
-                                                                <Trash2 className="mr-2 h-4 w-4" /> Hapus Ujian
-                                                            </DropdownMenuItem>
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
-                                                </div>
-                                            </td>
+                                            {!isAdmin && (
+                                                <td className="p-4 text-right">
+                                                    <div onClick={(e) => e.stopPropagation()}>
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                                    <MoreVertical className="h-4 w-4" />
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end" className="w-44">
+                                                                <DropdownMenuItem asChild>
+                                                                    <Link href={`/teacher/exams/${exam.id}`}>
+                                                                        <Eye className="mr-2 h-4 w-4 text-primary" /> Bank Soal & Detail
+                                                                    </Link>
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem asChild>
+                                                                    <Link href={`/teacher/exams/${exam.id}/edit`}>
+                                                                        <Pencil className="mr-2 h-4 w-4 text-primary" /> Edit Ujian
+                                                                    </Link>
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem
+                                                                    className="text-destructive focus:text-destructive"
+                                                                    onSelect={() => setExamToDelete(exam)}
+                                                                >
+                                                                    <Trash2 className="mr-2 h-4 w-4" /> Hapus Ujian
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                    </div>
+                                                </td>
+                                            )}
                                         </motion.tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={5} className="p-12 text-center text-muted-foreground italic">
+                                        <td colSpan={isAdmin ? 4 : 5} className="p-12 text-center text-muted-foreground italic">
                                             {searchQuery || statusFilter !== 'all'
                                                 ? 'Tidak ada ujian yang sesuai dengan pencarian/filter.'
                                                 : 'Belum ada ujian khusus untuk kelas ini.'}

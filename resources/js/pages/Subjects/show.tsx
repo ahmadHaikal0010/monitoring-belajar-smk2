@@ -198,8 +198,7 @@ export default function SubjectShow({
     }, [subject.id, subject.title]);
 
     const isTeacher = auth.user.role === 'guru' && auth.user.id === subject.teacher_user_id;
-    const isAdmin = auth.user.role === 'admin';
-    const canManage = isTeacher || isAdmin;
+    const canManage = isTeacher;
 
     // Total student count across classrooms
     const totalStudentsCount = useMemo(() => {
