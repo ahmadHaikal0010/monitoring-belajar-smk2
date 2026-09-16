@@ -226,15 +226,13 @@ class ClassroomContentController extends Controller
                         'teks_soal' => $q->teks_soal,
                         'tipe_soal' => $q->tipe_soal,
                         'bobot_nilai' => $q->bobot_nilai,
-                        'urutan' => $q->urutan,
                     ]);
 
-                    foreach ($q->options as $o) {
+                    foreach ($q->options as $opt) {
                         Option::create([
                             'id_soal' => $newQuestion->id,
-                            'teks_opsi' => $o->teks_opsi,
-                            'adalah_benar' => $o->adalah_benar,
-                            'urutan' => $o->urutan,
+                            'teks_opsi' => $opt->teks_opsi,
+                            'adalah_benar' => $opt->adalah_benar,
                         ]);
                     }
                 }
@@ -242,62 +240,6 @@ class ClassroomContentController extends Controller
             }
         });
 
-        return redirect()->back()->with('success', "Berhasil menyalin {$count} ujian beserta soal & opsi ke kelas {$classroom->nama_kelas}.");
-    }
-
-    /**
-     * Display student progress page for a specific classroom.
-     */
-    public function progress(Subject $subject, Classroom $classroom)
-    {
-        $user = auth()->user();
-        if ($user->role === 'guru') {
-            $teacher = DB::table('guru')->where('id_pengguna', $user->id)->first();
-            if ($subject->teacher_id !== ($teacher->id ?? null)) {
-                abort(403, 'Anda tidak memiliki hak akses untuk mata pelajaran ini.');
-            }
-        }
-
-        $students = DB::table('anggota_kelas')
-            ->join('siswa', 'anggota_kelas.id_siswa', '=', 'siswa.id')
-            ->join('pengguna', 'siswa.id_pengguna', '=', 'pengguna.id')
-            ->leftJoin('pendaftaran', function ($join) use ($subject) {
-                $join->on('siswa.id', '=', 'pendaftaran.id_siswa')
-                    ->where('pendaftaran.id_mata_pelajaran', '=', $subject->id);
-            })
-            ->where('anggota_kelas.id_kelas', $classroom->id)
-            ->select([
-                'siswa.id as student_id',
-                'pendaftaran.id as enrollment_id',
-                'pengguna.nama as student_name',
-                'pengguna.email as student_email',
-                'siswa.nisn as student_nisn',
-                'siswa.foto as student_photo',
-                'anggota_kelas.status as classroom_status',
-                'pendaftaran.status as enrollment_status',
-                'pendaftaran.terdaftar_pada as enrolled_at',
-            ])
-            ->addSelect([
-                'total_materials' => DB::table('materi')
-                    ->where('id_mata_pelajaran', $subject->id)
-                    ->where(function ($q) use ($classroom) {
-                        $q->where('id_kelas', $classroom->id)->orWhereNull('id_kelas');
-                    })
-                    ->selectRaw('count(*)'),
-                'completed_materials' => DB::table('progres_siswa')
-                    ->join('pendaftaran', 'progres_siswa.id_pendaftaran', '=', 'pendaftaran.id')
-                    ->where('pendaftaran.id_mata_pelajaran', $subject->id)
-                    ->whereColumn('pendaftaran.id_siswa', 'siswa.id')
-                    ->where('progres_siswa.selesai', true)
-                    ->selectRaw('count(*)'),
-            ])
-            ->orderBy('pengguna.nama', 'asc')
-            ->get();
-
-        return Inertia::render('Subjects/ClassroomProgress', [
-            'subject' => $subject,
-            'classroom' => $classroom,
-            'students' => $students,
-        ]);
+        return redirect()->back()->with('success', "Berhasil menyalin {$count} ujian beserta bank soal ke kelas {$classroom->nama_kelas}.");
     }
 }
