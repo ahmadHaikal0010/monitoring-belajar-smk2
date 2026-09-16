@@ -65,7 +65,9 @@ function PdfViewerClient({
     useEffect(() => {
         let isMounted = true;
         import('react-pdf').then((mod) => {
-            if (!isMounted) return;
+            if (!isMounted) {
+return;
+}
 
             import('react-pdf/dist/Page/AnnotationLayer.css');
             import('react-pdf/dist/Page/TextLayer.css');
@@ -90,7 +92,9 @@ function PdfViewerClient({
     };
 
     const toggleFullScreen = () => {
-        if (!pdfContainerRef.current) return;
+        if (!pdfContainerRef.current) {
+return;
+}
 
         if (!document.fullscreenElement) {
             pdfContainerRef.current.requestFullscreen().catch((err) => {
@@ -172,16 +176,18 @@ export default function StudentMaterialShow({ subject, material, all_materials }
     const { flash } = usePage().props as any;
     const [dismissedFlash, setDismissedFlash] = useState<string | null>(null);
 
-    // Deklarasi state untuk status selesai beserta setter-nya
+    // Menyimpan ID materi sebelumnya untuk mendeteksi perubahan prop
+    const [prevMaterialId, setPrevMaterialId] = useState(material.id);
     const [isCompletedState, setIsCompletedState] = useState(material.is_completed);
+
+    // Pola React resmi: Menyesuaikan state saat render jika prop material berubah
+    if (prevMaterialId !== material.id) {
+        setPrevMaterialId(material.id);
+        setIsCompletedState(material.is_completed);
+    }
 
     const flashMessage = flash?.success || flash?.error;
     const showSuccess = Boolean(flashMessage && dismissedFlash !== flashMessage);
-
-    // Sinkronkan state lokal saat prop material berubah
-    useEffect(() => {
-        setIsCompletedState(material.is_completed);
-    }, [material.id, material.is_completed]);
 
     useEffect(() => {
         if (flashMessage) {
@@ -204,7 +210,9 @@ export default function StudentMaterialShow({ subject, material, all_materials }
     }, [subject.id, subject.title, material.title]);
 
     const handleMarkComplete = () => {
-        if (isCompletedState) return;
+        if (isCompletedState) {
+return;
+}
 
         setIsCompletedState(true);
         router.post(
@@ -219,7 +227,9 @@ export default function StudentMaterialShow({ subject, material, all_materials }
 
     const renderContentBody = () => {
         const getStorageUrl = (path: string) => {
-            if (!path) return '';
+            if (!path) {
+return '';
+}
 
             const cleanPath = path.startsWith('/') ? path : `/${path}`;
 
