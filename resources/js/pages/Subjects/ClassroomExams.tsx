@@ -1,4 +1,4 @@
-import { Head, Link, setLayoutProps, usePage } from '@inertiajs/react';
+import { Head, Link, router, setLayoutProps, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ArrowLeft,
@@ -250,7 +250,7 @@ export default function ClassroomExams({
                         >
                             <div className={cn(
                                 "mb-2 flex items-start gap-3 rounded-xl border p-4 shadow-sm backdrop-blur-sm",
-                                flash?.success 
+                                flash?.success
                                     ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-200"
                                     : "border-destructive/20 bg-destructive/10 text-destructive"
                             )}>

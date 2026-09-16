@@ -69,7 +69,7 @@ class DashboardController extends Controller
                     : 0;
 
                 return [
-                    'name' => 'Tingkat ' . $item->grade_level,
+                    'name' => 'Tingkat '.$item->grade_level,
                     'count' => min($percentage, 100),
                     'total' => 100,
                     'percentage' => min($percentage, 100),
