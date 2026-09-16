@@ -117,7 +117,8 @@ export default function ClassroomMaterials({
     materials,
     otherClassroomMaterials,
 }: Props) {
-    const { flash } = usePage().props as any;
+    const { flash, auth } = usePage().props as any;
+    const isAdmin = auth?.user?.role === 'admin';
     const [dismissedFlash, setDismissedFlash] = useState<string | null>(null);
     const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
     const [selectedCopyIds, setSelectedCopyIds] = useState<string[]>([]);
@@ -207,8 +208,8 @@ export default function ClassroomMaterials({
         e.preventDefault();
 
         if (selectedCopyIds.length === 0) {
-return;
-}
+            return;
+        }
 
         setIsSubmittingCopy(true);
         router.post(
@@ -229,8 +230,8 @@ return;
 
     const handleDeleteMaterial = () => {
         if (!materialToDelete) {
-return;
-}
+            return;
+        }
 
         setIsDeleting(true);
 
@@ -307,25 +308,27 @@ return;
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        {otherClassroomMaterials.length > 0 && (
-                            <Button
-                                variant="outline"
-                                onClick={() => setIsCopyModalOpen(true)}
-                                className="h-9 gap-1.5 text-xs"
-                            >
-                                <Copy className="h-3.5 w-3.5 text-primary" />
-                                <span>Salin dari Kelas Lain</span>
-                            </Button>
-                        )}
+                    {!isAdmin && (
+                        <div className="flex items-center gap-2">
+                            {otherClassroomMaterials.length > 0 && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setIsCopyModalOpen(true)}
+                                    className="h-9 gap-1.5 text-xs"
+                                >
+                                    <Copy className="h-3.5 w-3.5 text-primary" />
+                                    <span>Salin dari Kelas Lain</span>
+                                </Button>
+                            )}
 
-                        <Button size="sm" className="h-9 gap-1.5 shadow-md shadow-primary/20 text-xs" asChild>
-                            <Link href={`/teacher/materials/create?subject_id=${subject.id}&classroom_id=${classroom.id}`}>
-                                <Plus className="h-4 w-4" />
-                                <span>Tambah Materi Baru</span>
-                            </Link>
-                        </Button>
-                    </div>
+                            <Button size="sm" className="h-9 gap-1.5 shadow-md shadow-primary/20 text-xs" asChild>
+                                <Link href={`/teacher/materials/create?subject_id=${subject.id}&classroom_id=${classroom.id}`}>
+                                    <Plus className="h-4 w-4" />
+                                    <span>Tambah Materi Baru</span>
+                                </Link>
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Search, Filter, & Sort Controls */}
@@ -351,7 +354,6 @@ return;
                                 <option value="all">Semua Jenis</option>
                                 <option value="document">Dokumen</option>
                                 <option value="video">Video</option>
-                                <option value="url">Tautan</option>
                             </select>
                         </div>
 
@@ -386,9 +388,11 @@ return;
                                     <th className="p-4 font-bold text-muted-foreground uppercase tracking-wider">
                                         Dibuat
                                     </th>
-                                    <th className="p-4 text-right font-bold text-muted-foreground uppercase tracking-wider">
-                                        Aksi
-                                    </th>
+                                    {!isAdmin && (
+                                        <th className="p-4 text-right font-bold text-muted-foreground uppercase tracking-wider">
+                                            Aksi
+                                        </th>
+                                    )}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -429,40 +433,42 @@ return;
                                                       })
                                                     : '-'}
                                             </td>
-                                            <td className="p-4 text-right">
-                                                <div onClick={(e) => e.stopPropagation()}>
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                                <MoreVertical className="h-4 w-4" />
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end" className="w-40">
-                                                            <DropdownMenuItem asChild>
-                                                                <Link href={`/teacher/materials/${material.id}`}>
-                                                                    <Eye className="mr-2 h-4 w-4 text-primary" /> Detail
-                                                                </Link>
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem asChild>
-                                                                <Link href={`/teacher/materials/${material.id}/edit`}>
-                                                                    <Pencil className="mr-2 h-4 w-4 text-primary" /> Edit
-                                                                </Link>
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem
-                                                                className="text-destructive focus:text-destructive"
-                                                                onSelect={() => setMaterialToDelete(material)}
-                                                            >
-                                                                <Trash2 className="mr-2 h-4 w-4" /> Hapus
-                                                            </DropdownMenuItem>
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
-                                                </div>
-                                            </td>
+                                            {!isAdmin && (
+                                                <td className="p-4 text-right">
+                                                    <div onClick={(e) => e.stopPropagation()}>
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                                    <MoreVertical className="h-4 w-4" />
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end" className="w-40">
+                                                                <DropdownMenuItem asChild>
+                                                                    <Link href={`/teacher/materials/${material.id}`}>
+                                                                        <Eye className="mr-2 h-4 w-4 text-primary" /> Detail
+                                                                    </Link>
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem asChild>
+                                                                    <Link href={`/teacher/materials/${material.id}/edit`}>
+                                                                        <Pencil className="mr-2 h-4 w-4 text-primary" /> Edit
+                                                                    </Link>
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem
+                                                                    className="text-destructive focus:text-destructive"
+                                                                    onSelect={() => setMaterialToDelete(material)}
+                                                                >
+                                                                    <Trash2 className="mr-2 h-4 w-4" /> Hapus
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                    </div>
+                                                </td>
+                                            )}
                                         </motion.tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={4} className="p-12 text-center text-muted-foreground italic">
+                                        <td colSpan={isAdmin ? 3 : 4} className="p-12 text-center text-muted-foreground italic">
                                             {searchQuery || typeFilter !== 'all'
                                                 ? 'Tidak ada materi yang sesuai dengan pencarian/filter.'
                                                 : 'Belum ada materi khusus untuk kelas ini.'}

@@ -1,6 +1,8 @@
 # Agent Directives & Constraints
 
 ## Core Rules & Execution Boundary
+- **Response Style Constraint**:
+  - Maximum token efficiency: direct code/answers only, zero conversational filler, zero theoretical explanations, zero summaries
 - **Environment**: Docker + Laravel Sail
 - **Utility Binary**: `/home/haikal/.local/bin/rtk`
 - **Command Prefix**: Mandatory `rtk ./vendor/bin/sail` for all VCS, shell, PHP, NPM, Artisan execution
@@ -15,8 +17,6 @@
   - NEVER execute bare PHP, NPM, or Artisan commands without `rtk ./vendor/bin/sail`
   - NEVER output planning mode drafts, artifacts, or execution steps
   - Directly modify target files using file tools (`write_file` / `edit_file`)
-- **Response Style Constraint**:
-  - Maximum token efficiency: direct code/answers only, zero conversational filler, zero theoretical explanations, zero summaries
 
 ## Stack Versions
 PHP 8.4 | Laravel 13 | React 19 | Inertia v3 | Tailwind v4 | Fortify v1 | Sanctum v4 | Wayfinder v0 | Boost v2 | Pint v1 | PHPUnit v11
