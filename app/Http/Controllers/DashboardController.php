@@ -43,6 +43,43 @@ class DashboardController extends Controller
 
     protected function getAdminDashboardData(): array
     {
+        // Hitung persentase ketercapaian penyelesaian materi berdasarkan Tingkat Kelas
+        $gradeCompletionStats = DB::table('kelas')
+            ->join('kelas_mata_pelajaran', 'kelas.id', '=', 'kelas_mata_pelajaran.id_kelas')
+            ->join('mata_pelajaran', 'kelas_mata_pelajaran.id_mata_pelajaran', '=', 'mata_pelajaran.id')
+            ->join('materi', 'mata_pelajaran.id', '=', 'materi.id_mata_pelajaran')
+            ->leftJoin('pendaftaran', 'mata_pelajaran.id', '=', 'pendaftaran.id_mata_pelajaran')
+            ->leftJoin('progres_siswa', function ($join) {
+                $join->on('pendaftaran.id', '=', 'progres_siswa.id_pendaftaran')
+                    ->where('progres_siswa.selesai', '=', true);
+            })
+            ->select([
+                'kelas.tingkat as grade_level',
+                DB::raw('COUNT(DISTINCT materi.id) as total_materials'),
+                DB::raw('COUNT(DISTINCT progres_siswa.id) as total_completed_materials'),
+                DB::raw('COUNT(DISTINCT pendaftaran.id_siswa) as total_students'),
+            ])
+            ->groupBy('kelas.tingkat')
+            ->orderBy('kelas.tingkat', 'asc')
+            ->get()
+            ->map(function ($item) {
+                $expectedTotal = $item->total_materials * $item->total_students;
+                $percentage = $expectedTotal > 0
+                    ? (int) round(($item->total_completed_materials / $expectedTotal) * 100)
+                    : 0;
+
+                return [
+                    'name' => 'Tingkat ' . $item->grade_level,
+                    'count' => min($percentage, 100),
+                    'total' => 100,
+                    'percentage' => min($percentage, 100),
+                    'students' => (int) $item->total_students,
+                    'materials' => (int) $item->total_materials,
+                ];
+            })
+            ->values()
+            ->toArray();
+
         return [
             'stats' => [
                 'total_students' => DB::table('pengguna')->where('peran', 'siswa')->where('disetujui', true)->count(),
@@ -62,19 +99,7 @@ class DashboardController extends Controller
                     'role' => $user->peran,
                     'date' => $user->created_at,
                 ]),
-            'subject_progress' => DB::table('mata_pelajaran')
-                ->join('pendaftaran', 'mata_pelajaran.id', '=', 'pendaftaran.id_mata_pelajaran')
-                ->select('mata_pelajaran.judul as name')
-                ->selectRaw('count(pendaftaran.id) as count')
-                ->groupBy('mata_pelajaran.id', 'mata_pelajaran.judul')
-                ->orderBy('count', 'desc')
-                ->limit(4)
-                ->get()
-                ->map(fn ($item) => [
-                    'name' => $item->name,
-                    'count' => (int) $item->count,
-                    'total' => DB::table('pengguna')->where('peran', 'siswa')->where('disetujui', true)->count(),
-                ]),
+            'subject_progress' => $gradeCompletionStats,
         ];
     }
 

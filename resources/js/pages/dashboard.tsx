@@ -12,6 +12,7 @@ import {
     Award,
     ShieldAlert,
     KeyRound,
+    GraduationCap,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -51,6 +52,8 @@ interface SubjectProgress {
     count: number;
     total: number;
     percentage?: number;
+    students?: number;
+    materials?: number;
 }
 
 interface EnrolledSubjectItem {
@@ -83,6 +86,7 @@ export default function Dashboard({
     const { auth } = usePage().props as any;
     const isGuru = auth.user.role === 'guru';
     const isSiswa = auth.user.role === 'siswa';
+    const isAdmin = auth.user.role === 'admin';
 
     const statCards = isSiswa
         ? [
@@ -146,7 +150,6 @@ export default function Dashboard({
                 <div className="flex flex-col gap-1">
                     <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
                         Selamat Datang, {auth.user.name.split(' ')[0]}!
-                        {isSiswa}
                     </h1>
                     <p className="text-muted-foreground text-sm">
                         {isSiswa
@@ -371,14 +374,16 @@ export default function Dashboard({
                             <CardHeader className="flex flex-row items-center justify-between pb-4">
                                 <div>
                                     <CardTitle className="text-lg font-bold">
-                                        {isGuru ? 'Pencapaian Siswa' : 'Mapel Terpopuler'}
+                                        {isAdmin ? 'Ketercapaian Pembelajaran Mapel' : 'Pencapaian Siswa'}
                                     </CardTitle>
                                     <p className="text-xs text-muted-foreground">
-                                        {isGuru ? 'Rata-rata progres siswa per kelas' : 'Mata pelajaran dengan pendaftaran terbanyak'}
+                                        {isAdmin
+                                            ? 'Persentase penyelesaian materi berdasarkan tingkat kelas'
+                                            : 'Rata-rata progres siswa per kelas'}
                                     </p>
                                 </div>
                                 <div className="rounded-xl bg-primary/10 p-2.5 text-primary shadow-sm">
-                                    <BookOpen className="h-4 w-4" />
+                                    {isAdmin ? <GraduationCap className="h-4 w-4" /> : <BookOpen className="h-4 w-4" />}
                                 </div>
                             </CardHeader>
                             <CardContent>
@@ -393,7 +398,7 @@ export default function Dashboard({
                                                         {mapel.name}
                                                     </span>
                                                     <span className="font-black text-primary tabular-nums">
-                                                        {isGuru ? `${percentage}%` : `${mapel.count} Siswa`}
+                                                        {percentage}%
                                                     </span>
                                                 </div>
                                                 <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary shadow-inner">
@@ -412,10 +417,12 @@ export default function Dashboard({
                                                 </div>
                                                 <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-70">
                                                     <span>
-                                                        {isGuru ? 'Progres Rata-rata' : 'Popularitas'}
+                                                        {isAdmin ? 'Penyelesaian Materi' : 'Progres Rata-rata'}
                                                     </span>
                                                     <span>
-                                                        {isGuru ? `${mapel.count}/${mapel.total} Target` : `DARI ${mapel.total} TOTAL SISWA`}
+                                                        {isAdmin && mapel.students !== undefined
+                                                            ? `${mapel.students} Siswa • ${mapel.materials} Materi`
+                                                            : `${mapel.count}/${mapel.total} Target`}
                                                     </span>
                                                 </div>
                                             </div>
