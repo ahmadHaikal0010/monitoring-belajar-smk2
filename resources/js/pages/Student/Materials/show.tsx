@@ -176,9 +176,18 @@ export default function StudentMaterialShow({ subject, material, all_materials }
     const { flash } = usePage().props as any;
     const [dismissedFlash, setDismissedFlash] = useState<string | null>(null);
 
+    // Menyimpan ID materi sebelumnya untuk mendeteksi perubahan prop
+    const [prevMaterialId, setPrevMaterialId] = useState(material.id);
+    const [isCompletedState, setIsCompletedState] = useState(material.is_completed);
+
+    // Pola React resmi: Menyesuaikan state saat render jika prop material berubah
+    if (prevMaterialId !== material.id) {
+        setPrevMaterialId(material.id);
+        setIsCompletedState(material.is_completed);
+    }
+
     const flashMessage = flash?.success || flash?.error;
     const showSuccess = Boolean(flashMessage && dismissedFlash !== flashMessage);
-    const isCompletedState = material.is_completed;
 
     useEffect(() => {
         if (flashMessage) {
@@ -313,7 +322,6 @@ return '';
                                                 {material.content_type}
                                             </Badge>
 
-                                            {/* Badge Selesai di samping kategori */}
                                             {isCompletedState && (
                                                 <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-[10px] gap-1 px-2 py-0.5">
                                                     <CheckCircle2 className="h-3 w-3 shrink-0" />
@@ -367,7 +375,6 @@ return '';
                                                 )}
                                             >
                                                 <div className="flex items-center gap-2 min-w-0">
-                                                    {/* Icon Centang jika materi selesai */}
                                                     {isCompleted && (
                                                         <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
                                                     )}
