@@ -88,6 +88,8 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
         Route::get('teachers/import-template', [AdminTeacherController::class, 'downloadTemplate'])->name('teachers.import-template');
         Route::resource('teachers', AdminTeacherController::class);
         Route::resource('users', AdminUserController::class);
+        Route::post('students/import', [AdminStudentController::class, 'import'])->name('students.import');
+        Route::get('students/import-template', [AdminStudentController::class, 'downloadTemplate'])->name('students.import-template');
         Route::resource('students', AdminStudentController::class);
         Route::resource('majors', AdminMajorController::class);
         Route::resource('classrooms', AdminClassroomController::class);

@@ -94,7 +94,7 @@ class TeacherService
             $rawSpesialisasi = ($spesialisasiIdx !== false && isset($row[$spesialisasiIdx])) ? trim((string) $row[$spesialisasiIdx]) : null;
             $rawBio = ($bioIdx !== false && isset($row[$bioIdx])) ? trim((string) $row[$bioIdx]) : null;
 
-            // Handle Excel scientific notation (e.g. "1.23123123123123E+17") via string expansion to avoid float binary rounding artifacts
+            // Handle Excel scientific notation
             $cleanNip = str_replace(['"', "'"], '', $rawNip);
             $cleanNip = preg_replace('/\.0+$/', '', $cleanNip);
 
@@ -108,7 +108,6 @@ class TeacherService
                 $cleanNip = sprintf('%.0f', (float) $cleanNip);
             }
 
-            // Sanitize and limit lengths to prevent SQL truncation errors
             $nip = substr(trim(str_replace(' ', '', $cleanNip)), 0, 18);
             $nama = substr(trim(str_replace(['"', "'"], '', $rawNama)), 0, 255);
             $email = substr(trim(str_replace(['"', "'", ' '], '', $rawEmail)), 0, 255);
@@ -116,7 +115,11 @@ class TeacherService
             $bio = $rawBio ? substr(trim(str_replace(['"', "'"], '', $rawBio)), 0, 255) : null;
 
             if (empty($nip) || empty($nama) || empty($email)) {
-                $errors[] = "Baris {$rowNumber}: NIP, nama, atau email kosong.";
+                $errors[] = [
+                    'line' => $rowNumber,
+                    'data' => 'NIP: '.($rawNip ?: '-').' | Nama: '.($rawNama ?: '-'),
+                    'reason' => 'NIP, nama, atau email tidak boleh kosong.',
+                ];
                 $skipped++;
 
                 continue;
@@ -126,7 +129,11 @@ class TeacherService
             $existingTeacher = Teacher::where('nip', $nip)->first();
 
             if ($existingUser || $existingTeacher) {
-                $errors[] = "Baris {$rowNumber}: NIP '{$nip}' atau Email '{$email}' sudah terdaftar.";
+                $errors[] = [
+                    'line' => $rowNumber,
+                    'data' => "NIP: {$nip} | Email: {$email}",
+                    'reason' => "NIP '{$nip}' atau Email '{$email}' sudah terdaftar.",
+                ];
                 $skipped++;
 
                 continue;
@@ -152,7 +159,11 @@ class TeacherService
                     $imported++;
                 });
             } catch (Exception $e) {
-                $errors[] = "Baris {$rowNumber}: Gagal menyimpan data ({$e->getMessage()}).";
+                $errors[] = [
+                    'line' => $rowNumber,
+                    'data' => "NIP: {$nip} | Nama: {$nama}",
+                    'reason' => 'Gagal menyimpan data: '.$e->getMessage(),
+                ];
                 $skipped++;
             }
         }

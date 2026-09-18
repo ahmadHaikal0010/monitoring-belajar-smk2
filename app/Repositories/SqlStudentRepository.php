@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Repositories\Interfaces\StudentRepositoryInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Symfony\Component\Uid\Uuid;
 
 class SqlStudentRepository implements StudentRepositoryInterface
@@ -171,5 +172,66 @@ class SqlStudentRepository implements StudentRepositoryInterface
     public function delete(string $id)
     {
         DB::table('siswa')->where('id', $id)->delete();
+    }
+
+    public function findClassByName(string $className): ?object
+    {
+        return DB::table('kelas')
+            ->where('nama_kelas', trim($className))
+            ->first();
+    }
+
+    public function isEmailExists(string $email): bool
+    {
+        return DB::table('pengguna')
+            ->where('email', trim($email))
+            ->exists();
+    }
+
+    public function isNisnExists(string $nisn): bool
+    {
+        return DB::table('siswa')
+            ->where('nisn', trim($nisn))
+            ->exists();
+    }
+
+    public function createStudentWithUser(array $userData, array $studentData, ?string $classId): void
+    {
+        DB::transaction(function () use ($userData, $studentData, $classId) {
+            // 1. Insert ke tabel pengguna
+            $userId = DB::table('pengguna')->insertGetId([
+                'nama' => $userData['nama'],
+                'email' => $userData['email'],
+                'kata_sandi' => $userData['kata_sandi'],
+                'peran' => 'siswa',
+                'disetujui' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // 2. Insert ke tabel siswa
+            $siswaId = (string) Str::orderedUuid();
+            DB::table('siswa')->insert([
+                'id' => $siswaId,
+                'id_pengguna' => $userId,
+                'id_kelas' => $classId,
+                'nisn' => $studentData['nisn'],
+                'alamat' => $studentData['alamat'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // 3. Insert ke tabel anggota_kelas jika kelas terikat
+            if ($classId) {
+                DB::table('anggota_kelas')->insert([
+                    'id' => (string) Str::orderedUuid(),
+                    'id_kelas' => $classId,
+                    'id_siswa' => $siswaId,
+                    'status' => 'aktif',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        });
     }
 }

@@ -17,4 +17,12 @@ interface StudentRepositoryInterface
     public function update(string $id, array $data);
 
     public function delete(string $id);
+
+    public function findClassByName(string $className): ?object;
+
+    public function isEmailExists(string $email): bool;
+
+    public function isNisnExists(string $nisn): bool;
+
+    public function createStudentWithUser(array $userData, array $studentData, ?string $classId): void;
 }

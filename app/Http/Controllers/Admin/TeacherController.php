@@ -94,7 +94,6 @@ class TeacherController extends Controller
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan saat memperbarui profil guru. Silakan coba lagi.');
         }
-
     }
 
     public function destroy(Teacher $teacher)
@@ -117,21 +116,23 @@ class TeacherController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => ['required', 'file', 'max:5120'],
+            'file' => ['required', 'file', 'mimes:csv,txt,xls,xlsx', 'max:5120'],
         ]);
 
         try {
             $result = $this->teacherService->importTeachersFromCsv($request->file('file'));
 
-            $message = "Import selesai! {$result['imported']} data guru berhasil ditambahkan.";
+            $message = "Impor selesai! {$result['imported']} data guru berhasil ditambahkan.";
             if ($result['skipped'] > 0) {
-                $message .= " ({$result['skipped']} data dilewati).";
+                $message .= " Terdapat {$result['skipped']} data yang dilewati/gagal.";
             }
 
             return redirect()->route('admin.teachers.index')
-                ->with('success', $message);
+                ->with('success', $message)
+                ->with('import_errors', $result['errors']); // Direct array mapping ke 'import_errors'
+
         } catch (Exception $e) {
-            Log::error('Error importing teachers CSV: '.$e->getMessage());
+            Log::error('Error importing teachers spreadsheet: '.$e->getMessage());
 
             return redirect()->back()
                 ->with('error', $e->getMessage());

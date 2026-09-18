@@ -7,6 +7,7 @@ use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Services\Interfaces\ImageConverterInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class StudentService
@@ -61,13 +62,11 @@ class StudentService
         }
 
         DB::transaction(function () use ($userId, $student, $data) {
-            // Update User data (name, email)
             $this->userRepository->update($userId, [
                 'name' => $data['name'],
                 'email' => $data['email'],
             ]);
 
-            // Handle Photo
             if (! empty($data['photo']) && $data['photo'] instanceof UploadedFile) {
                 if ($student->photo) {
                     Storage::disk('public')->delete($student->photo);
@@ -76,7 +75,6 @@ class StudentService
                 $data['photo'] = $this->storePhoto($data['photo']);
             }
 
-            // Update Student data
             $this->studentRepository->update($student->id, [
                 'nisn' => $data['nisn'] ?? $student->nisn,
                 'address' => $data['address'] ?? $student->address,
@@ -116,9 +114,6 @@ class StudentService
         return $this->imageConverter->convertAndStore($file, 'student-photos', 'public', 80);
     }
 
-    /**
-     * Update student profile from Student Web Controller
-     */
     public function updateStudent(string $studentId, array $data)
     {
         $student = $this->findStudent($studentId);
@@ -128,7 +123,6 @@ class StudentService
         }
 
         DB::transaction(function () use ($student, $data) {
-            // 1. Update nama pada tabel pengguna jika ada
             if (! empty($data['name'])) {
                 $userId = $student->user_id ?? $student->id_pengguna;
 
@@ -138,25 +132,163 @@ class StudentService
                 ]);
             }
 
-            // 2. Siapkan array update untuk tabel siswa
             $updateFields = [
                 'nisn' => $data['nisn'] ?? $student->nisn,
                 'address' => $data['address'] ?? $student->address,
             ];
 
-            // 3. Olah upload foto baru jika dikirim dari controller
             if (! empty($data['photo']) && $data['photo'] instanceof UploadedFile) {
-                // Hapus foto lama di storage jika ada
                 if ($student->photo && Storage::disk('public')->exists($student->photo)) {
                     Storage::disk('public')->delete($student->photo);
                 }
 
-                // Simpan foto baru dan tambahkan path ke array update
                 $updateFields['photo'] = $this->storePhoto($data['photo']);
             }
 
-            // 4. Update tabel siswa via repository
             $this->studentRepository->update($student->id, $updateFields);
         });
+    }
+
+    public function importStudentsFromCsv(UploadedFile $file): array
+    {
+        $filePath = $file->getRealPath();
+
+        // Deteksi otomatis separator (, atau ;)
+        $firstLine = file_exists($filePath) ? fgets(fopen($filePath, 'r')) : '';
+        $delimiter = (substr_count($firstLine, ';') > substr_count($firstLine, ',')) ? ';' : ',';
+
+        $handle = fopen($filePath, 'r');
+        if (! $handle) {
+            throw new \Exception('Gagal membaca berkas CSV.');
+        }
+
+        $header = fgetcsv($handle, 1000, $delimiter, '"', '\\');
+        if (! $header) {
+            fclose($handle);
+            throw new \Exception('Berkas CSV kosong.');
+        }
+
+        // Hapus BOM UTF-8 jika ada
+        if (isset($header[0])) {
+            $header[0] = preg_replace('/\x{EF}\x{BB}\x{BF}/u', '', $header[0]);
+        }
+
+        // Normalisasi header ke huruf kecil tanpa spasi
+        $header = array_map(fn ($col) => strtolower(trim($col)), $header);
+
+        $imported = 0;
+        $skipped = [];
+        $lineNumber = 1;
+
+        while (($row = fgetcsv($handle, 1000, $delimiter, '"', '\\')) !== false) {
+            $lineNumber++;
+
+            if (empty(array_filter($row))) {
+                continue;
+            }
+
+            if (count($row) < count($header)) {
+                $row = array_pad($row, count($header), '');
+            }
+
+            $rowCombined = array_combine($header, array_map('trim', array_slice($row, 0, count($header))));
+
+            // Ubah semua key baris ke huruf kecil untuk keamanan
+            $rowData = [];
+            foreach ($rowCombined as $key => $val) {
+                $rowData[strtolower($key)] = $val;
+            }
+
+            $nama = $rowData['nama'] ?? null;
+            $email = $rowData['email'] ?? null;
+            $nisn = $rowData['nisn'] ?? null;
+            $alamat = $rowData['alamat'] ?? '';
+            $namaKelas = $rowData['kelas'] ?? null;
+
+            if (! $nama || ! $email || ! $nisn) {
+                $skipped[] = [
+                    'line' => $lineNumber,
+                    'data' => 'Nama: '.($nama ?: '-').', Email: '.($email ?: '-').', NISN: '.($nisn ?: '-'),
+                    'reason' => 'Kolom nama, email, atau NISN tidak boleh kosong.',
+                ];
+
+                continue;
+            }
+
+            if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $skipped[] = [
+                    'line' => $lineNumber,
+                    'data' => "Nama: {$nama}, Email: {$email}",
+                    'reason' => 'Format alamat email tidak valid.',
+                ];
+
+                continue;
+            }
+
+            if ($this->studentRepository->isEmailExists($email)) {
+                $skipped[] = [
+                    'line' => $lineNumber,
+                    'data' => "Nama: {$nama}, Email: {$email}",
+                    'reason' => "Email '{$email}' sudah terdaftar di sistem.",
+                ];
+
+                continue;
+            }
+
+            if ($this->studentRepository->isNisnExists($nisn)) {
+                $skipped[] = [
+                    'line' => $lineNumber,
+                    'data' => "Nama: {$nama}, NISN: {$nisn}",
+                    'reason' => "NISN '{$nisn}' sudah terdaftar di sistem.",
+                ];
+
+                continue;
+            }
+
+            $classId = null;
+            if ($namaKelas) {
+                $kelas = $this->studentRepository->findClassByName($namaKelas);
+                if (! $kelas) {
+                    $skipped[] = [
+                        'line' => $lineNumber,
+                        'data' => "Nama: {$nama}, Kelas: {$namaKelas}",
+                        'reason' => "Kelas '{$namaKelas}' tidak ditemukan di database.",
+                    ];
+
+                    continue;
+                }
+                $classId = $kelas->id;
+            }
+
+            try {
+                $this->studentRepository->createStudentWithUser(
+                    [
+                        'nama' => $nama,
+                        'email' => $email,
+                        'kata_sandi' => Hash::make('password123'),
+                    ],
+                    [
+                        'nisn' => $nisn,
+                        'alamat' => $alamat,
+                    ],
+                    $classId
+                );
+                $imported++;
+            } catch (\Exception $e) {
+                $skipped[] = [
+                    'line' => $lineNumber,
+                    'data' => "Nama: {$nama}, Email: {$email}, NISN: {$nisn}",
+                    'reason' => 'Gagal menyimpan data: '.$e->getMessage(),
+                ];
+            }
+        }
+
+        fclose($handle);
+
+        return [
+            'imported' => $imported,
+            'skipped_count' => count($skipped),
+            'skipped_items' => $skipped,
+        ];
     }
 }
