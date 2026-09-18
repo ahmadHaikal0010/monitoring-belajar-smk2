@@ -7,7 +7,10 @@ use App\Http\Requests\Admin\Student\StoreStudentRequest;
 use App\Http\Requests\Admin\Student\UpdateStudentRequest;
 use App\Models\Student;
 use App\Services\StudentService;
+use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class StudentController extends Controller
@@ -95,5 +98,45 @@ class StudentController extends Controller
 
         return redirect()->route('admin.students.index')
             ->with('success', 'Data profil siswa telah berhasil dihapus.');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimetypes:text/csv,text/plain,application/csv,text/comma-separated-values,application/excel,application/vnd.ms-excel', 'max:5120'],
+        ], [
+            'file.required' => 'Berkas CSV wajib diunggah.',
+            'file.mimetypes' => 'Berkas harus berupa file CSV valid.',
+            'file.max' => 'Ukuran berkas maksimal adalah 5MB.',
+        ]);
+
+        try {
+            $result = $this->studentService->importStudentsFromCsv($request->file('file'));
+
+            $msg = "Berhasil mengimpor {$result['imported']} siswa.";
+            if ($result['skipped_count'] > 0) {
+                $msg .= " ({$result['skipped_count']} data gagal/dilewati).";
+            }
+
+            return redirect()->back()->with([
+                'success' => $msg,
+                'import_errors' => $result['skipped_items'] ?? [],
+            ]);
+        } catch (Exception $e) {
+            Log::error('Error importing students CSV: '.$e->getMessage());
+
+            return redirect()->back()->with('error', 'Gagal mengimpor file: '.$e->getMessage());
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $csvHeader = "nama,email,nisn,alamat,kelas\n";
+        $csvExample = "Ahmad Rizky,ahmad.rizky@example.com,0051234567,Jl. Sudirman No. 12,X TKJ 1\nSiti Aminah,siti.aminah@example.com,0051234568,Jl. Merdeka No. 45,X RPL AB\n";
+
+        return response($csvHeader.$csvExample, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="template_import_siswa.csv"',
+        ]);
     }
 }

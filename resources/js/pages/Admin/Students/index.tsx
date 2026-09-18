@@ -4,6 +4,7 @@ import {
     Search,
     Filter,
     MoreVertical,
+    GraduationCap,
     Mail,
     ChevronLeft,
     ChevronRight,
@@ -17,7 +18,11 @@ import {
     Trash2,
     AlertTriangle,
     Eye,
-    MapPin,
+    FileSpreadsheet,
+    Upload,
+    Download,
+    Copy,
+    CheckCheck,
 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -39,6 +44,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import admin from '@/routes/admin';
 
 interface Student {
@@ -73,6 +79,12 @@ interface Filters {
     direction?: 'asc' | 'desc';
 }
 
+interface ImportErrorItem {
+    line: number;
+    data: string;
+    reason: string;
+}
+
 interface Props {
     students: PaginatedData<Student>;
     filters: Filters;
@@ -99,13 +111,87 @@ const SortIcon = ({
 };
 
 export default function StudentList({ students, filters }: Props) {
-    const { flash } = usePage().props as any;
+    const { flash, errors } = usePage().props as any;
     const [search, setSearch] = useState(filters.search || '');
     const [showSuccess, setShowSuccess] = useState(false);
-    const [studentToDelete, setStudentToDelete] = useState<Student | null>(
-        null,
-    );
+    const [showError, setShowError] = useState(false);
+    const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    // State Modal Import CSV
+    const [isImportOpen, setIsImportOpen] = useState(false);
+    const [importFile, setImportFile] = useState<File | null>(null);
+    const [isImporting, setIsImporting] = useState(false);
+
+    // Derived State untuk Modal Error Import (Bebas dari useEffect anti-pattern)
+    const [copied, setCopied] = useState(false);
+    const [dismissedErrors, setDismissedErrors] = useState<ImportErrorItem[] | null>(null);
+
+    const importErrors: ImportErrorItem[] = flash?.import_errors || [];
+    const isErrorModalOpen = importErrors.length > 0 && dismissedErrors !== importErrors;
+
+    // Flash Toast Auto-Dismiss
+    useEffect(() => {
+        let hideTimer: ReturnType<typeof setTimeout>;
+        let showTimer: ReturnType<typeof setTimeout>;
+
+        if (flash?.success) {
+            showTimer = setTimeout(() => setShowSuccess(true), 0);
+            hideTimer = setTimeout(() => setShowSuccess(false), 5000);
+        }
+
+        return () => {
+            if (showTimer) {
+                clearTimeout(showTimer);
+            }
+
+            if (hideTimer) {
+                clearTimeout(hideTimer);
+            }
+        };
+    }, [flash?.success]);
+
+    useEffect(() => {
+        let hideTimer: ReturnType<typeof setTimeout>;
+        let showTimer: ReturnType<typeof setTimeout>;
+
+        if (flash?.error) {
+            showTimer = setTimeout(() => setShowError(true), 0);
+            hideTimer = setTimeout(() => setShowError(false), 7000);
+        }
+
+        return () => {
+            if (showTimer) {
+                clearTimeout(showTimer);
+            }
+
+            if (hideTimer) {
+                clearTimeout(hideTimer);
+            }
+        };
+    }, [flash?.error]);
+
+    const handleImportSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!importFile) {
+            return;
+        }
+
+        setIsImporting(true);
+
+        router.post(
+            '/admin/students/import',
+            { file: importFile },
+            {
+                onSuccess: () => {
+                    setIsImportOpen(false);
+                    setImportFile(null);
+                },
+                onFinish: () => setIsImporting(false),
+            },
+        );
+    };
 
     const handleDelete = () => {
         if (!studentToDelete) {
@@ -122,30 +208,19 @@ export default function StudentList({ students, filters }: Props) {
         });
     };
 
-    useEffect(() => {
-        let hideTimer: ReturnType<typeof setTimeout>;
-        let showTimer: ReturnType<typeof setTimeout>;
-
-        if (flash?.success) {
-            showTimer = setTimeout(() => {
-                setShowSuccess(true);
-            }, 0);
-
-            hideTimer = setTimeout(() => {
-                setShowSuccess(false);
-            }, 5000);
+    const handleCopyErrors = () => {
+        if (!importErrors.length) {
+            return;
         }
 
-        return () => {
-            if (showTimer) {
-                clearTimeout(showTimer);
-            }
+        const errorText = importErrors
+            .map((err) => `Baris ${err.line} | [${err.data}] -> ${err.reason}`)
+            .join('\n');
 
-            if (hideTimer) {
-                clearTimeout(hideTimer);
-            }
-        };
-    }, [flash?.success]);
+        navigator.clipboard.writeText(`LAPORAN ERROR IMPORT SISWA:\n\n${errorText}`);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+    };
 
     setLayoutProps({
         breadcrumbs: [
@@ -194,6 +269,7 @@ export default function StudentList({ students, filters }: Props) {
             <Head title="Daftar Siswa" />
 
             <div className="flex flex-col gap-6 p-6">
+                {/* Notification Toasts */}
                 <AnimatePresence>
                     {showSuccess && flash?.success && (
                         <motion.div
@@ -202,8 +278,8 @@ export default function StudentList({ students, filters }: Props) {
                             exit={{ opacity: 0, height: 0, y: -20 }}
                             className="overflow-hidden"
                         >
-                            <div className="mb-2 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm dark:border-emerald-500/20 dark:bg-emerald-500/10">
-                                <Check className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                            <div className="mb-2 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm dark:border-emerald-500/20 dark:bg-emerald-500/10">
+                                <Check className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
                                 <div className="flex-1">
                                     <p className="text-sm font-medium text-emerald-800 dark:text-emerald-200">
                                         {flash.success}
@@ -218,8 +294,33 @@ export default function StudentList({ students, filters }: Props) {
                             </div>
                         </motion.div>
                     )}
+
+                    {showError && flash?.error && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0, y: -20 }}
+                            animate={{ opacity: 1, height: 'auto', y: 0 }}
+                            exit={{ opacity: 0, height: 0, y: -20 }}
+                            className="overflow-hidden"
+                        >
+                            <div className="mb-2 flex items-start gap-3 rounded-xl border border-destructive/20 bg-destructive/10 p-4 shadow-sm">
+                                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+                                <div className="flex-1">
+                                    <p className="text-sm font-medium text-destructive">
+                                        {flash.error}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setShowError(false)}
+                                    className="rounded-lg p-1 text-destructive transition-colors hover:bg-destructive/20"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
                 </AnimatePresence>
 
+                {/* Header Action Bar */}
                 <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">
@@ -257,18 +358,30 @@ export default function StudentList({ students, filters }: Props) {
                             </Button>
                         </div>
 
-                        <Button
-                            className="h-10 w-full gap-2 shadow-lg shadow-primary/20 sm:w-auto"
-                            asChild
-                        >
-                            <Link href={admin.students.create.url()}>
-                                <UserPlus className="h-4 w-4" />
-                                <span>Tambah Siswa Baru</span>
-                            </Link>
-                        </Button>
+                        <div className="flex w-full items-center gap-2 sm:w-auto">
+                            <Button
+                                variant="outline"
+                                className="h-10 w-full gap-2 border-dashed sm:w-auto"
+                                onClick={() => setIsImportOpen(true)}
+                            >
+                                <FileSpreadsheet className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                                <span>Import CSV</span>
+                            </Button>
+
+                            <Button
+                                className="h-10 w-full gap-2 shadow-lg shadow-primary/20 sm:w-auto"
+                                asChild
+                            >
+                                <Link href={admin.students.create.url()}>
+                                    <UserPlus className="h-4 w-4" />
+                                    <span>Tambah Siswa Baru</span>
+                                </Link>
+                            </Button>
+                        </div>
                     </div>
                 </div>
 
+                {/* Table Section */}
                 <Card className="overflow-hidden border-none bg-card/50 shadow-xl backdrop-blur-sm">
                     <div className="overflow-x-auto">
                         <table className="w-full border-collapse text-left">
@@ -289,12 +402,10 @@ export default function StudentList({ students, filters }: Props) {
                                     </th>
                                     <th
                                         className="cursor-pointer p-4 text-xs font-bold tracking-wider text-muted-foreground uppercase transition-colors hover:text-primary"
-                                        onClick={() =>
-                                            handleSort('students.nisn')
-                                        }
+                                        onClick={() => handleSort('students.nisn')}
                                     >
                                         <div className="flex items-center">
-                                            Informasi Siswa{' '}
+                                            Detail Profil{' '}
                                             <SortIcon
                                                 field="students.nisn"
                                                 currentSort={filters.sort}
@@ -304,9 +415,7 @@ export default function StudentList({ students, filters }: Props) {
                                     </th>
                                     <th
                                         className="cursor-pointer p-4 text-xs font-bold tracking-wider text-muted-foreground uppercase transition-colors hover:text-primary"
-                                        onClick={() =>
-                                            handleSort('students.created_at')
-                                        }
+                                        onClick={() => handleSort('students.created_at')}
                                     >
                                         <div className="flex items-center">
                                             Terdaftar{' '}
@@ -336,17 +445,11 @@ export default function StudentList({ students, filters }: Props) {
                                                 <div className="flex items-center gap-3">
                                                     <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
                                                         <AvatarImage
-                                                            src={
-                                                                student.photo_url
-                                                            }
-                                                            alt={
-                                                                student.user_name
-                                                            }
+                                                            src={student.photo_url}
+                                                            alt={student.user_name}
                                                         />
                                                         <AvatarFallback className="bg-primary/10 text-xs font-bold text-primary">
-                                                            {student.user_name.charAt(
-                                                                0,
-                                                            )}
+                                                            {student.user_name.charAt(0)}
                                                         </AvatarFallback>
                                                     </Avatar>
                                                     <div className="flex flex-col">
@@ -366,10 +469,10 @@ export default function StudentList({ students, filters }: Props) {
                                                         variant="outline"
                                                         className="h-5 w-fit border-zinc-200 bg-muted/50 py-0 text-[10px] font-bold dark:border-zinc-800"
                                                     >
-                                                        NISN: {student.nisn}
+                                                        {student.nisn}
                                                     </Badge>
-                                                    <span className="flex items-center gap-1 text-xs font-medium text-foreground truncate max-w-[200px]">
-                                                        <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
+                                                    <span className="flex items-center gap-1 text-xs font-medium text-foreground">
+                                                        <GraduationCap className="h-3 w-3 text-muted-foreground" />
                                                         {student.address}
                                                     </span>
                                                 </div>
@@ -379,34 +482,26 @@ export default function StudentList({ students, filters }: Props) {
                                                     <span className="text-xs font-medium text-foreground">
                                                         {new Date(
                                                             student.created_at,
-                                                        ).toLocaleDateString(
-                                                            'id-ID',
-                                                            {
-                                                                day: 'numeric',
-                                                                month: 'short',
-                                                                year: 'numeric',
-                                                            },
-                                                        )}
+                                                        ).toLocaleDateString('id-ID', {
+                                                            day: 'numeric',
+                                                            month: 'short',
+                                                            year: 'numeric',
+                                                        })}
                                                     </span>
                                                     <span className="text-[10px] font-bold tracking-tighter text-muted-foreground uppercase">
                                                         {new Date(
                                                             student.created_at,
-                                                        ).toLocaleTimeString(
-                                                            'id-ID',
-                                                            {
-                                                                hour: '2-digit',
-                                                                minute: '2-digit',
-                                                            },
-                                                        )}{' '}
+                                                        ).toLocaleTimeString('id-ID', {
+                                                            hour: '2-digit',
+                                                            minute: '2-digit',
+                                                        })}{' '}
                                                         WIB
                                                     </span>
                                                 </div>
                                             </td>
                                             <td className="p-4 text-right">
                                                 <DropdownMenu>
-                                                    <DropdownMenuTrigger
-                                                        asChild
-                                                    >
+                                                    <DropdownMenuTrigger asChild>
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
@@ -429,9 +524,7 @@ export default function StudentList({ students, filters }: Props) {
                                                                 )}
                                                             >
                                                                 <Eye className="h-4 w-4 text-primary" />
-                                                                <span>
-                                                                    Lihat Detail
-                                                                </span>
+                                                                <span>Lihat Detail</span>
                                                             </Link>
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem
@@ -444,9 +537,7 @@ export default function StudentList({ students, filters }: Props) {
                                                                 )}
                                                             >
                                                                 <Pencil className="h-4 w-4 text-primary" />
-                                                                <span>
-                                                                    Edit Profil
-                                                                </span>
+                                                                <span>Edit Profil</span>
                                                             </Link>
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem
@@ -458,9 +549,7 @@ export default function StudentList({ students, filters }: Props) {
                                                             }
                                                         >
                                                             <Trash2 className="h-4 w-4" />
-                                                            <span>
-                                                                Hapus Profil
-                                                            </span>
+                                                            <span>Hapus Profil</span>
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
@@ -593,8 +682,7 @@ export default function StudentList({ students, filters }: Props) {
                                 <span className="font-bold text-foreground break-all">
                                     {studentToDelete?.user_name}
                                 </span>
-                                ? Tindakan ini tidak dapat dibatalkan dan akan
-                                memutuskan hubungan akun user dengan data siswa.
+                                ? Tindakan ini tidak dapat dibatalkan.
                             </DialogDescription>
                         </DialogHeader>
                         <DialogFooter className="mt-4 gap-2 sm:gap-0">
@@ -617,6 +705,169 @@ export default function StudentList({ students, filters }: Props) {
                                     <Trash2 className="h-4 w-4" />
                                 )}
                                 Hapus Profil
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Modal Import CSV */}
+                <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
+                    <DialogContent className="sm:max-w-[480px]">
+                        <DialogHeader>
+                            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400">
+                                <FileSpreadsheet className="h-6 w-6" />
+                            </div>
+                            <DialogTitle>Import Data Siswa (CSV)</DialogTitle>
+                            <DialogDescription>
+                                Unggah berkas CSV untuk mendaftarkan banyak siswa sekaligus. Kata sandi default akun adalah <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono font-bold">password123</code>.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <form onSubmit={handleImportSubmit} className="space-y-4 pt-2">
+                            <div className="rounded-xl border border-zinc-200/80 bg-zinc-50/80 p-3.5 text-xs dark:border-zinc-800 dark:bg-zinc-800/40">
+                                <div className="flex items-center justify-between">
+                                    <span className="font-semibold text-zinc-800 dark:text-zinc-200">Format Kolom CSV:</span>
+                                    <a
+                                        href="/admin/students/import-template"
+                                        download
+                                        className="inline-flex items-center gap-1 font-bold text-primary hover:underline"
+                                    >
+                                        <Download className="h-3.5 w-3.5" />
+                                        Unduh Template
+                                    </a>
+                                </div>
+                                <p className="mt-1 text-zinc-500 font-mono text-[11px]">
+                                    nama, email, nisn, alamat, kelas
+                                </p>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label htmlFor="csv_file" className="text-xs font-medium">Pilih Berkas CSV</Label>
+                                <Input
+                                    id="csv_file"
+                                    type="file"
+                                    accept=".csv,.txt"
+                                    required
+                                    onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                                    className="h-10 cursor-pointer text-xs"
+                                />
+                                {errors?.file && (
+                                    <p className="mt-1 text-xs font-semibold text-destructive">
+                                        {errors.file}
+                                    </p>
+                                )}
+                            </div>
+
+                            <DialogFooter className="mt-6 gap-2 sm:gap-0">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    onClick={() => setIsImportOpen(false)}
+                                    disabled={isImporting}
+                                >
+                                    Batal
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    disabled={!importFile || isImporting}
+                                    className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+                                >
+                                    {isImporting ? (
+                                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                    ) : (
+                                        <Upload className="h-4 w-4" />
+                                    )}
+                                    Proses Import
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Modal Error Persisten */}
+                <Dialog
+                    open={isErrorModalOpen}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            setDismissedErrors(importErrors);
+                        }
+                    }}
+                >
+                    <DialogContent
+                        className="sm:max-w-[620px]"
+                        onPointerDownOutside={(e) => e.preventDefault()}
+                        onEscapeKeyDown={(e) => e.preventDefault()}
+                    >
+                        <DialogHeader>
+                            <div className="flex items-center gap-3 border-b pb-3">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400">
+                                    <AlertTriangle className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <DialogTitle className="text-lg font-bold text-amber-900 dark:text-amber-200">
+                                        Laporan Data Import Gagal / Dilewati
+                                    </DialogTitle>
+                                    <DialogDescription className="text-xs text-muted-foreground">
+                                        Ditemukan {importErrors.length} baris data yang bermasalah pada berkas CSV.
+                                    </DialogDescription>
+                                </div>
+                            </div>
+                        </DialogHeader>
+
+                        {/* Tabel Detail Error */}
+                        <div className="my-2 max-h-[320px] overflow-y-auto rounded-lg border border-amber-200/80 bg-amber-50/40 p-2 dark:border-amber-900/40 dark:bg-amber-950/20">
+                            <table className="w-full text-left text-xs">
+                                <thead>
+                                    <tr className="border-b border-amber-200/60 text-amber-900 dark:border-amber-800/40 dark:text-amber-300">
+                                        <th className="w-16 p-2 font-bold">Baris</th>
+                                        <th className="p-2 font-bold">Informasi Input</th>
+                                        <th className="p-2 font-bold">Alasan Penolakan</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-amber-200/40 dark:divide-amber-800/20">
+                                    {importErrors.map((err, idx) => (
+                                        <tr key={idx} className="hover:bg-amber-100/50 dark:hover:bg-amber-900/20">
+                                            <td className="p-2 font-mono font-bold text-amber-700 dark:text-amber-400">
+                                                #{err.line}
+                                            </td>
+                                            <td className="p-2 font-mono text-[11px] text-zinc-700 dark:text-zinc-300">
+                                                {err.data}
+                                            </td>
+                                            <td className="p-2 font-medium text-rose-600 dark:text-rose-400">
+                                                {err.reason}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <DialogFooter className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={handleCopyErrors}
+                                className="w-full gap-2 text-xs font-semibold sm:w-auto"
+                            >
+                                {copied ? (
+                                    <>
+                                        <CheckCheck className="h-4 w-4 text-emerald-600" />
+                                        <span>Berhasil Disalin!</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Copy className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
+                                        <span>Salin Ringkasan Error</span>
+                                    </>
+                                )}
+                            </Button>
+
+                            <Button
+                                type="button"
+                                onClick={() => setDismissedErrors(importErrors)}
+                                className="w-full bg-amber-600 text-xs font-semibold text-white hover:bg-amber-700 sm:w-auto"
+                            >
+                                Tutup Laporan
                             </Button>
                         </DialogFooter>
                     </DialogContent>
