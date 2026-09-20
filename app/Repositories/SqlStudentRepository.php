@@ -82,22 +82,27 @@ class SqlStudentRepository implements StudentRepositoryInterface
     {
         $student = DB::table('siswa')
             ->where('id', $id)
-            ->select([
-                'id',
-                'id_pengguna as user_id',
-                'nisn',
-                'alamat as address',
-                'foto as photo',
-                'created_at',
-            ])
             ->first();
 
         if ($student) {
+            if (!isset($student->id_kelas) || !$student->id_kelas) {
+                $enrollment = DB::table('anggota_kelas')
+                    ->where('id_siswa', $student->id)
+                    ->where('status', 'aktif')
+                    ->first();
+                if ($enrollment) {
+                    $student->id_kelas = $enrollment->id_kelas;
+                }
+            }
+
             $student->user = DB::table('pengguna')
-                ->where('id', $student->user_id)
+                ->where('id', $student->id_pengguna)
                 ->select(['id', 'nama as name', 'email'])
                 ->first();
 
+            $student->user_id = $student->id_pengguna;
+            $student->address = $student->alamat;
+            $student->photo = $student->foto;
             $student->photo_url = $this->formatPhotoUrl($student->photo);
         }
 
@@ -119,17 +124,27 @@ class SqlStudentRepository implements StudentRepositoryInterface
 
     public function findByUserId(string|int $userId)
     {
-        return DB::table('siswa')
+        $student = DB::table('siswa')
             ->where('id_pengguna', $userId)
-            ->select([
-                'id',
-                'id_pengguna as user_id',
-                'nisn',
-                'alamat as address',
-                'foto as photo',
-                'created_at',
-            ])
             ->first();
+
+        if ($student) {
+            if (!isset($student->id_kelas) || !$student->id_kelas) {
+                $enrollment = DB::table('anggota_kelas')
+                    ->where('id_siswa', $student->id)
+                    ->where('status', 'aktif')
+                    ->first();
+                if ($enrollment) {
+                    $student->id_kelas = $enrollment->id_kelas;
+                }
+            }
+
+            $student->user_id = $student->id_pengguna;
+            $student->address = $student->alamat;
+            $student->photo = $student->foto;
+        }
+
+        return $student;
     }
 
     public function create(array $data)

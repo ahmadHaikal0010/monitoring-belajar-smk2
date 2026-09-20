@@ -21,7 +21,7 @@ class StudentController extends Controller
      */
     public function profile(Request $request)
     {
-        $user = $request->user()->load('student');
+        $user = $request->user()->load(['student.classroom']);
 
         return response()->json([
             'success' => true,
@@ -44,7 +44,7 @@ class StudentController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Profil Anda telah berhasil diperbarui.',
-            'data' => $request->user()->load('student'),
+            'data' => $request->user()->load(['student.classroom']),
         ]);
     }
 }

@@ -25,4 +25,6 @@ interface SubjectRepositoryInterface
     public function getAssignments(string $subjectId);
 
     public function getExams(string $subjectId);
+
+    public function getSubjectsByClassroom(string $classroomId);
 }

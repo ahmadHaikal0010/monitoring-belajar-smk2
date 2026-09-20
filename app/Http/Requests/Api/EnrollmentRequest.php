@@ -14,15 +14,16 @@ class EnrollmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'code' => ['required', 'string', 'exists:mata_pelajaran,kode'],
+            'subject_id' => ['required', 'uuid', 'exists:mata_pelajaran,id'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'code.required' => 'Kode mata pelajaran wajib diisi.',
-            'code.exists' => 'Kode mata pelajaran tidak valid atau tidak ditemukan.',
+            'subject_id.required' => 'ID mata pelajaran wajib diisi.',
+            'subject_id.uuid' => 'ID mata pelajaran harus berupa UUID yang valid.',
+            'subject_id.exists' => 'Mata pelajaran tidak ditemukan.',
         ];
     }
 }
