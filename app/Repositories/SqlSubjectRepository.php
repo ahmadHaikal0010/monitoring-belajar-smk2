@@ -238,4 +238,22 @@ class SqlSubjectRepository implements SubjectRepositoryInterface
             ->orderBy('created_at', 'asc')
             ->get();
     }
+
+    public function getSubjectsByClassroom(string $classroomId)
+    {
+        return DB::table('mata_pelajaran')
+            ->join('kelas_mata_pelajaran', 'mata_pelajaran.id', '=', 'kelas_mata_pelajaran.id_mata_pelajaran')
+            ->join('guru', 'mata_pelajaran.id_guru', '=', 'guru.id')
+            ->join('pengguna', 'guru.id_pengguna', '=', 'pengguna.id')
+            ->where('kelas_mata_pelajaran.id_kelas', $classroomId)
+            ->select([
+                'mata_pelajaran.id',
+                'mata_pelajaran.judul as title',
+                'mata_pelajaran.kode as code',
+                'mata_pelajaran.deskripsi as description',
+                'pengguna.nama as teacher_name',
+            ])
+            ->orderBy('mata_pelajaran.judul', 'asc')
+            ->get();
+    }
 }

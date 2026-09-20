@@ -67,4 +67,9 @@ class SubjectService
     {
         return $this->subjectRepository->getExams($id);
     }
+
+    public function getSubjectsByClassroom(string $classroomId)
+    {
+        return $this->subjectRepository->getSubjectsByClassroom($classroomId);
+    }
 }

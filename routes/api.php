@@ -27,7 +27,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Enrollment Routes
     Route::get('/subjects', [EnrollmentController::class, 'index']);
+    Route::get('/subjects/available', [EnrollmentController::class, 'availableSubjects']);
     Route::post('/enroll', [EnrollmentController::class, 'store']);
+    Route::delete('/subjects/{subject}/unenroll', [EnrollmentController::class, 'destroy']);
 
     // Material Routes
     Route::get('/subjects/{subject}/materials', [MaterialController::class, 'index']);

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 #[Fillable(['id_pengguna', 'id_kelas', 'nisn', 'foto', 'alamat', 'user_id', 'classroom_id', 'address', 'photo'])]
 class Student extends Model
@@ -44,7 +45,17 @@ class Student extends Model
 
     public function getClassroomIdAttribute()
     {
-        return $this->attributes['id_kelas'] ?? null;
+        $idKelas = $this->attributes['id_kelas'] ?? null;
+        if (! $idKelas) {
+            $enrollment = DB::table('anggota_kelas')
+                ->where('id_siswa', $this->id)
+                ->where('status', 'aktif')
+                ->first();
+
+            return $enrollment ? $enrollment->id_kelas : null;
+        }
+
+        return $idKelas;
     }
 
     public function setClassroomIdAttribute($value): void
