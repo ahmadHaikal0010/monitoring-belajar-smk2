@@ -7,6 +7,7 @@ use App\Http\Requests\Api\LoginRequest;
 use App\Http\Requests\Api\RegisterRequest;
 use App\Services\UserService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class Authentication extends Controller
 {
@@ -58,6 +59,32 @@ class Authentication extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Pendaftaran berhasil. Akun Anda akan segera ditinjau oleh administrator sekolah.',
+        ]);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'old_password' => 'required',
+            'new_password' => 'required|min:8|confirmed',
+        ]);
+
+        $user = $request->user();
+
+        if (! Hash::check($request->old_password, $user->kata_sandi)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kata sandi lama tidak sesuai.',
+            ], 422);
+        }
+
+        $user->update([
+            'kata_sandi' => Hash::make($request->new_password),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kata sandi berhasil diperbarui.',
         ]);
     }
 }

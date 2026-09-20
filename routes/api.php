@@ -16,6 +16,7 @@ Route::post('/register', [Authentication::class, 'register']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [StudentController::class, 'profile']);
     Route::post('/update-profile', [StudentController::class, 'update']);
+    Route::post('/change-password', [Authentication::class, 'changePassword']);
 
     // Dashboard Routes
     Route::prefix('dashboard')->group(function () {
