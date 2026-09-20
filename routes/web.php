@@ -15,6 +15,7 @@ use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\ReportExportController;
 use App\Http\Controllers\StudentWebController;
 use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\Teacher\HomeroomController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Middleware\AdminAccess;
 use App\Http\Middleware\CheckAccount;
@@ -69,6 +70,12 @@ Route::middleware(['auth', CheckAccount::class])->group(function () {
             Route::resource('assignments', AssignmentController::class);
             Route::get('assignments/{assignment}/submissions/{submission}', [AssignmentController::class, 'showSubmission'])->name('assignments.submissions.show');
             Route::post('assignments/{assignment}/submissions/{submission}/grade', [AssignmentController::class, 'gradeSubmission'])->name('assignments.submissions.grade');
+
+            // Homeroom (Wali Kelas) pages for teachers
+            Route::get('homeroom', [HomeroomController::class, 'index'])->name('homeroom.index');
+            Route::post('homeroom/students', [HomeroomController::class, 'store'])->name('homeroom.students.store');
+            Route::put('homeroom/students/{student}', [HomeroomController::class, 'updateStatus'])->name('homeroom.update-status');
+            Route::delete('homeroom/students/{student}', [HomeroomController::class, 'destroy'])->name('homeroom.students.destroy');
         });
 
     });

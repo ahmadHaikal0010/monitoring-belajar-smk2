@@ -4,17 +4,7 @@
 - **Response Style Constraint**:
   - Maximum token efficiency: direct code/answers only, zero conversational filler, zero theoretical explanations, zero summaries
 - **Environment**: Docker + Laravel Sail
-- **Utility Binary**: `/home/haikal/.local/bin/rtk`
-- **Command Prefix**: Mandatory `rtk ./vendor/bin/sail` for all VCS, shell, PHP, NPM, Artisan execution
-  - Sistem memiliki utilitas RTK yang terpasang di `/home/haikal/.local/bin/rtk`.
-  - Anda WAJIB menyisipkan prefix path lengkap `/home/haikal/.local/bin/rtk` di depan setiap perintah shell/VCS (contoh: `/home/haikal/.local/bin/rtk git status`, `/home/haikal/.local/bin/rtk php artisan migrate`). JANGAN PERNAH menggunakan kata 'rtk' saja tanpa path lengkapnya.
-  - Artisan: `rtk ./vendor/bin/sail artisan migrate`
-  - Testing: `rtk ./vendor/bin/sail test --compact`
-  - NPM: `rtk ./vendor/bin/sail npm run dev`
-  - VCS: `rtk git status`
-  - Pint: `rtk ./vendor/bin/sail bin pint --dirty --format agent`
-- **Forbidden Actions**:
-  - NEVER execute bare PHP, NPM, or Artisan commands without `rtk ./vendor/bin/sail`
+- **Command Prefix**: Mandatory `/vendor/bin/sail` for all VCS, shell, PHP, NPM, Artisan execution
   - NEVER output planning mode drafts, artifacts, or execution steps
   - Directly modify target files using file tools (`write_file` / `edit_file`)
 

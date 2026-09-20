@@ -242,4 +242,86 @@ class ClassroomContentController extends Controller
 
         return redirect()->back()->with('success', "Berhasil menyalin {$count} ujian beserta bank soal ke kelas {$classroom->nama_kelas}.");
     }
+
+    /**
+     * Display student progress page for a specific classroom.
+     */
+    public function progress(Subject $subject, Classroom $classroom)
+    {
+        $user = auth()->user();
+
+        if ($user->role === 'guru') {
+            $teacher = DB::table('guru')->where('id_pengguna', $user->id)->first();
+
+            if ($subject->teacher_id !== ($teacher->id ?? null)) {
+                abort(403, 'Anda tidak memiliki hak akses untuk mata pelajaran ini.');
+            }
+        }
+
+        $students = DB::table('anggota_kelas')
+            ->join('siswa', 'anggota_kelas.id_siswa', '=', 'siswa.id')
+            ->join('pengguna', 'siswa.id_pengguna', '=', 'pengguna.id')
+            ->leftJoin('pendaftaran', function ($join) use ($subject) {
+                $join->on('siswa.id', '=', 'pendaftaran.id_siswa')
+                    ->where('pendaftaran.id_mata_pelajaran', '=', $subject->id);
+            })
+            ->where('anggota_kelas.id_kelas', $classroom->id)
+            ->select([
+                'siswa.id as student_id',
+                'pendaftaran.id as enrollment_id',
+                'pengguna.nama as student_name',
+                'pengguna.email as student_email',
+                'siswa.nisn as student_nisn',
+                'siswa.foto as student_photo',
+                'anggota_kelas.status as classroom_status',
+                'pendaftaran.status as enrollment_status',
+                'pendaftaran.terdaftar_pada as enrolled_at',
+            ])
+            ->addSelect([
+                'total_materials' => DB::table('materi')
+                    ->where('id_mata_pelajaran', $subject->id)
+                    ->where(function ($q) use ($classroom) {
+                        $q->where('id_kelas', $classroom->id)->orWhereNull('id_kelas');
+                    })
+                    ->selectRaw('count(*)'),
+                'completed_materials' => DB::table('progres_siswa')
+                    ->join('pendaftaran', 'progres_siswa.id_pendaftaran', '=', 'pendaftaran.id')
+                    ->where('pendaftaran.id_mata_pelajaran', $subject->id)
+                    ->whereColumn('pendaftaran.id_siswa', 'siswa.id')
+                    ->where('progres_siswa.selesai', true)
+                    ->selectRaw('count(*)'),
+                'total_assignments' => DB::table('tugas')
+                    ->where('id_mata_pelajaran', $subject->id)
+                    ->where(function ($q) use ($classroom) {
+                        $q->where('id_kelas', $classroom->id)->orWhereNull('id_kelas');
+                    })
+                    ->selectRaw('count(*)'),
+                'completed_assignments' => DB::table('pengumpulan_tugas')
+                    ->join('tugas', 'pengumpulan_tugas.id_tugas', '=', 'tugas.id')
+                    ->where('tugas.id_mata_pelajaran', $subject->id)
+                    ->whereColumn('pengumpulan_tugas.id_siswa', 'siswa.id')
+                    ->whereIn('pengumpulan_tugas.status', ['submitted', 'graded'])
+                    ->selectRaw('count(*)'),
+                'total_exams' => DB::table('ujian')
+                    ->where('id_mata_pelajaran', $subject->id)
+                    ->where(function ($q) use ($classroom) {
+                        $q->where('id_kelas', $classroom->id)->orWhereNull('id_kelas');
+                    })
+                    ->selectRaw('count(*)'),
+                'completed_exams' => DB::table('sesi_ujian')
+                    ->join('ujian', 'sesi_ujian.id_ujian', '=', 'ujian.id')
+                    ->where('ujian.id_mata_pelajaran', $subject->id)
+                    ->whereColumn('sesi_ujian.id_siswa', 'siswa.id')
+                    ->whereIn('sesi_ujian.status', ['submitted', 'graded', 'timed_out'])
+                    ->selectRaw('count(*)'),
+            ])
+            ->orderBy('pengguna.nama', 'asc')
+            ->get();
+
+        return Inertia::render('Subjects/ClassroomProgress', [
+            'subject' => $subject,
+            'classroom' => $classroom,
+            'students' => $students,
+        ]);
+    }
 }

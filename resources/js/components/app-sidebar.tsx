@@ -69,6 +69,15 @@ export function AppSidebar() {
         });
     }
 
+    // Menu khusus Wali Kelas (hanya guru)
+    if (auth?.user?.role === 'guru') {
+        mainNavItems.push({
+            title: 'Wali Kelas',
+            href: '/teacher/homeroom',
+            icon: School,
+        });
+    }
+
     if (auth?.user?.role === 'admin') {
         mainNavItems.push({
             title: 'Manajemen Jurusan & Kelas',

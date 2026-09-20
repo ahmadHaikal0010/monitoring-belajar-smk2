@@ -42,6 +42,10 @@ interface StudentItem {
     enrollment_status?: string;
     completed_materials?: number;
     total_materials?: number;
+    completed_assignments?: number;
+    total_assignments?: number;
+    completed_exams?: number;
+    total_exams?: number;
 }
 
 interface Props {
@@ -114,7 +118,7 @@ return students;
                         >
                             <div className={cn(
                                 "mb-2 flex items-start gap-3 rounded-xl border p-4 shadow-sm backdrop-blur-sm",
-                                flash?.success 
+                                flash?.success
                                     ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-200"
                                     : "border-destructive/20 bg-destructive/10 text-destructive"
                             )}>
@@ -200,6 +204,12 @@ return students;
                                     <th className="p-4 font-bold text-muted-foreground uppercase tracking-wider">
                                         Progres Materi
                                     </th>
+                                    <th className="p-4 font-bold text-muted-foreground uppercase tracking-wider">
+                                        Progres Tugas
+                                    </th>
+                                    <th className="p-4 font-bold text-muted-foreground uppercase tracking-wider">
+                                        Progres Ujian
+                                    </th>
                                     <th className="p-4 text-right font-bold text-muted-foreground uppercase tracking-wider">
                                         Aksi
                                     </th>
@@ -261,6 +271,50 @@ return students;
                                                         </div>
                                                     </div>
                                                 </td>
+                                                <td className="p-4 text-xs">
+                                                    {(() => {
+                                                        const assignCompleted = item.completed_assignments ?? 0;
+                                                        const assignTotal = item.total_assignments ?? 0;
+                                                        const assignPercentage = assignTotal > 0 ? Math.round((assignCompleted / assignTotal) * 100) : 0;
+
+                                                        return (
+                                                            <div className="flex flex-col gap-1.5 max-w-[200px]">
+                                                                <div className="flex items-center justify-between text-[11px] font-medium">
+                                                                    <span>{assignCompleted} / {assignTotal} Tugas</span>
+                                                                    <span className="font-bold text-amber-600 dark:text-amber-400">{assignPercentage}%</span>
+                                                                </div>
+                                                                <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                                                                    <div
+                                                                        className="h-full bg-amber-500 transition-all duration-500 rounded-full"
+                                                                        style={{ width: `${assignPercentage}%` }}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })()}
+                                                </td>
+                                                <td className="p-4 text-xs">
+                                                    {(() => {
+                                                        const examCompleted = item.completed_exams ?? 0;
+                                                        const examTotal = item.total_exams ?? 0;
+                                                        const examPercentage = examTotal > 0 ? Math.round((examCompleted / examTotal) * 100) : 0;
+
+                                                        return (
+                                                            <div className="flex flex-col gap-1.5 max-w-[200px]">
+                                                                <div className="flex items-center justify-between text-[11px] font-medium">
+                                                                    <span>{examCompleted} / {examTotal} Ujian</span>
+                                                                    <span className="font-bold text-rose-600 dark:text-rose-400">{examPercentage}%</span>
+                                                                </div>
+                                                                <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                                                                    <div
+                                                                        className="h-full bg-rose-500 transition-all duration-500 rounded-full"
+                                                                        style={{ width: `${examPercentage}%` }}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })()}
+                                                </td>
                                                 <td className="p-4 text-right">
                                                     {item.enrollment_id ? (
                                                         <Button
@@ -283,7 +337,7 @@ return students;
                                     })
                                 ) : (
                                     <tr>
-                                        <td colSpan={4} className="p-12 text-center text-muted-foreground italic">
+                                        <td colSpan={6} className="p-12 text-center text-muted-foreground italic">
                                             {searchQuery ? 'Tidak ada siswa yang cocok dengan pencarian.' : 'Belum ada siswa terdaftar di rombel kelas ini.'}
                                         </td>
                                     </tr>
