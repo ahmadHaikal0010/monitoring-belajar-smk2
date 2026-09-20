@@ -46,13 +46,15 @@ class Student extends Model
     public function getClassroomIdAttribute()
     {
         $idKelas = $this->attributes['id_kelas'] ?? null;
-        if (!$idKelas) {
+        if (! $idKelas) {
             $enrollment = DB::table('anggota_kelas')
                 ->where('id_siswa', $this->id)
                 ->where('status', 'aktif')
                 ->first();
+
             return $enrollment ? $enrollment->id_kelas : null;
         }
+
         return $idKelas;
     }
 

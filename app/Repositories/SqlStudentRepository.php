@@ -85,7 +85,7 @@ class SqlStudentRepository implements StudentRepositoryInterface
             ->first();
 
         if ($student) {
-            if (!isset($student->id_kelas) || !$student->id_kelas) {
+            if (! isset($student->id_kelas) || ! $student->id_kelas) {
                 $enrollment = DB::table('anggota_kelas')
                     ->where('id_siswa', $student->id)
                     ->where('status', 'aktif')
@@ -129,7 +129,7 @@ class SqlStudentRepository implements StudentRepositoryInterface
             ->first();
 
         if ($student) {
-            if (!isset($student->id_kelas) || !$student->id_kelas) {
+            if (! isset($student->id_kelas) || ! $student->id_kelas) {
                 $enrollment = DB::table('anggota_kelas')
                     ->where('id_siswa', $student->id)
                     ->where('status', 'aktif')

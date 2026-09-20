@@ -12,7 +12,9 @@ use Illuminate\Http\Request;
 class EnrollmentController extends Controller
 {
     protected EnrollmentService $enrollmentService;
+
     protected StudentService $studentService;
+
     protected SubjectService $subjectService;
 
     public function __construct(
@@ -68,6 +70,7 @@ class EnrollmentController extends Controller
 
         $data = collect($allSubjects)->map(function ($subject) use ($enrolledSubjectIds) {
             $subject->is_enrolled = in_array($subject->id, $enrolledSubjectIds);
+
             return $subject;
         });
 
